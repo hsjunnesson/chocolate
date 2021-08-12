@@ -1,0 +1,53 @@
+#pragma once
+
+#include <inttypes.h>
+#include "math.inl"
+
+struct GLFWwindow;
+
+namespace foundation {
+class Allocator;
+}
+
+namespace engine {
+using namespace foundation;
+
+class EngineParams;
+struct Engine;
+struct Input;
+struct InputCommand;
+
+struct EngineCallbacks {
+    void (*on_input)(Engine &engine, void *game, InputCommand &input_command);
+    void (*update)(Engine &engine, void *game, double frame_time, double delta);
+};
+
+struct Engine {
+    Engine(Allocator &allocator, const char *params_path);
+    ~Engine();
+
+    Allocator &allocator;
+    EngineParams *params;
+    EngineCallbacks *engine_callbacks;
+    void *game_object;
+    uint64_t frames;
+    GLFWwindow *glfw_window;
+    Rect window_rect;
+    Input *input;
+    Vector2 camera_offset;
+    bool terminating;
+};
+
+// Runs the engine, returns the exit code.
+int run(Engine &engine);
+
+// Moves camera to a position.
+void move_camera(Engine &engine, int32_t x, int32_t y);
+
+// Offsets a camera by pixels.
+void offset_camera(Engine &engine, int32_t x, int32_t y);
+
+// Flag the engine to terminate
+void terminate(Engine &engine);
+
+} // namespace engine
