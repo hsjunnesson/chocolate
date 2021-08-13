@@ -18,8 +18,9 @@ struct Input;
 struct InputCommand;
 
 struct EngineCallbacks {
-    void (*on_input)(Engine &engine, void *game, InputCommand &input_command);
-    void (*update)(Engine &engine, void *game, double frame_time, double delta);
+    void (*on_input)(Engine &engine, void *game_object, InputCommand &input_command);
+    void (*update)(Engine &engine, void *game_object, double frame_time, double delta);
+    void (*render)(Engine &engine, void *game_object);
 };
 
 struct Engine {

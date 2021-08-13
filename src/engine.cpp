@@ -231,39 +231,10 @@ void render(Engine &engine) {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    engine.engine_callbacks->render(engine, engine.game_object);
+    
     int window_width, window_height;
     glfwGetFramebufferSize(engine.glfw_window, &window_width, &window_height);
-
-//    game::render(engine.game, engine);
-
-    // const uint32_t render_scale = engine.params.render_scale();
-
-    // const glm::mat4 projection = glm::ortho(0.0f, (float)window_width, 0.0f, (float)window_height);
-    // glm::mat4 view = glm::mat4(1);
-    // view = glm::translate(view, glm::vec3(engine.camera_offset.x, engine.camera_offset.y, 0.0f));
-
-    // Tiles
-    /*
-    if (engine.tilesheet_shader && engine.tilesheet_shader->program && engine.tilesheet_vao && engine.tilesheet_ebo) {
-        const GLuint shader_program = engine.tilesheet_shader->program;
-
-        glUseProgram(shader_program);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, engine.tilesheet_atlas->texture);
-        glUniform1i(glGetUniformLocation(shader_program, "texture0"), 0);
-
-        glBindVertexArray(engine.tilesheet_vao);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, engine.tilesheet_ebo);
-
-        glm::mat4 model = glm::mat4(1);
-        model = glm::scale(model, glm::vec3(engine.tile_size * render_scale, engine.tile_size * render_scale, 1));
-
-        glUniformMatrix4fv(glGetUniformLocation(shader_program, "projection"), 1, GL_FALSE, glm::value_ptr(projection * view));
-        glUniformMatrix4fv(glGetUniformLocation(shader_program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-
-        glDrawElements(GL_TRIANGLES, 6 * engine.game.tiles_width * engine.game.tiles_height, GL_UNSIGNED_INT, (void *)0);
-    }
-    */
 
     glfwSwapBuffers(engine.glfw_window);
 }
