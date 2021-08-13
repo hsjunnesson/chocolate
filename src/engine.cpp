@@ -231,7 +231,9 @@ void render(Engine &engine) {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    engine.engine_callbacks->render(engine, engine.game_object);
+    if (engine.engine_callbacks && engine.engine_callbacks->render) {
+        engine.engine_callbacks->render(engine, engine.game_object);
+    }
     
     int window_width, window_height;
     glfwGetFramebufferSize(engine.glfw_window, &window_width, &window_height);
@@ -250,13 +252,17 @@ int run(Engine &engine) {
 
     while (running) {
         // Process queued events
-        for (uint32_t i = 0; i < array::size(*engine.input->input_commands); ++i) {
-            InputCommand &input_command = (*engine.input->input_commands)[i];
-            engine.engine_callbacks->on_input(engine, engine.game_object, input_command);
+        if (engine.engine_callbacks && engine.engine_callbacks->on_input) {
+            for (uint32_t i = 0; i < array::size(*engine.input->input_commands); ++i) {
+                InputCommand &input_command = (*engine.input->input_commands)[i];
+                engine.engine_callbacks->on_input(engine, engine.game_object, input_command);
+            }
         }
 
         // Update
-        engine.engine_callbacks->update(engine, engine.game_object, current_frame_time, delta_time);
+        if (engine.engine_callbacks && engine.engine_callbacks->update) {
+            engine.engine_callbacks->update(engine, engine.game_object, current_frame_time, delta_time);
+        }
 
         if (glfwWindowShouldClose(engine.glfw_window)) {
             terminate(engine);
