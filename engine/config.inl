@@ -8,6 +8,7 @@
 
 #include "log.h"
 
+namespace engine {
 namespace config {
 
 inline void read(const char *filename, google::protobuf::Message *message) {
@@ -28,3 +29,4 @@ inline void read(const char *filename, google::protobuf::Message *message) {
 }
 
 } // namespace config
+} // namespace engine

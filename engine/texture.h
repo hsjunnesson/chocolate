@@ -3,7 +3,7 @@
 #include <inttypes.h>
 
 namespace foundation {
-    class Allocator;
+class Allocator;
 }
 
 namespace engine {

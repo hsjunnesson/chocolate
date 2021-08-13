@@ -11,6 +11,7 @@ set(LIB_NAME ${PROJECT_NAME})
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(Protobuf CONFIG REQUIRED)
+find_package(cJSON CONFIG REQUIRED)
 
 
 # Fetch dependencies from Github
@@ -110,6 +111,7 @@ target_link_libraries(${LIB_NAME}
     glm::glm
     protobuf::libprotobuf
     date::date
+    cjson
 )
 
 #export(TARGETS libchocolate NAMESPACE engine:: FILE LibLicensingTargets.cmake)

@@ -7,6 +7,7 @@
 
 #include "engine/shader.h"
 #include "engine/log.h"
+#include "engine/file.h"
 
 #include <memory.h>
 #include <array.h>
@@ -23,55 +24,6 @@ using namespace foundation;
 using namespace array;
 using namespace string_stream;
 
-void read_file(Buffer &buffer, const char *filename) {
-    // https://wiki.sei.cmu.edu/confluence/display/c/FIO19-C.+Do+not+use+fseek%28%29+and+ftell%28%29+to+compute+the+size+of+a+regular+file
-#if defined(_WIN32)
-    LARGE_INTEGER file_size;
-
-    HANDLE file = CreateFile(TEXT(filename), GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-
-    if (INVALID_HANDLE_VALUE == file) {
-        log_fatal("Could not read file %s: invalid file handle", filename);
-    }
-    
-    if (!GetFileSizeEx(file, &file_size)) {
-        log_fatal("Could not read file %s: could not get size", filename);
-    }
-
-    resize(buffer, (uint32_t)file_size.QuadPart);
-
-    if (!ReadFile(file, begin(buffer), (uint32_t)file_size.QuadPart, NULL, NULL)) {
-        log_fatal("Could not read file %s", filename);
-    }
-
-    if (!CloseHandle(file)) {
-        log_fatal("Could not close file after read %s", filename);
-    }
-#elif defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
-    struct stat info;
-    if (stat(filename, &info) != 0) {
-        log_fatal("Could not read file %s", filename);
-    }
-
-    resize(buffer, info.st_size);
-
-    FILE *file = fopen(filename, "rb");
-    if (!file) {
-        log_fatal("Could not read file %s", filename);
-    }
-
-    fread(begin(buffer), info.st_size, 1, file);
-
-    if (ferror(file) != 0) {
-        log_fatal("Could not read file %s", filename);
-    }
-    
-    fclose(file);
-#else
-    log_fatal("Unsupported platform");
-#endif
-}
-
 Shader::Shader(const char *geometry_shader_file, const char *vertex_shader_file, const char *fragment_shader_file)
 : program(0) {
     program = glCreateProgram();
@@ -84,7 +36,9 @@ Shader::Shader(const char *geometry_shader_file, const char *vertex_shader_file,
         TempAllocator512 ta;
 
         Buffer shader_program_buffer(ta);
-        read_file(shader_program_buffer, file_name);
+        if (!file::read(shader_program_buffer, file_name)) {
+            log_fatal("Could not read program source");
+        }
 
         GLuint shader = glCreateShader(shader_type);
 
