@@ -5,7 +5,7 @@
 namespace engine {
 
 struct Shader {
-    Shader(const char *geometry_shader_file, const char *vertex_shader_file, const char *fragment_shader_file);
+    Shader(const char *geometry_source, const char *vertex_source, const char *fragment_source);
     ~Shader();
 
     uint32_t program;

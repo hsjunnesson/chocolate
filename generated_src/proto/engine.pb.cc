@@ -65,8 +65,6 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_proto_2fengine_2eproto::offset
   PROTOBUF_FIELD_OFFSET(::engine::TilesheetParams, tiles_width_),
   PROTOBUF_FIELD_OFFSET(::engine::TilesheetParams, tiles_height_),
   PROTOBUF_FIELD_OFFSET(::engine::TilesheetParams, atlas_gutter_),
-  PROTOBUF_FIELD_OFFSET(::engine::TilesheetParams, fragment_shader_),
-  PROTOBUF_FIELD_OFFSET(::engine::TilesheetParams, vertex_shader_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::engine::EngineParams, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -78,7 +76,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_proto_2fengine_2eproto::offset
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, sizeof(::engine::TilesheetParams)},
-  { 12, -1, sizeof(::engine::EngineParams)},
+  { 10, -1, sizeof(::engine::EngineParams)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -87,14 +85,13 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
 };
 
 const char descriptor_table_protodef_proto_2fengine_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
-  "\n\022proto/engine.proto\022\006engine\"\255\001\n\017Tileshe"
-  "etParams\022\026\n\016atlas_filename\030\001 \001(\t\022\021\n\ttile"
-  "_size\030\002 \001(\005\022\023\n\013tiles_width\030\003 \001(\005\022\024\n\014tile"
-  "s_height\030\004 \001(\005\022\024\n\014atlas_gutter\030\005 \001(\005\022\027\n\017"
-  "fragment_shader\030\006 \001(\t\022\025\n\rvertex_shader\030\007"
-  " \001(\t\"Q\n\014EngineParams\022\024\n\014window_width\030\001 \001"
-  "(\005\022\025\n\rwindow_height\030\002 \001(\005\022\024\n\014render_scal"
-  "e\030\003 \001(\005b\006proto3"
+  "\n\022proto/engine.proto\022\006engine\"}\n\017Tileshee"
+  "tParams\022\026\n\016atlas_filename\030\001 \001(\t\022\021\n\ttile_"
+  "size\030\002 \001(\005\022\023\n\013tiles_width\030\003 \001(\005\022\024\n\014tiles"
+  "_height\030\004 \001(\005\022\024\n\014atlas_gutter\030\005 \001(\005\"Q\n\014E"
+  "ngineParams\022\024\n\014window_width\030\001 \001(\005\022\025\n\rwin"
+  "dow_height\030\002 \001(\005\022\024\n\014render_scale\030\003 \001(\005b\006"
+  "proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_proto_2fengine_2eproto_deps[1] = {
 };
@@ -104,7 +101,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_pro
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_proto_2fengine_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_proto_2fengine_2eproto = {
-  false, false, descriptor_table_protodef_proto_2fengine_2eproto, "proto/engine.proto", 295,
+  false, false, descriptor_table_protodef_proto_2fengine_2eproto, "proto/engine.proto", 246,
   &descriptor_table_proto_2fengine_2eproto_once, descriptor_table_proto_2fengine_2eproto_sccs, descriptor_table_proto_2fengine_2eproto_deps, 2, 0,
   schemas, file_default_instances, TableStruct_proto_2fengine_2eproto::offsets,
   file_level_metadata_proto_2fengine_2eproto, 2, file_level_enum_descriptors_proto_2fengine_2eproto, file_level_service_descriptors_proto_2fengine_2eproto,
@@ -134,16 +131,6 @@ TilesheetParams::TilesheetParams(const TilesheetParams& from)
     atlas_filename_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_atlas_filename(), 
       GetArena());
   }
-  fragment_shader_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (!from._internal_fragment_shader().empty()) {
-    fragment_shader_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_fragment_shader(), 
-      GetArena());
-  }
-  vertex_shader_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (!from._internal_vertex_shader().empty()) {
-    vertex_shader_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_vertex_shader(), 
-      GetArena());
-  }
   ::memcpy(&tile_size_, &from.tile_size_,
     static_cast<size_t>(reinterpret_cast<char*>(&atlas_gutter_) -
     reinterpret_cast<char*>(&tile_size_)) + sizeof(atlas_gutter_));
@@ -153,8 +140,6 @@ TilesheetParams::TilesheetParams(const TilesheetParams& from)
 void TilesheetParams::SharedCtor() {
   ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_TilesheetParams_proto_2fengine_2eproto.base);
   atlas_filename_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  fragment_shader_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  vertex_shader_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
       reinterpret_cast<char*>(&tile_size_) - reinterpret_cast<char*>(this)),
       0, static_cast<size_t>(reinterpret_cast<char*>(&atlas_gutter_) -
@@ -170,8 +155,6 @@ TilesheetParams::~TilesheetParams() {
 void TilesheetParams::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
   atlas_filename_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  fragment_shader_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  vertex_shader_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
 void TilesheetParams::ArenaDtor(void* object) {
@@ -196,8 +179,6 @@ void TilesheetParams::Clear() {
   (void) cached_has_bits;
 
   atlas_filename_.ClearToEmpty();
-  fragment_shader_.ClearToEmpty();
-  vertex_shader_.ClearToEmpty();
   ::memset(&tile_size_, 0, static_cast<size_t>(
       reinterpret_cast<char*>(&atlas_gutter_) -
       reinterpret_cast<char*>(&tile_size_)) + sizeof(atlas_gutter_));
@@ -245,24 +226,6 @@ const char* TilesheetParams::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPAC
       case 5:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 40)) {
           atlas_gutter_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // string fragment_shader = 6;
-      case 6:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 50)) {
-          auto str = _internal_mutable_fragment_shader();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "engine.TilesheetParams.fragment_shader"));
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // string vertex_shader = 7;
-      case 7:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 58)) {
-          auto str = _internal_mutable_vertex_shader();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "engine.TilesheetParams.vertex_shader"));
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -328,26 +291,6 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(5, this->_internal_atlas_gutter(), target);
   }
 
-  // string fragment_shader = 6;
-  if (this->fragment_shader().size() > 0) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_fragment_shader().data(), static_cast<int>(this->_internal_fragment_shader().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "engine.TilesheetParams.fragment_shader");
-    target = stream->WriteStringMaybeAliased(
-        6, this->_internal_fragment_shader(), target);
-  }
-
-  // string vertex_shader = 7;
-  if (this->vertex_shader().size() > 0) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_vertex_shader().data(), static_cast<int>(this->_internal_vertex_shader().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "engine.TilesheetParams.vertex_shader");
-    target = stream->WriteStringMaybeAliased(
-        7, this->_internal_vertex_shader(), target);
-  }
-
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -369,20 +312,6 @@ size_t TilesheetParams::ByteSizeLong() const {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
         this->_internal_atlas_filename());
-  }
-
-  // string fragment_shader = 6;
-  if (this->fragment_shader().size() > 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_fragment_shader());
-  }
-
-  // string vertex_shader = 7;
-  if (this->vertex_shader().size() > 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_vertex_shader());
   }
 
   // int32 tile_size = 2;
@@ -447,12 +376,6 @@ void TilesheetParams::MergeFrom(const TilesheetParams& from) {
   if (from.atlas_filename().size() > 0) {
     _internal_set_atlas_filename(from._internal_atlas_filename());
   }
-  if (from.fragment_shader().size() > 0) {
-    _internal_set_fragment_shader(from._internal_fragment_shader());
-  }
-  if (from.vertex_shader().size() > 0) {
-    _internal_set_vertex_shader(from._internal_vertex_shader());
-  }
   if (from.tile_size() != 0) {
     _internal_set_tile_size(from._internal_tile_size());
   }
@@ -489,8 +412,6 @@ void TilesheetParams::InternalSwap(TilesheetParams* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   atlas_filename_.Swap(&other->atlas_filename_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  fragment_shader_.Swap(&other->fragment_shader_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  vertex_shader_.Swap(&other->vertex_shader_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
       PROTOBUF_FIELD_OFFSET(TilesheetParams, atlas_gutter_)
       + sizeof(TilesheetParams::atlas_gutter_)

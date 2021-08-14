@@ -24,7 +24,7 @@ using namespace foundation;
 using namespace array;
 using namespace string_stream;
 
-Shader::Shader(const char *geometry_shader_file, const char *vertex_shader_file, const char *fragment_shader_file)
+Shader::Shader(const char *geometry_source, const char *vertex_source, const char *fragment_source)
 : program(0) {
     program = glCreateProgram();
 
@@ -32,17 +32,11 @@ Shader::Shader(const char *geometry_shader_file, const char *vertex_shader_file,
     GLuint vertex_shader = 0;
     GLuint fragment_shader = 0;
 
-    auto compile_shader = [program = program](const char *file_name, GLenum shader_type) -> GLint {
+    auto compile_shader = [program = program](const char *shader_program_source, GLenum shader_type) -> GLint {
         TempAllocator512 ta;
-
-        Buffer shader_program_buffer(ta);
-        if (!file::read(shader_program_buffer, file_name)) {
-            log_fatal("Could not read program source");
-        }
 
         GLuint shader = glCreateShader(shader_type);
 
-        const char *shader_program_source = c_str(shader_program_buffer);
         glShaderSource(shader, 1, &shader_program_source, nullptr);
         glCompileShader(shader);
 
@@ -58,7 +52,7 @@ Shader::Shader(const char *geometry_shader_file, const char *vertex_shader_file,
                 glGetShaderInfoLog(shader, log_length, nullptr, begin(error_buffer));
             }
 
-            log_fatal("Error compiling shader %s: %s", file_name, c_str(error_buffer));
+            log_fatal("Error compiling shader: %s", c_str(error_buffer));
         }
 
         glAttachShader(program, shader);
@@ -66,16 +60,16 @@ Shader::Shader(const char *geometry_shader_file, const char *vertex_shader_file,
         return shader;
     };
 
-    if (geometry_shader_file) {
-        geometry_shader = compile_shader(geometry_shader_file, GL_GEOMETRY_SHADER);
+    if (geometry_source) {
+        geometry_shader = compile_shader(geometry_source, GL_GEOMETRY_SHADER);
     }
 
-    if (vertex_shader_file) {
-        vertex_shader = compile_shader(vertex_shader_file, GL_VERTEX_SHADER);
+    if (vertex_source) {
+        vertex_shader = compile_shader(vertex_source, GL_VERTEX_SHADER);
     }
 
-    if (fragment_shader_file) {
-        fragment_shader = compile_shader(fragment_shader_file, GL_FRAGMENT_SHADER);
+    if (fragment_source) {
+        fragment_shader = compile_shader(fragment_source, GL_FRAGMENT_SHADER);
     }
 
     glLinkProgram(program);

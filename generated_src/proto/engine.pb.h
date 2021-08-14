@@ -182,8 +182,6 @@ class TilesheetParams PROTOBUF_FINAL :
 
   enum : int {
     kAtlasFilenameFieldNumber = 1,
-    kFragmentShaderFieldNumber = 6,
-    kVertexShaderFieldNumber = 7,
     kTileSizeFieldNumber = 2,
     kTilesWidthFieldNumber = 3,
     kTilesHeightFieldNumber = 4,
@@ -203,38 +201,6 @@ class TilesheetParams PROTOBUF_FINAL :
   const std::string& _internal_atlas_filename() const;
   void _internal_set_atlas_filename(const std::string& value);
   std::string* _internal_mutable_atlas_filename();
-  public:
-
-  // string fragment_shader = 6;
-  void clear_fragment_shader();
-  const std::string& fragment_shader() const;
-  void set_fragment_shader(const std::string& value);
-  void set_fragment_shader(std::string&& value);
-  void set_fragment_shader(const char* value);
-  void set_fragment_shader(const char* value, size_t size);
-  std::string* mutable_fragment_shader();
-  std::string* release_fragment_shader();
-  void set_allocated_fragment_shader(std::string* fragment_shader);
-  private:
-  const std::string& _internal_fragment_shader() const;
-  void _internal_set_fragment_shader(const std::string& value);
-  std::string* _internal_mutable_fragment_shader();
-  public:
-
-  // string vertex_shader = 7;
-  void clear_vertex_shader();
-  const std::string& vertex_shader() const;
-  void set_vertex_shader(const std::string& value);
-  void set_vertex_shader(std::string&& value);
-  void set_vertex_shader(const char* value);
-  void set_vertex_shader(const char* value, size_t size);
-  std::string* mutable_vertex_shader();
-  std::string* release_vertex_shader();
-  void set_allocated_vertex_shader(std::string* vertex_shader);
-  private:
-  const std::string& _internal_vertex_shader() const;
-  void _internal_set_vertex_shader(const std::string& value);
-  std::string* _internal_mutable_vertex_shader();
   public:
 
   // int32 tile_size = 2;
@@ -281,8 +247,6 @@ class TilesheetParams PROTOBUF_FINAL :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr atlas_filename_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr fragment_shader_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr vertex_shader_;
   ::PROTOBUF_NAMESPACE_ID::int32 tile_size_;
   ::PROTOBUF_NAMESPACE_ID::int32 tiles_width_;
   ::PROTOBUF_NAMESPACE_ID::int32 tiles_height_;
@@ -598,128 +562,6 @@ inline void TilesheetParams::_internal_set_atlas_gutter(::PROTOBUF_NAMESPACE_ID:
 inline void TilesheetParams::set_atlas_gutter(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_atlas_gutter(value);
   // @@protoc_insertion_point(field_set:engine.TilesheetParams.atlas_gutter)
-}
-
-// string fragment_shader = 6;
-inline void TilesheetParams::clear_fragment_shader() {
-  fragment_shader_.ClearToEmpty();
-}
-inline const std::string& TilesheetParams::fragment_shader() const {
-  // @@protoc_insertion_point(field_get:engine.TilesheetParams.fragment_shader)
-  return _internal_fragment_shader();
-}
-inline void TilesheetParams::set_fragment_shader(const std::string& value) {
-  _internal_set_fragment_shader(value);
-  // @@protoc_insertion_point(field_set:engine.TilesheetParams.fragment_shader)
-}
-inline std::string* TilesheetParams::mutable_fragment_shader() {
-  // @@protoc_insertion_point(field_mutable:engine.TilesheetParams.fragment_shader)
-  return _internal_mutable_fragment_shader();
-}
-inline const std::string& TilesheetParams::_internal_fragment_shader() const {
-  return fragment_shader_.Get();
-}
-inline void TilesheetParams::_internal_set_fragment_shader(const std::string& value) {
-  
-  fragment_shader_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void TilesheetParams::set_fragment_shader(std::string&& value) {
-  
-  fragment_shader_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:engine.TilesheetParams.fragment_shader)
-}
-inline void TilesheetParams::set_fragment_shader(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  fragment_shader_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:engine.TilesheetParams.fragment_shader)
-}
-inline void TilesheetParams::set_fragment_shader(const char* value,
-    size_t size) {
-  
-  fragment_shader_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:engine.TilesheetParams.fragment_shader)
-}
-inline std::string* TilesheetParams::_internal_mutable_fragment_shader() {
-  
-  return fragment_shader_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* TilesheetParams::release_fragment_shader() {
-  // @@protoc_insertion_point(field_release:engine.TilesheetParams.fragment_shader)
-  return fragment_shader_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void TilesheetParams::set_allocated_fragment_shader(std::string* fragment_shader) {
-  if (fragment_shader != nullptr) {
-    
-  } else {
-    
-  }
-  fragment_shader_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), fragment_shader,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:engine.TilesheetParams.fragment_shader)
-}
-
-// string vertex_shader = 7;
-inline void TilesheetParams::clear_vertex_shader() {
-  vertex_shader_.ClearToEmpty();
-}
-inline const std::string& TilesheetParams::vertex_shader() const {
-  // @@protoc_insertion_point(field_get:engine.TilesheetParams.vertex_shader)
-  return _internal_vertex_shader();
-}
-inline void TilesheetParams::set_vertex_shader(const std::string& value) {
-  _internal_set_vertex_shader(value);
-  // @@protoc_insertion_point(field_set:engine.TilesheetParams.vertex_shader)
-}
-inline std::string* TilesheetParams::mutable_vertex_shader() {
-  // @@protoc_insertion_point(field_mutable:engine.TilesheetParams.vertex_shader)
-  return _internal_mutable_vertex_shader();
-}
-inline const std::string& TilesheetParams::_internal_vertex_shader() const {
-  return vertex_shader_.Get();
-}
-inline void TilesheetParams::_internal_set_vertex_shader(const std::string& value) {
-  
-  vertex_shader_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void TilesheetParams::set_vertex_shader(std::string&& value) {
-  
-  vertex_shader_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:engine.TilesheetParams.vertex_shader)
-}
-inline void TilesheetParams::set_vertex_shader(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  vertex_shader_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:engine.TilesheetParams.vertex_shader)
-}
-inline void TilesheetParams::set_vertex_shader(const char* value,
-    size_t size) {
-  
-  vertex_shader_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:engine.TilesheetParams.vertex_shader)
-}
-inline std::string* TilesheetParams::_internal_mutable_vertex_shader() {
-  
-  return vertex_shader_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* TilesheetParams::release_vertex_shader() {
-  // @@protoc_insertion_point(field_release:engine.TilesheetParams.vertex_shader)
-  return vertex_shader_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void TilesheetParams::set_allocated_vertex_shader(std::string* vertex_shader) {
-  if (vertex_shader != nullptr) {
-    
-  } else {
-    
-  }
-  vertex_shader_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), vertex_shader,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:engine.TilesheetParams.vertex_shader)
 }
 
 // -------------------------------------------------------------------

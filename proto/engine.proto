@@ -8,8 +8,6 @@ message TilesheetParams {
     int32 tiles_width      = 3;
     int32 tiles_height     = 4;
     int32 atlas_gutter     = 5;
-    string fragment_shader = 6;
-    string vertex_shader   = 7;
 }
 
 message EngineParams {

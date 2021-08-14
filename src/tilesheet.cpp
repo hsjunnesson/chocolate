@@ -17,6 +17,45 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/euler_angles.hpp>
 
+namespace {
+
+const char *vertex_source = R"(
+#version 440 core
+
+uniform mat4 projection;
+uniform mat4 model;
+
+layout (location = 0) in vec3 in_position;
+layout (location = 1) in vec3 in_color;
+layout (location = 2) in vec2 in_texture_coords;
+
+smooth out vec2 uv;
+smooth out vec4 color;
+
+void main() {
+   mat4 mvp = projection * model;
+   gl_Position = mvp * vec4(in_position, 1.0);
+   uv = in_texture_coords;
+   color = vec4(in_color, 1.0);
+}
+)";
+
+const char *fragment_source = R"(
+#version 440 core
+
+uniform sampler2D texture0;
+in vec2 uv;
+in vec4 color;
+
+out vec4 out_color;
+
+void main() {
+   out_color = color * texture(texture0, uv);
+}
+)";
+
+}
+
 namespace engine {
 
 Tilesheet::Tilesheet(Allocator &allocator, const char *params_path)
@@ -36,7 +75,7 @@ Tilesheet::Tilesheet(Allocator &allocator, const char *params_path)
 
     tile_size = params->tile_size();
 
-    tilesheet_shader = MAKE_NEW(allocator, engine::Shader, nullptr, params->vertex_shader().c_str(), params->fragment_shader().c_str());
+    tilesheet_shader = MAKE_NEW(allocator, engine::Shader, nullptr, vertex_source, fragment_source);
     tilesheet_atlas = MAKE_NEW(allocator, engine::Texture, allocator, params->atlas_filename().c_str());
     tiles = MAKE_NEW(allocator, Array<Tile>, allocator);
 }
