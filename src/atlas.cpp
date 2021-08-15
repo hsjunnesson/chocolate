@@ -114,7 +114,7 @@ Atlas::~Atlas() {
     }
 }
 
-const Rect *atlas_rect(Atlas &atlas, const char *filename) {
+const Rect *atlas_rect(const Atlas &atlas, const char *filename) {
     if (!filename) {
         return nullptr;
     }

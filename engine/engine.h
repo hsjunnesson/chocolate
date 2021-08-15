@@ -35,6 +35,7 @@ struct Engine {
     GLFWwindow *glfw_window;
     Rect window_rect;
     Input *input;
+    float camera_zoom;
     Vector2 camera_offset;
     bool terminating;
 };

@@ -154,12 +154,15 @@ Engine::Engine(Allocator &allocator, const char *params_path)
 , glfw_window(nullptr)
 , window_rect({{0, 0}, {0, 0}})
 , input(nullptr)
+, camera_zoom(1)
 , camera_offset({0, 0})
 , terminating(false)
 {
     params = MAKE_NEW(allocator, EngineParams);
     config::read(params_path, params);
 
+    camera_zoom = params->render_scale();
+    
     // glfw
     {
         glfwSetErrorCallback(glfw_error_callback);

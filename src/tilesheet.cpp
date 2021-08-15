@@ -236,7 +236,7 @@ void render_tilesheet(Engine &engine, Tilesheet &tilesheet) {
         return;
     }
 
-    const uint32_t render_scale = engine.params->render_scale();
+    const float render_scale = engine.camera_zoom;
 
     const glm::mat4 projection = glm::ortho(0.0f, (float)engine.window_rect.size.x, 0.0f, (float)engine.window_rect.size.y);
     glm::mat4 view = glm::mat4(1);

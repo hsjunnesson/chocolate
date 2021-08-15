@@ -22,6 +22,6 @@ struct Atlas {
 };
 
 // Returns a pointer to a Rect which corresponds to the filename of the image in the atlas.
-const Rect *atlas_rect(Atlas &atlas, const char *filename);
+const Rect *atlas_rect(const Atlas &atlas, const char *filename);
 
 } // namespace engine
