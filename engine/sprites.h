@@ -19,16 +19,18 @@ struct Shader;
 struct Sprite {
     const Rect *atlas_rect;
     glm::mat4 transform;
+    bool dirty = false;
 };
 
 // A collection of sprites that share an atlas.
 struct Sprites {
-    Sprites(Allocator &allocator, Atlas &atlas);
+    Sprites(Allocator &allocator);
     ~Sprites();
 
     Allocator &allocator;
-    const Atlas *atlas;
+    Atlas *atlas;
     Shader *shader;
+    Vertex *vertex_data;
     uint32_t vbo;
     uint32_t vao;
     uint32_t ebo;
@@ -36,8 +38,14 @@ struct Sprites {
     Array<Sprite> *sprites;
 };
 
+// Initializes this Sprites with an atlas. Required before rendering.
+void init_sprites(Sprites &sprites, const char *atlas_filename);
+
 // Adds a sprite and returns a pointer to the Sprite if successful.
 Sprite *add_sprite(Sprites &sprites, const char *sprite_name);
+
+// Updates all dirty sprites.
+void update_sprites(Sprites &sprites);
 
 // Renders the sprites.
 void render_sprites(Engine &engine, Sprites &sprites);

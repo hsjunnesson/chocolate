@@ -57,14 +57,22 @@ void main() {
 }
 )";
 
+const glm::vec4 unit_quad[] = {
+    {0.0f, 0.0f, 0.0f, 1.0f},
+    {1.0f, 1.0f, 0.0f, 1.0f},
+    {0.0f, 1.0f, 0.0f, 1.0f},
+    {1.0f, 0.0f, 0.0f, 1.0f}
+};
+
 }
 
 namespace engine {
 
-Sprites::Sprites(Allocator &allocator, Atlas &atlas)
+Sprites::Sprites(Allocator &allocator)
 : allocator(allocator)
-, atlas(&atlas)
+, atlas(nullptr)
 , shader(nullptr)
+, vertex_data(nullptr)
 , vbo(0)
 , vao(0)
 , ebo(0)
@@ -73,33 +81,47 @@ Sprites::Sprites(Allocator &allocator, Atlas &atlas)
     shader = MAKE_NEW(allocator, Shader, nullptr, vertex_source, fragment_source);
     sprites = MAKE_NEW(allocator, Array<Sprite>, allocator);
 
-    // Atlas rect
-    {
-        // const Rect *rect = engine::atlas_rect(atlas, sprite_name);
-        // if (!rect) {
-        //     log_fatal("Altas doesn't contain %s", sprite_name);
-        // }
-
-        // this->atlas_rect = rect;
-    }
-
-    size_t vertex_count = 4 * max_sprites;
-    Vertex *vertex_data = (Vertex *)allocator.allocate(sizeof(Vertex) * vertex_count);
+    const size_t vertex_count = 4 * max_sprites;
+    const size_t vertex_data_size = sizeof(Vertex) * vertex_count;
 
     size_t index_count = 6 * max_sprites;
     GLuint *index_data = (GLuint *)allocator.allocate(sizeof(GLuint) * index_count);
 
-    // OpenGL setup unit quad
-    for (uint64_t i = 0; i < max_sprites; ++i) {
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
+    glGenBuffers(1, &vbo);
+    glGenBuffers(1, &ebo);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+//    glBufferData(GL_ARRAY_BUFFER, vertex_data_size, vertex_data, GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
+
+    // position
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *)0);
+
+    // color
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *)offsetof(Vertex, color));
+
+    // texture_coords
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *)offsetof(Vertex, texture_coords));
+
+    // Immutable data storage
+    {
+        GLbitfield flags = GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
+        glBufferStorage(GL_ARRAY_BUFFER, vertex_data_size, 0, flags);
+        vertex_data = (Vertex *)glMapBufferRange(GL_ARRAY_BUFFER, 0, vertex_data_size, flags);
+
+        for (uint64_t i = 0; i < max_sprites; ++i) {
         // position
         {
-            float x = 0;
-            float y = 0;
-
-            vertex_data[i * 4 + 0].position = {x,     y,     0.0f};
-            vertex_data[i * 4 + 1].position = {x + 10, y + 10, 0.0f};
-            vertex_data[i * 4 + 2].position = {x,     y + 10, 0.0f};
-            vertex_data[i * 4 + 3].position = {x + 10, y,     0.0f};
+            // Copy unit quad into vertex data for this sprite
+            for (int ii = 0; ii < 4; ++ii) {
+                vertex_data[i * 4 + ii].position = {unit_quad[ii].x, unit_quad[ii].y, unit_quad[ii].z};
+            }
         }
 
         // color
@@ -140,27 +162,7 @@ Sprites::Sprites(Allocator &allocator, Atlas &atlas)
         }
     }
 
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-
-    glGenBuffers(1, &vbo);
-    glGenBuffers(1, &ebo);
-
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, vertex_count * sizeof(Vertex), vertex_data, GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
-    glEnableVertexAttribArray(2);
-
-    // position
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *)0);
-
-    // color
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *)offsetof(Vertex, color));
-
-    // texture_coords
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *)offsetof(Vertex, texture_coords));
+    }
 
     // Element index array
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
@@ -173,7 +175,6 @@ Sprites::Sprites(Allocator &allocator, Atlas &atlas)
     glDisableVertexAttribArray(1);
     glDisableVertexAttribArray(2);
 
-    allocator.deallocate(vertex_data);
     allocator.deallocate(index_data);
 }
 
@@ -183,6 +184,8 @@ Sprites::~Sprites() {
     }
 
     if (vbo) {
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glUnmapBuffer(GL_ARRAY_BUFFER);
         glDeleteBuffers(1, &vbo);
     }
 
@@ -197,6 +200,14 @@ Sprites::~Sprites() {
     if (sprites) {
         MAKE_DELETE(allocator, Array, sprites);
     }
+
+    if (atlas) {
+        MAKE_DELETE(allocator, Atlas, atlas);
+    }
+}
+
+void init_sprites(Sprites &sprites, const char *atlas_filename) {
+    sprites.atlas = MAKE_NEW(sprites.allocator, Atlas, sprites.allocator, atlas_filename);
 }
 
 Sprite *add_sprite(Sprites &sprites, const char *sprite_name) {
@@ -209,14 +220,32 @@ Sprite *add_sprite(Sprites &sprites, const char *sprite_name) {
     Sprite sprite;
     sprite.atlas_rect = rect;
     sprite.transform = glm::mat4(1.0);
+    sprite.dirty = true;
 
     array::push_back(*sprites.sprites, sprite);
+    engine::Sprite &back = array::back(*sprites.sprites);
+    return &back;
+}
 
-    return array::end(*sprites.sprites);
+void update_sprites(Sprites &sprites) {
+    for (uint32_t i = 0; i < array::size(*sprites.sprites); ++i) {
+        Sprite &sprite = (*sprites.sprites)[i];
+        
+        if (sprite.dirty) {
+            // Copy unit quad into vertex data for this sprite
+            for (int ii = 0; ii < 4; ++ii) {
+                glm::vec4 position = sprite.transform * unit_quad[ii];
+                sprites.vertex_data[i * 4 + ii].position = {position.x, position.y, position.z};
+            }
+
+            sprite.dirty = false;
+        }
+    }
+
 }
 
 void render_sprites(Engine &engine, Sprites &sprites) {
-    if (!(sprites.shader && sprites.shader->program && sprites.vao && sprites.ebo)) {
+    if (!(sprites.shader && sprites.shader->program && sprites.vao && sprites.ebo && sprites.atlas)) {
         return;
     }
 

@@ -6,6 +6,7 @@
 #include "engine/math.inl"
 #include "engine/log.h"
 #include "engine/config.inl"
+#include "engine/sprites.h"
 
 #include <memory.h>
 #include <temp_allocator.h>
@@ -26,6 +27,8 @@ namespace {
 
 using namespace foundation;
 using namespace string_stream;
+
+GLsync gl_lock;
 
 void glfw_error_callback(int error, const char *description) {
     log_error("GLFW error %d: %s\n", error, description);
@@ -132,6 +135,25 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
     glViewport(0, 0, width, height);
 }
 
+void lock_buffer() {
+    if (gl_lock) {
+        glDeleteSync(gl_lock);
+    }
+
+    gl_lock = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+}
+
+void wait_buffer() {
+    if (gl_lock) {
+        while (true) {
+            GLenum wait_return = glClientWaitSync(gl_lock, GL_SYNC_FLUSH_COMMANDS_BIT, 1);
+            if (wait_return == GL_ALREADY_SIGNALED || wait_return == GL_CONDITION_SATISFIED) {
+                return;
+            }
+        }
+    }
+}
+
 } // namespace
 
 namespace engine {
@@ -157,6 +179,7 @@ Engine::Engine(Allocator &allocator, const char *params_path)
 , camera_zoom(1)
 , camera_offset({0, 0})
 , terminating(false)
+, sprites(nullptr)
 {
     params = MAKE_NEW(allocator, EngineParams);
     config::read(params_path, params);
@@ -172,7 +195,7 @@ Engine::Engine(Allocator &allocator, const char *params_path)
         }
 
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
@@ -211,6 +234,8 @@ Engine::Engine(Allocator &allocator, const char *params_path)
     }
 
     input = MAKE_NEW(allocator, Input, allocator, glfw_window);
+
+    sprites = MAKE_NEW(allocator, Sprites, allocator);
 }
 
 Engine::~Engine() {
@@ -220,6 +245,10 @@ Engine::~Engine() {
 
     if (input) {
         MAKE_DELETE(allocator, Input, input);
+    }
+
+    if (sprites) {
+        MAKE_DELETE(allocator, Sprites, sprites);
     }
 
     // glfw
@@ -234,9 +263,15 @@ void render(Engine &engine) {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    wait_buffer();
+
+    render_sprites(engine, *engine.sprites);
+
     if (engine.engine_callbacks && engine.engine_callbacks->render) {
         engine.engine_callbacks->render(engine, engine.game_object);
     }
+    
+    lock_buffer();
     
     int window_width, window_height;
     glfwGetFramebufferSize(engine.glfw_window, &window_width, &window_height);
@@ -245,13 +280,13 @@ void render(Engine &engine) {
 }
 
 int run(Engine &engine) {
-    double prev_frame_time = glfwGetTime();
+    float prev_frame_time = glfwGetTime();
 
     bool running = true;
     int exit_code = 0;
 
-    double current_frame_time = prev_frame_time;
-    double delta_time = current_frame_time - prev_frame_time;
+    float current_frame_time = prev_frame_time;
+    float delta_time = current_frame_time - prev_frame_time;
 
     while (running) {
         // Process queued events
@@ -265,6 +300,10 @@ int run(Engine &engine) {
         // Update
         if (engine.engine_callbacks && engine.engine_callbacks->update) {
             engine.engine_callbacks->update(engine, engine.game_object, current_frame_time, delta_time);
+        }
+
+        if (engine.sprites) {
+            update_sprites(*engine.sprites);
         }
 
         if (glfwWindowShouldClose(engine.glfw_window)) {

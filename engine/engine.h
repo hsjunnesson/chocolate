@@ -16,10 +16,11 @@ class EngineParams;
 struct Engine;
 struct Input;
 struct InputCommand;
+struct Sprites;
 
 struct EngineCallbacks {
     void (*on_input)(Engine &engine, void *game_object, InputCommand &input_command);
-    void (*update)(Engine &engine, void *game_object, double frame_time, double delta);
+    void (*update)(Engine &engine, void *game_object, float frame_time, float delta);
     void (*render)(Engine &engine, void *game_object);
 };
 
@@ -38,6 +39,7 @@ struct Engine {
     float camera_zoom;
     Vector2 camera_offset;
     bool terminating;
+    Sprites *sprites;
 };
 
 // Runs the engine, returns the exit code.
