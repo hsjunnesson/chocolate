@@ -15,6 +15,9 @@
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 #include <fstream>
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 
 // #include <glm/glm.hpp>
 // #include <glm/gtc/matrix_transform.hpp>
@@ -236,6 +239,19 @@ Engine::Engine(Allocator &allocator, const char *params_path)
     input = MAKE_NEW(allocator, Input, allocator, glfw_window);
 
     sprites = MAKE_NEW(allocator, Sprites, allocator);
+
+    // imgui
+    {
+        if (!IMGUI_CHECKVERSION()) {
+            log_fatal("Invalid imgui version");
+        }
+
+        ImGui::CreateContext();
+        ImGui_ImplGlfw_InitForOpenGL(glfw_window, true);
+        ImGui_ImplOpenGL3_Init(nullptr);
+
+        ImGui::StyleColorsDark();
+    }
 }
 
 Engine::~Engine() {
@@ -249,6 +265,13 @@ Engine::~Engine() {
 
     if (sprites) {
         MAKE_DELETE(allocator, Sprites, sprites);
+    }
+
+    // imgui
+    {
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui_ImplGlfw_Shutdown();
+        ImGui::DestroyContext();
     }
 
     // glfw
@@ -265,17 +288,31 @@ void render(Engine &engine) {
 
     wait_buffer();
 
+    // imgui
+    {
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+    }
+
     render_sprites(engine, *engine.sprites);
 
     if (engine.engine_callbacks && engine.engine_callbacks->render) {
         engine.engine_callbacks->render(engine, engine.game_object);
     }
     
+    // imgui
+    {
+        if (engine.engine_callbacks->render_imgui) {
+            engine.engine_callbacks->render_imgui(engine, engine.game_object);
+        }
+
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    }
+
     lock_buffer();
     
-    int window_width, window_height;
-    glfwGetFramebufferSize(engine.glfw_window, &window_width, &window_height);
-
     glfwSwapBuffers(engine.glfw_window);
 }
 

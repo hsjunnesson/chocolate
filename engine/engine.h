@@ -19,9 +19,10 @@ struct InputCommand;
 struct Sprites;
 
 struct EngineCallbacks {
-    void (*on_input)(Engine &engine, void *game_object, InputCommand &input_command);
-    void (*update)(Engine &engine, void *game_object, float frame_time, float delta);
-    void (*render)(Engine &engine, void *game_object);
+    void (*on_input)(Engine &engine, void *game_object, InputCommand &input_command) = nullptr;
+    void (*update)(Engine &engine, void *game_object, float frame_time, float delta) = nullptr;
+    void (*render)(Engine &engine, void *game_object) = nullptr;
+    void (*render_imgui)(Engine &engine, void *game_object) = nullptr;
 };
 
 struct Engine {
