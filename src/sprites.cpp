@@ -18,7 +18,7 @@
 #include <glm/gtx/euler_angles.hpp>
 
 namespace {
-const uint64_t max_sprites = 1024;
+const uint64_t max_sprites = 65536;
 
 const char *vertex_source = R"(
 #version 440 core
@@ -51,9 +51,7 @@ in vec4 color;
 out vec4 out_color;
 
 void main() {
-    out_color = color;
-//    out_color = vec4(uv, 0.0, 0.0);
-//    out_color = color * texture(texture0, uv);
+    out_color = texture(texture0, uv);
 }
 )";
 
@@ -134,31 +132,18 @@ Sprites::Sprites(Allocator &allocator)
 
         // texture_coords
         {
-            // const int atlas_width = this->atlas->texture->width;
-            // const int atlas_height = this->atlas->texture->height;
-
-            // float texcoord_x = (float)atlas_rect->origin.x / atlas_width;
-            // float texcoord_y = (float)atlas_rect->origin.y / atlas_height;
-            // float texcoord_w = (float)atlas_rect->size.x / atlas_width;
-            // float texcoord_h = (float)atlas_rect->size.y / atlas_height;
-
-            // vertex_data[0].texture_coords = {texcoord_x,                texcoord_y             };
-            // vertex_data[1].texture_coords = {texcoord_x + texcoord_w,   texcoord_y + texcoord_h};
-            // vertex_data[2].texture_coords = {texcoord_x,                texcoord_y + texcoord_h};
-            // vertex_data[3].texture_coords = {texcoord_x + texcoord_w,   texcoord_y             };
-
             vertex_data[i * 4 + 0].texture_coords = {0.0, 0.0};
             vertex_data[i * 4 + 1].texture_coords = {0.0, 0.0};
             vertex_data[i * 4 + 2].texture_coords = {0.0, 0.0};
             vertex_data[i * 4 + 3].texture_coords = {0.0, 0.0};
 
-            index_data[i * 6 + 0] = 0;
-            index_data[i * 6 + 1] = 1;
-            index_data[i * 6 + 2] = 2;
+            index_data[i * 6 + 0] = i * 4 + 0;
+            index_data[i * 6 + 1] = i * 4 + 1;
+            index_data[i * 6 + 2] = i * 4 + 2;
 
-            index_data[i * 6 + 3] = 0;
-            index_data[i * 6 + 4] = 3;
-            index_data[i * 6 + 5] = 1;
+            index_data[i * 6 + 3] = i * 4 + 0;
+            index_data[i * 6 + 4] = i * 4 + 3;
+            index_data[i * 6 + 5] = i * 4 + 1;
         }
     }
 
@@ -211,6 +196,10 @@ void init_sprites(Sprites &sprites, const char *atlas_filename) {
 }
 
 Sprite *add_sprite(Sprites &sprites, const char *sprite_name) {
+    if (array::size(*sprites.sprites) > max_sprites) {
+        log_fatal("Sprites already at max size");
+    }
+
     const Rect *rect = atlas_rect(*sprites.atlas, sprite_name);
     if (!rect) {
         log_error("Sprites atlas doesn't contain %s", sprite_name);
@@ -232,11 +221,25 @@ void update_sprites(Sprites &sprites) {
         Sprite &sprite = (*sprites.sprites)[i];
         
         if (sprite.dirty) {
-            // Copy unit quad into vertex data for this sprite
+            // position
             for (int ii = 0; ii < 4; ++ii) {
                 glm::vec4 position = sprite.transform * unit_quad[ii];
                 sprites.vertex_data[i * 4 + ii].position = {position.x, position.y, position.z};
             }
+
+            // texture coords
+            const int atlas_width = sprites.atlas->texture->width;
+            const int atlas_height = sprites.atlas->texture->height;
+
+            float texcoord_x = (float)sprite.atlas_rect->origin.x / atlas_width;
+            float texcoord_y = (float)(sprite.atlas_rect->origin.y + sprite.atlas_rect->size.y) / atlas_height;
+            float texcoord_w = (float)sprite.atlas_rect->size.x / atlas_width;
+            float texcoord_h = (float)sprite.atlas_rect->size.y / atlas_height;
+
+            sprites.vertex_data[i * 4 + 0].texture_coords = {texcoord_x,                texcoord_y             };
+            sprites.vertex_data[i * 4 + 1].texture_coords = {texcoord_x + texcoord_w,   texcoord_y - texcoord_h};
+            sprites.vertex_data[i * 4 + 2].texture_coords = {texcoord_x,                texcoord_y - texcoord_h};
+            sprites.vertex_data[i * 4 + 3].texture_coords = {texcoord_x + texcoord_w,   texcoord_y             };
 
             sprite.dirty = false;
         }
@@ -273,11 +276,7 @@ void render_sprites(Engine &engine, Sprites &sprites) {
 
     uint64_t quads = array::size(*sprites.sprites);
 
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
     glDrawElements(GL_TRIANGLES, 6 * quads, GL_UNSIGNED_INT, (void *)0);
-
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
