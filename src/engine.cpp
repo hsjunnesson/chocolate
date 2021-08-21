@@ -200,7 +200,7 @@ Engine::Engine(Allocator &allocator, const char *params_path)
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 
-        glfw_window = glfwCreateWindow(params->window_width(), params->window_height(), "Court of the Unseen", nullptr, nullptr);
+        glfw_window = glfwCreateWindow(params->window_width(), params->window_height(), params->title().c_str(), nullptr, nullptr);
         if (!glfw_window) {
             glfwTerminate();
             log_fatal("Unable to create GLFW window");

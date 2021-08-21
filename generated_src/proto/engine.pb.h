@@ -368,10 +368,27 @@ class EngineParams PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
+    kTitleFieldNumber = 4,
     kWindowWidthFieldNumber = 1,
     kWindowHeightFieldNumber = 2,
     kRenderScaleFieldNumber = 3,
   };
+  // string title = 4;
+  void clear_title();
+  const std::string& title() const;
+  void set_title(const std::string& value);
+  void set_title(std::string&& value);
+  void set_title(const char* value);
+  void set_title(const char* value, size_t size);
+  std::string* mutable_title();
+  std::string* release_title();
+  void set_allocated_title(std::string* title);
+  private:
+  const std::string& _internal_title() const;
+  void _internal_set_title(const std::string& value);
+  std::string* _internal_mutable_title();
+  public:
+
   // int32 window_width = 1;
   void clear_window_width();
   ::PROTOBUF_NAMESPACE_ID::int32 window_width() const;
@@ -406,6 +423,7 @@ class EngineParams PROTOBUF_FINAL :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr title_;
   ::PROTOBUF_NAMESPACE_ID::int32 window_width_;
   ::PROTOBUF_NAMESPACE_ID::int32 window_height_;
   ::PROTOBUF_NAMESPACE_ID::int32 render_scale_;
@@ -626,6 +644,67 @@ inline void EngineParams::_internal_set_render_scale(::PROTOBUF_NAMESPACE_ID::in
 inline void EngineParams::set_render_scale(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_render_scale(value);
   // @@protoc_insertion_point(field_set:engine.EngineParams.render_scale)
+}
+
+// string title = 4;
+inline void EngineParams::clear_title() {
+  title_.ClearToEmpty();
+}
+inline const std::string& EngineParams::title() const {
+  // @@protoc_insertion_point(field_get:engine.EngineParams.title)
+  return _internal_title();
+}
+inline void EngineParams::set_title(const std::string& value) {
+  _internal_set_title(value);
+  // @@protoc_insertion_point(field_set:engine.EngineParams.title)
+}
+inline std::string* EngineParams::mutable_title() {
+  // @@protoc_insertion_point(field_mutable:engine.EngineParams.title)
+  return _internal_mutable_title();
+}
+inline const std::string& EngineParams::_internal_title() const {
+  return title_.Get();
+}
+inline void EngineParams::_internal_set_title(const std::string& value) {
+  
+  title_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void EngineParams::set_title(std::string&& value) {
+  
+  title_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:engine.EngineParams.title)
+}
+inline void EngineParams::set_title(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  title_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:engine.EngineParams.title)
+}
+inline void EngineParams::set_title(const char* value,
+    size_t size) {
+  
+  title_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:engine.EngineParams.title)
+}
+inline std::string* EngineParams::_internal_mutable_title() {
+  
+  return title_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* EngineParams::release_title() {
+  // @@protoc_insertion_point(field_release:engine.EngineParams.title)
+  return title_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void EngineParams::set_allocated_title(std::string* title) {
+  if (title != nullptr) {
+    
+  } else {
+    
+  }
+  title_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), title,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:engine.EngineParams.title)
 }
 
 #ifdef __GNUC__

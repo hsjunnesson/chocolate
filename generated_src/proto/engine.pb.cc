@@ -73,6 +73,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_proto_2fengine_2eproto::offset
   PROTOBUF_FIELD_OFFSET(::engine::EngineParams, window_width_),
   PROTOBUF_FIELD_OFFSET(::engine::EngineParams, window_height_),
   PROTOBUF_FIELD_OFFSET(::engine::EngineParams, render_scale_),
+  PROTOBUF_FIELD_OFFSET(::engine::EngineParams, title_),
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, sizeof(::engine::TilesheetParams)},
@@ -88,10 +89,10 @@ const char descriptor_table_protodef_proto_2fengine_2eproto[] PROTOBUF_SECTION_V
   "\n\022proto/engine.proto\022\006engine\"}\n\017Tileshee"
   "tParams\022\026\n\016atlas_filename\030\001 \001(\t\022\021\n\ttile_"
   "size\030\002 \001(\005\022\023\n\013tiles_width\030\003 \001(\005\022\024\n\014tiles"
-  "_height\030\004 \001(\005\022\024\n\014atlas_gutter\030\005 \001(\005\"Q\n\014E"
+  "_height\030\004 \001(\005\022\024\n\014atlas_gutter\030\005 \001(\005\"`\n\014E"
   "ngineParams\022\024\n\014window_width\030\001 \001(\005\022\025\n\rwin"
-  "dow_height\030\002 \001(\005\022\024\n\014render_scale\030\003 \001(\005b\006"
-  "proto3"
+  "dow_height\030\002 \001(\005\022\024\n\014render_scale\030\003 \001(\005\022\r"
+  "\n\005title\030\004 \001(\tb\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_proto_2fengine_2eproto_deps[1] = {
 };
@@ -101,7 +102,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_pro
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_proto_2fengine_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_proto_2fengine_2eproto = {
-  false, false, descriptor_table_protodef_proto_2fengine_2eproto, "proto/engine.proto", 246,
+  false, false, descriptor_table_protodef_proto_2fengine_2eproto, "proto/engine.proto", 261,
   &descriptor_table_proto_2fengine_2eproto_once, descriptor_table_proto_2fengine_2eproto_sccs, descriptor_table_proto_2fengine_2eproto_deps, 2, 0,
   schemas, file_default_instances, TableStruct_proto_2fengine_2eproto::offsets,
   file_level_metadata_proto_2fengine_2eproto, 2, file_level_enum_descriptors_proto_2fengine_2eproto, file_level_service_descriptors_proto_2fengine_2eproto,
@@ -440,6 +441,11 @@ EngineParams::EngineParams(::PROTOBUF_NAMESPACE_ID::Arena* arena)
 EngineParams::EngineParams(const EngineParams& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  title_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_title().empty()) {
+    title_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_title(), 
+      GetArena());
+  }
   ::memcpy(&window_width_, &from.window_width_,
     static_cast<size_t>(reinterpret_cast<char*>(&render_scale_) -
     reinterpret_cast<char*>(&window_width_)) + sizeof(render_scale_));
@@ -447,6 +453,8 @@ EngineParams::EngineParams(const EngineParams& from)
 }
 
 void EngineParams::SharedCtor() {
+  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_EngineParams_proto_2fengine_2eproto.base);
+  title_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
       reinterpret_cast<char*>(&window_width_) - reinterpret_cast<char*>(this)),
       0, static_cast<size_t>(reinterpret_cast<char*>(&render_scale_) -
@@ -461,6 +469,7 @@ EngineParams::~EngineParams() {
 
 void EngineParams::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
+  title_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
 void EngineParams::ArenaDtor(void* object) {
@@ -484,6 +493,7 @@ void EngineParams::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
+  title_.ClearToEmpty();
   ::memset(&window_width_, 0, static_cast<size_t>(
       reinterpret_cast<char*>(&render_scale_) -
       reinterpret_cast<char*>(&window_width_)) + sizeof(render_scale_));
@@ -515,6 +525,15 @@ const char* EngineParams::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_I
       case 3:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
           render_scale_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // string title = 4;
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 34)) {
+          auto str = _internal_mutable_title();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "engine.EngineParams.title"));
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -564,6 +583,16 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(3, this->_internal_render_scale(), target);
   }
 
+  // string title = 4;
+  if (this->title().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_title().data(), static_cast<int>(this->_internal_title().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "engine.EngineParams.title");
+    target = stream->WriteStringMaybeAliased(
+        4, this->_internal_title(), target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -579,6 +608,13 @@ size_t EngineParams::ByteSizeLong() const {
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
+
+  // string title = 4;
+  if (this->title().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_title());
+  }
 
   // int32 window_width = 1;
   if (this->window_width() != 0) {
@@ -632,6 +668,9 @@ void EngineParams::MergeFrom(const EngineParams& from) {
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
+  if (from.title().size() > 0) {
+    _internal_set_title(from._internal_title());
+  }
   if (from.window_width() != 0) {
     _internal_set_window_width(from._internal_window_width());
   }
@@ -664,6 +703,7 @@ bool EngineParams::IsInitialized() const {
 void EngineParams::InternalSwap(EngineParams* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  title_.Swap(&other->title_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
       PROTOBUF_FIELD_OFFSET(EngineParams, render_scale_)
       + sizeof(EngineParams::render_scale_)
