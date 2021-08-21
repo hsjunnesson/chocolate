@@ -12,6 +12,7 @@ find_package(glfw3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(Protobuf CONFIG REQUIRED)
 find_package(cJSON CONFIG REQUIRED)
+find_package(imgui CONFIG REQUIRED)
 
 
 # Fetch dependencies from Github
@@ -71,11 +72,19 @@ file(GLOB_RECURSE HEADERS
     "include/*.inl"
 )
 
+file(GLOB_RECURSE SRC_Imgui
+    "bindings/imgui_impl_glfw.cpp"
+    "bindings/imgui_impl_opengl3.cpp"
+    "bindings/imgui_impl_glfw.h"
+    "bindings/imgui_impl_opengl3.h"
+)
+
 
 # Create library
 add_library(${LIB_NAME} STATIC
     ${SRC_Chocolate}
     ${SRC_Generated}
+    ${SRC_Imgui}
     ${HEADERS}
 )
 
