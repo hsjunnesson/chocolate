@@ -121,6 +121,7 @@ target_link_libraries(${LIB_NAME}
     protobuf::libprotobuf
     date::date
     cjson
+    imgui::imgui
 )
 
 #export(TARGETS libchocolate NAMESPACE engine:: FILE LibLicensingTargets.cmake)
