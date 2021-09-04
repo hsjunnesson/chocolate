@@ -208,7 +208,6 @@ Sprite *add_sprite(Sprites &sprites, const char *sprite_name) {
 
     Sprite sprite;
     sprite.atlas_rect = rect;
-    sprite.transform = glm::mat4(1.0);
     sprite.dirty = true;
 
     array::push_back(*sprites.sprites, sprite);
@@ -221,9 +220,13 @@ void update_sprites(Sprites &sprites) {
         Sprite &sprite = (*sprites.sprites)[i];
         
         if (sprite.dirty) {
+            glm::mat4 transform = glm::mat4(1.0f);
+            transform = glm::translate(transform, sprite.position);
+            transform = glm::scale(transform, glm::vec3(sprite.atlas_rect->size.x, sprite.atlas_rect->size.y, 1.0f) * sprite.scale);
+
             // position
             for (int ii = 0; ii < 4; ++ii) {
-                glm::vec4 position = sprite.transform * unit_quad[ii];
+                glm::vec4 position = transform * unit_quad[ii];
                 sprites.vertex_data[i * 4 + ii].position = {position.x, position.y, position.z};
             }
 

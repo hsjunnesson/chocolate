@@ -17,8 +17,9 @@ struct Atlas;
 struct Shader;
 
 struct Sprite {
-    const Rect *atlas_rect;
-    glm::mat4 transform;
+    const Rect *atlas_rect = nullptr;
+    glm::vec3 scale = { 1.0f, 1.0f, 1.0f };
+    glm::vec3 position = { 0.0f, 0.0f, 0.0f };
     bool dirty = false;
 };
 
