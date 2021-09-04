@@ -61,6 +61,7 @@ file(GLOB_RECURSE SRC_Generated
 file(GLOB_RECURSE SRC_Chocolate
     "src/*.c"
     "src/*.cpp"
+    "src/*.inl"
     "glad/src/glad.c"
 )
 
