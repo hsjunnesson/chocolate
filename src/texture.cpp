@@ -7,8 +7,8 @@
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 
-#include <cstring>
 #include <algorithm>
+#include <cstring>
 
 using namespace foundation;
 
@@ -44,7 +44,7 @@ void __free(void *ptr) {
 } // namespace
 
 #define STBI_MALLOC(size) __malloc(size)
-#define STBI_REALLOC(ptr, new_size)__realloc(ptr, new_size)
+#define STBI_REALLOC(ptr, new_size) __realloc(ptr, new_size)
 #define STBI_FREE(ptr) __free(ptr)
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -64,39 +64,39 @@ Texture::Texture(Allocator &allocator, const char *texture_filename)
     unsigned char *padded_data = nullptr;
 
     if (channels != 4) {
-		padded_data = (unsigned char *)allocator.allocate(width * height * 4);
-		for (int x = 0; x < width; ++x) {
-			for (int y = 0; y < height; ++y) {
-				if (channels == 3) {
-					padded_data[(y * width + x) * 4 + 0] = data[(y * width + x) * 3 + 0];
-					padded_data[(y * width + x) * 4 + 1] = data[(y * width + x) * 3 + 1];
-					padded_data[(y * width + x) * 4 + 2] = data[(y * width + x) * 3 + 2];
-				} else if (channels == 1) {
-					unsigned char val = data[(y * width + x) * 1 + 0];
-					padded_data[(y * width + x) * 4 + 0] = val;
-					padded_data[(y * width + x) * 4 + 1] = val;
-					padded_data[(y * width + x) * 4 + 2] = val;
-				}
-				padded_data[(y * width + x) * 4 + 3] = 255;
-			}
-		}
-	}
+        padded_data = (unsigned char *)allocator.allocate(width * height * 4);
+        for (int x = 0; x < width; ++x) {
+            for (int y = 0; y < height; ++y) {
+                if (channels == 3) {
+                    padded_data[(y * width + x) * 4 + 0] = data[(y * width + x) * 3 + 0];
+                    padded_data[(y * width + x) * 4 + 1] = data[(y * width + x) * 3 + 1];
+                    padded_data[(y * width + x) * 4 + 2] = data[(y * width + x) * 3 + 2];
+                } else if (channels == 1) {
+                    unsigned char val = data[(y * width + x) * 1 + 0];
+                    padded_data[(y * width + x) * 4 + 0] = val;
+                    padded_data[(y * width + x) * 4 + 1] = val;
+                    padded_data[(y * width + x) * 4 + 2] = val;
+                }
+                padded_data[(y * width + x) * 4 + 3] = 255;
+            }
+        }
+    }
 
-	// normal texture
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    // normal texture
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, padded_data == nullptr ? data : padded_data);
-	glBindTexture(GL_TEXTURE_2D, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, padded_data == nullptr ? data : padded_data);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
-	if (padded_data != nullptr) {
+    if (padded_data != nullptr) {
         allocator.deallocate(padded_data);
     }
 
-	stbi_image_free(data);
+    stbi_image_free(data);
 }
 
 } // namespace engine

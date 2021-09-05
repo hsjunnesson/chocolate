@@ -1,9 +1,9 @@
 #include "engine/tilesheet.h"
+#include "engine/config.inl"
 #include "engine/engine.h"
+#include "engine/log.h"
 #include "engine/shader.h"
 #include "engine/texture.h"
-#include "engine/log.h"
-#include "engine/config.inl"
 
 #include <array.h>
 #include <proto/engine.pb.h>
@@ -54,7 +54,7 @@ void main() {
 }
 )";
 
-}
+} // namespace
 
 namespace engine {
 
@@ -150,10 +150,10 @@ void commit_tilesheet(Tilesheet &tilesheet) {
 
         // position
         {
-            vertex_data[i * 4 + 0].position = {(float)x,     (float)y,     0.0f};
+            vertex_data[i * 4 + 0].position = {(float)x, (float)y, 0.0f};
             vertex_data[i * 4 + 1].position = {(float)x + 1, (float)y + 1, 0.0f};
-            vertex_data[i * 4 + 2].position = {(float)x,     (float)y + 1, 0.0f};
-            vertex_data[i * 4 + 3].position = {(float)x + 1, (float)y,     0.0f};
+            vertex_data[i * 4 + 2].position = {(float)x, (float)y + 1, 0.0f};
+            vertex_data[i * 4 + 3].position = {(float)x + 1, (float)y, 0.0f};
         }
 
         // color
@@ -192,7 +192,7 @@ void commit_tilesheet(Tilesheet &tilesheet) {
             index_data[i * 6 + 5] = i * 4 + 1;
         }
     }
- 
+
     glGenVertexArrays(1, &tilesheet.tilesheet_vao);
     glBindVertexArray(tilesheet.tilesheet_vao);
 

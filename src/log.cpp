@@ -69,7 +69,7 @@ void internal_log(LoggingSeverity severity, const char *format, ...) {
         // https://github.com/bombela/backward-cpp/issues/206
         TraceResolver _workaround;
         (void)_workaround;
-        
+
         StackTrace st;
         st.load_here();
         Printer p;

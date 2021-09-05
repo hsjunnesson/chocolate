@@ -3,12 +3,12 @@
 #include "engine/log.h"
 #include "engine/texture.h"
 
-#include <memory.h>
 #include <collection_types.h>
 #include <hash.h>
-#include <temp_allocator.h>
-#include <string_stream.h>
+#include <memory.h>
 #include <murmur_hash.h>
+#include <string_stream.h>
+#include <temp_allocator.h>
 
 #include <cjson/cJSON.h>
 
@@ -17,8 +17,7 @@ using namespace foundation;
 
 Atlas::Atlas(foundation::Allocator &allocator, const char *atlas_filename)
 : allocator(allocator)
-, frames(nullptr)
-{
+, frames(nullptr) {
     frames = MAKE_NEW(allocator, Hash<Rect>, allocator);
 
     string_stream::Buffer data(allocator);

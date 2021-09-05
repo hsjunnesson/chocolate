@@ -1,12 +1,12 @@
 #include "engine/sprites.h"
 #include "engine/atlas.h"
-#include "engine/log.h"
-#include "engine/texture.h"
-#include "engine/shader.h"
 #include "engine/engine.h"
+#include "engine/log.h"
+#include "engine/shader.h"
+#include "engine/texture.h"
 
-#include <memory.h>
 #include <array.h>
+#include <memory.h>
 
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
@@ -59,10 +59,9 @@ const glm::vec4 unit_quad[] = {
     {0.0f, 0.0f, 0.0f, 1.0f},
     {1.0f, 1.0f, 0.0f, 1.0f},
     {0.0f, 1.0f, 0.0f, 1.0f},
-    {1.0f, 0.0f, 0.0f, 1.0f}
-};
+    {1.0f, 0.0f, 0.0f, 1.0f}};
 
-}
+} // namespace
 
 namespace engine {
 
@@ -74,8 +73,7 @@ Sprites::Sprites(Allocator &allocator)
 , vbo(0)
 , vao(0)
 , ebo(0)
-, sprites(nullptr)
-{
+, sprites(nullptr) {
     shader = MAKE_NEW(allocator, Shader, nullptr, vertex_source, fragment_source);
     sprites = MAKE_NEW(allocator, Array<Sprite>, allocator);
 
@@ -92,7 +90,7 @@ Sprites::Sprites(Allocator &allocator)
     glGenBuffers(1, &ebo);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-//    glBufferData(GL_ARRAY_BUFFER, vertex_data_size, vertex_data, GL_STATIC_DRAW);
+    //    glBufferData(GL_ARRAY_BUFFER, vertex_data_size, vertex_data, GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
@@ -114,39 +112,38 @@ Sprites::Sprites(Allocator &allocator)
         vertex_data = (Vertex *)glMapBufferRange(GL_ARRAY_BUFFER, 0, vertex_data_size, flags);
 
         for (uint64_t i = 0; i < max_sprites; ++i) {
-        // position
-        {
-            // Copy unit quad into vertex data for this sprite
-            for (int ii = 0; ii < 4; ++ii) {
-                vertex_data[i * 4 + ii].position = {unit_quad[ii].x, unit_quad[ii].y, unit_quad[ii].z};
+            // position
+            {
+                // Copy unit quad into vertex data for this sprite
+                for (int ii = 0; ii < 4; ++ii) {
+                    vertex_data[i * 4 + ii].position = {unit_quad[ii].x, unit_quad[ii].y, unit_quad[ii].z};
+                }
+            }
+
+            // color
+            {
+                vertex_data[i * 4 + 0].color = {1.0f, 1.0f, 1.0f};
+                vertex_data[i * 4 + 1].color = {1.0f, 1.0f, 1.0f};
+                vertex_data[i * 4 + 2].color = {1.0f, 1.0f, 1.0f};
+                vertex_data[i * 4 + 3].color = {1.0f, 1.0f, 1.0f};
+            }
+
+            // texture_coords
+            {
+                vertex_data[i * 4 + 0].texture_coords = {0.0, 0.0};
+                vertex_data[i * 4 + 1].texture_coords = {0.0, 0.0};
+                vertex_data[i * 4 + 2].texture_coords = {0.0, 0.0};
+                vertex_data[i * 4 + 3].texture_coords = {0.0, 0.0};
+
+                index_data[i * 6 + 0] = i * 4 + 0;
+                index_data[i * 6 + 1] = i * 4 + 1;
+                index_data[i * 6 + 2] = i * 4 + 2;
+
+                index_data[i * 6 + 3] = i * 4 + 0;
+                index_data[i * 6 + 4] = i * 4 + 3;
+                index_data[i * 6 + 5] = i * 4 + 1;
             }
         }
-
-        // color
-        {
-            vertex_data[i * 4 + 0].color = {1.0f, 1.0f, 1.0f};
-            vertex_data[i * 4 + 1].color = {1.0f, 1.0f, 1.0f};
-            vertex_data[i * 4 + 2].color = {1.0f, 1.0f, 1.0f};
-            vertex_data[i * 4 + 3].color = {1.0f, 1.0f, 1.0f};
-        }
-
-        // texture_coords
-        {
-            vertex_data[i * 4 + 0].texture_coords = {0.0, 0.0};
-            vertex_data[i * 4 + 1].texture_coords = {0.0, 0.0};
-            vertex_data[i * 4 + 2].texture_coords = {0.0, 0.0};
-            vertex_data[i * 4 + 3].texture_coords = {0.0, 0.0};
-
-            index_data[i * 6 + 0] = i * 4 + 0;
-            index_data[i * 6 + 1] = i * 4 + 1;
-            index_data[i * 6 + 2] = i * 4 + 2;
-
-            index_data[i * 6 + 3] = i * 4 + 0;
-            index_data[i * 6 + 4] = i * 4 + 3;
-            index_data[i * 6 + 5] = i * 4 + 1;
-        }
-    }
-
     }
 
     // Element index array
@@ -218,7 +215,7 @@ Sprite *add_sprite(Sprites &sprites, const char *sprite_name) {
 void update_sprites(Sprites &sprites) {
     for (uint32_t i = 0; i < array::size(*sprites.sprites); ++i) {
         Sprite &sprite = (*sprites.sprites)[i];
-        
+
         if (sprite.dirty) {
             glm::mat4 transform = glm::mat4(1.0f);
             transform = glm::translate(transform, sprite.position);
@@ -239,15 +236,14 @@ void update_sprites(Sprites &sprites) {
             float texcoord_w = (float)sprite.atlas_rect->size.x / atlas_width;
             float texcoord_h = (float)sprite.atlas_rect->size.y / atlas_height;
 
-            sprites.vertex_data[i * 4 + 0].texture_coords = {texcoord_x,                texcoord_y             };
-            sprites.vertex_data[i * 4 + 1].texture_coords = {texcoord_x + texcoord_w,   texcoord_y - texcoord_h};
-            sprites.vertex_data[i * 4 + 2].texture_coords = {texcoord_x,                texcoord_y - texcoord_h};
-            sprites.vertex_data[i * 4 + 3].texture_coords = {texcoord_x + texcoord_w,   texcoord_y             };
+            sprites.vertex_data[i * 4 + 0].texture_coords = {texcoord_x, texcoord_y};
+            sprites.vertex_data[i * 4 + 1].texture_coords = {texcoord_x + texcoord_w, texcoord_y - texcoord_h};
+            sprites.vertex_data[i * 4 + 2].texture_coords = {texcoord_x, texcoord_y - texcoord_h};
+            sprites.vertex_data[i * 4 + 3].texture_coords = {texcoord_x + texcoord_w, texcoord_y};
 
             sprite.dirty = false;
         }
     }
-
 }
 
 void render_sprites(Engine &engine, Sprites &sprites) {
@@ -269,7 +265,7 @@ void render_sprites(Engine &engine, Sprites &sprites) {
     glUniform1i(glGetUniformLocation(shader_program, "texture0"), 0);
 
     glm::mat4 model = glm::mat4(1);
-//    model = glm::scale(model, glm::vec3(tilesheet.tile_size * render_scale, tilesheet.tile_size * render_scale, 1));
+    //    model = glm::scale(model, glm::vec3(tilesheet.tile_size * render_scale, tilesheet.tile_size * render_scale, 1));
 
     glUniformMatrix4fv(glGetUniformLocation(shader_program, "projection"), 1, GL_FALSE, glm::value_ptr(projection * view));
     glUniformMatrix4fv(glGetUniformLocation(shader_program, "model"), 1, GL_FALSE, glm::value_ptr(model));

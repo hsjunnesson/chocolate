@@ -1,18 +1,17 @@
 #include "engine/file.h"
 #include "engine/log.h"
 
-#include <memory.h>
 #include <array.h>
+#include <memory.h>
 #include <string_stream.h>
 #include <temp_allocator.h>
 
 #if defined(_WIN32)
-#include <windows.h>
 #include <fileapi.h>
-#elif defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
+#include <windows.h>
+#elif defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
 #include <sys/stat.h>
 #endif
-
 
 namespace engine {
 namespace file {
@@ -30,7 +29,7 @@ bool read(string_stream::Buffer &buffer, const char *filename) {
         log_error("Could not read file %s: invalid file handle", filename);
         return false;
     }
-    
+
     if (!GetFileSizeEx(file, &file_size)) {
         log_error("Could not read file %s: could not get size", filename);
         return false;
@@ -49,7 +48,7 @@ bool read(string_stream::Buffer &buffer, const char *filename) {
     }
 
     return true;
-#elif defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
+#elif defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
     struct stat info;
     if (stat(filename, &info) != 0) {
         log_error("Could not read file %s", filename);
@@ -70,9 +69,9 @@ bool read(string_stream::Buffer &buffer, const char *filename) {
         log_error("Could not read file %s", filename);
         return false;
     }
-    
+
     fclose(file);
-    
+
     return true;
 #else
     log_error("Unsupported platform");
@@ -82,4 +81,3 @@ bool read(string_stream::Buffer &buffer, const char *filename) {
 
 } // namespace file
 } // namespace engine
-

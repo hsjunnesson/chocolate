@@ -1,30 +1,29 @@
 #include "engine/engine.h"
 
-#include "engine/input.h"
-#include "engine/shader.h"
-#include "engine/texture.h"
-#include "engine/math.inl"
-#include "engine/log.h"
 #include "engine/config.inl"
+#include "engine/input.h"
+#include "engine/log.h"
+#include "engine/math.inl"
+#include "engine/shader.h"
 #include "engine/sprites.h"
+#include "engine/texture.h"
 
-#include <memory.h>
-#include <temp_allocator.h>
-#include <proto/engine.pb.h>
-#include <string_stream.h>
 #include <GLFW/glfw3.h>
-#include <glad/glad.h>
 #include <fstream>
+#include <glad/glad.h>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+#include <memory.h>
+#include <proto/engine.pb.h>
+#include <string_stream.h>
+#include <temp_allocator.h>
 
 // #include <glm/glm.hpp>
 // #include <glm/gtc/matrix_transform.hpp>
 // #include <glm/gtc/type_ptr.hpp>
 // #define GLM_ENABLE_EXPERIMENTAL
 // #include <glm/gtx/euler_angles.hpp>
-
 
 namespace {
 
@@ -169,7 +168,6 @@ static const double Update_Rate = 60;
 static const double Desired_Frametime = 1.0 / Update_Rate;
 #endif
 
-
 Engine::Engine(Allocator &allocator, const char *params_path)
 : allocator(allocator)
 , params(nullptr)
@@ -182,13 +180,12 @@ Engine::Engine(Allocator &allocator, const char *params_path)
 , camera_zoom(1)
 , camera_offset({0, 0})
 , terminating(false)
-, sprites(nullptr)
-{
+, sprites(nullptr) {
     params = MAKE_NEW(allocator, EngineParams);
     config::read(params_path, params);
 
     camera_zoom = params->render_scale();
-    
+
     // glfw
     {
         glfwSetErrorCallback(glfw_error_callback);
@@ -224,9 +221,9 @@ Engine::Engine(Allocator &allocator, const char *params_path)
 
         int swap_interval = 0;
 
-        #if WAIT_VSYNC
-            swap_interval = 1;
-        #endif
+#if WAIT_VSYNC
+        swap_interval = 1;
+#endif
 
         glfwSwapInterval(swap_interval);
 
@@ -300,7 +297,7 @@ void render(Engine &engine) {
     if (engine.engine_callbacks && engine.engine_callbacks->render) {
         engine.engine_callbacks->render(engine, engine.game_object);
     }
-    
+
     // imgui
     {
         if (engine.engine_callbacks->render_imgui) {
@@ -312,7 +309,7 @@ void render(Engine &engine) {
     }
 
     lock_buffer();
-    
+
     glfwSwapBuffers(engine.glfw_window);
 }
 

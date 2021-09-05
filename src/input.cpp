@@ -6,7 +6,6 @@
 
 #include <GLFW/glfw3.h>
 
-
 namespace engine {
 
 using namespace foundation;
@@ -100,7 +99,6 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
     input_command.mouse_state = mouse_state;
 
     array::push_back(*engine->input->input_commands, input_command);
-
 }
 
 Input::Input(Allocator &allocator, GLFWwindow *glfw_window)

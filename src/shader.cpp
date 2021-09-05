@@ -1,20 +1,20 @@
 #if defined(_WIN32)
-#include <windows.h>
 #include <fileapi.h>
-#elif defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
+#include <windows.h>
+#elif defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
 #include <sys/stat.h>
 #endif
 
-#include "engine/shader.h"
-#include "engine/log.h"
 #include "engine/file.h"
+#include "engine/log.h"
+#include "engine/shader.h"
 
-#include <memory.h>
+#include <GLFW/glfw3.h>
 #include <array.h>
+#include <glad/glad.h>
+#include <memory.h>
 #include <string_stream.h>
 #include <temp_allocator.h>
-#include <GLFW/glfw3.h>
-#include <glad/glad.h>
 
 #include <fstream>
 
