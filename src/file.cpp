@@ -6,12 +6,14 @@
 #include <string_stream.h>
 #include <temp_allocator.h>
 
+// clang-format off
 #if defined(_WIN32)
-#include <fileapi.h>
 #include <windows.h>
+#include <fileapi.h>
 #elif defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
 #include <sys/stat.h>
 #endif
+// clang-format on
 
 namespace engine {
 namespace file {

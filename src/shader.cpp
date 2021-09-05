@@ -1,10 +1,3 @@
-#if defined(_WIN32)
-#include <fileapi.h>
-#include <windows.h>
-#elif defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
-#include <sys/stat.h>
-#endif
-
 #include "engine/file.h"
 #include "engine/log.h"
 #include "engine/shader.h"
