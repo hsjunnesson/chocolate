@@ -14,17 +14,16 @@ using namespace foundation;
 
 struct Window;
 
-enum class Action {
+enum class InputType {
     None,
-    Quit,
-    ZoomIn,
-    ZoomOut,
+    Mouse,
+    Key
+};
+
+enum class MouseAction {
+    None,
     MouseMoved,
     MouseTrigger,
-    MoveDown,
-    MoveLeft,
-    MoveRight,
-    MoveUp,
 };
 
 enum class TriggerState {
@@ -35,10 +34,12 @@ enum class TriggerState {
 };
 
 struct KeyState {
+    int16_t keycode = -1;
     TriggerState trigger_state = TriggerState::None;
 };
 
 struct MouseState {
+    MouseAction mouse_action = MouseAction::None;
     Vector2f mouse_position = {0.0f, 0.0f};
     Vector2f mouse_relative_motion = {0.0f, 0.0f};
     TriggerState mouse_left_state = TriggerState::None;
@@ -46,7 +47,7 @@ struct MouseState {
 };
 
 struct InputCommand {
-    Action action = Action::None;
+    InputType input_type = InputType::None;
 
     union {
         KeyState key_state;

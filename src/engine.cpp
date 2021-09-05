@@ -344,10 +344,8 @@ int run(Engine &engine) {
         }
 
         if (glfwWindowShouldClose(engine.glfw_window)) {
-            if (engine.engine_callbacks && engine.engine_callbacks->on_input) {
-                InputCommand quit_command;
-                quit_command.action = Action::Quit;
-                engine.engine_callbacks->on_input(engine, engine.game_object, quit_command);
+            if (engine.engine_callbacks && engine.engine_callbacks->on_shutdown) {
+                engine.engine_callbacks->on_shutdown(engine, engine.game_object);
             } else {
                 terminate(engine);
             }

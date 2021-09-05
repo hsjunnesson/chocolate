@@ -22,6 +22,8 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
     }
 
     InputCommand input_command;
+    input_command.input_type = InputType::Key;
+    input_command.key_state.keycode = key;
 
     if (action == GLFW_PRESS) {
         input_command.key_state.trigger_state = TriggerState::Pressed;
@@ -29,17 +31,6 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
         input_command.key_state.trigger_state = TriggerState::Released;
     } else if (action == GLFW_REPEAT) {
         input_command.key_state.trigger_state = TriggerState::Repeated;
-    }
-
-    switch (key) {
-    case GLFW_KEY_ESCAPE: {
-        input_command.action = Action::Quit;
-        break;
-    }
-
-    default: {
-        return;
-    }
     }
 
     array::push_back(*engine->input->input_commands, input_command);
@@ -55,13 +46,14 @@ void cursor_callback(GLFWwindow *window, double x, double y) {
     Input &input = *engine->input;
 
     MouseState mouse_state = input.mouse_state;
+    mouse_state.mouse_action = MouseAction::MouseMoved;
     mouse_state.mouse_relative_motion = {(float)x - mouse_state.mouse_position.x, (float)y - mouse_state.mouse_position.y};
     mouse_state.mouse_position = {(float)x, (float)y};
 
     input.mouse_state = mouse_state;
 
     InputCommand input_command;
-    input_command.action = Action::MouseMoved;
+    input_command.input_type = InputType::Mouse;
     input_command.mouse_state = mouse_state;
 
     array::push_back(*engine->input->input_commands, input_command);
@@ -79,6 +71,7 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
     Input &input = *engine->input;
 
     MouseState mouse_state = input.mouse_state;
+    mouse_state.mouse_action = MouseAction::MouseTrigger;
 
     if (button == GLFW_MOUSE_BUTTON_LEFT) {
         if (action == GLFW_RELEASE) {
@@ -103,7 +96,7 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
     input.mouse_state = mouse_state;
 
     InputCommand input_command;
-    input_command.action = Action::MouseTrigger;
+    input_command.input_type = InputType::Mouse;
     input_command.mouse_state = mouse_state;
 
     array::push_back(*engine->input->input_commands, input_command);
