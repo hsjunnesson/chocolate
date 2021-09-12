@@ -213,13 +213,20 @@ Sprite *add_sprite(Sprites &sprites, const char *sprite_name) {
 }
 
 void update_sprites(Sprites &sprites) {
+    const static glm::vec3 rotation_vec = glm::vec3(0.0f, 0.0f, -1.0f);
+
     for (uint32_t i = 0; i < array::size(*sprites.sprites); ++i) {
         Sprite &sprite = (*sprites.sprites)[i];
 
         if (sprite.dirty) {
+            glm::vec3 half_size = glm::vec3(0.5f * (float)sprite.atlas_rect->size.x, 0.5f * (float)sprite.atlas_rect->size.y, 0.0f) * sprite.scale;
+
             glm::mat4 transform = glm::mat4(1.0f);
             transform = glm::translate(transform, sprite.position);
-            transform = glm::scale(transform, glm::vec3(sprite.atlas_rect->size.x, sprite.atlas_rect->size.y, 1.0f) * sprite.scale);
+            transform = glm::translate(transform, half_size);
+            transform = glm::rotate(transform, sprite.rotation, rotation_vec);
+            transform = glm::translate(transform, -half_size);
+            transform = glm::scale(transform, glm::vec3((float)sprite.atlas_rect->size.x, (float)sprite.atlas_rect->size.y, 1.0f) * sprite.scale);
 
             // position
             for (int ii = 0; ii < 4; ++ii) {
