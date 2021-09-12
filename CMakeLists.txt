@@ -125,40 +125,7 @@ target_link_libraries(${LIB_NAME}
     imgui::imgui
 )
 
-#export(TARGETS libchocolate NAMESPACE engine:: FILE LibLicensingTargets.cmake)
+# Enable tests
 
-
-# # Test application
-# SET(APP_EXE StaticTest)
-
-# add_executable(${APP_EXE}
-#     "src/main.cpp"
-# )
-
-
-# # Includes
-# include_directories(
-#         ${PROJECT_SOURCE_DIR}/include
-# )
-
-# target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-# target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC ${bitsquidfoundation_SOURCE_DIR})
-# target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE ${backward_SOURCE_DIR})
-# target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE ${date_SOURCE_DIR})
-# target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/glad/include)
-# target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/generated_src)
-
-
-# # Linked libraries
-# target_link_libraries(${APP_EXE} PRIVATE backward)
-# target_link_libraries(${APP_EXE} PRIVATE bitsquid-foundation)
-# target_link_libraries(${APP_EXE} PRIVATE glfw)
-# target_link_libraries(${APP_EXE} PRIVATE glm::glm)
-# target_link_libraries(${APP_EXE} PRIVATE protobuf::libprotobuf)
-# target_link_libraries(${APP_EXE} PRIVATE date::date)
-
-# target_compile_definitions(${APP_EXE} PRIVATE "GLFW_INCLUDE_NONE")
-
-
-# # Compiler warnings
-# target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic -Werror -Wno-unknown-pragmas -Wno-gnu-zero-variadic-macro-arguments)
+enable_testing()
+add_subdirectory(tests)

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <inttypes.h>
+#include <algorithm>
 
 namespace engine {
 
@@ -60,6 +61,14 @@ constexpr uint32_t index(uint32_t const x, uint32_t const y, uint32_t const max_
 constexpr void coord(uint32_t const index, uint32_t &x, uint32_t &y, uint32_t const max_width) {
     x = index % max_width;
     y = index / max_width;
+}
+
+/**
+ * @brief Returns a new value that approaches a target by an amount
+ */
+template<typename T> constexpr T approach(T value, T target, T amount) {
+    T a = amount < 0 ? -amount : amount; // abs
+    return value > target ? std::max(value - a, target) : std::min(value + a, target);
 }
 
 } // namespace engine
