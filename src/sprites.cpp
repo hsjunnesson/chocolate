@@ -223,7 +223,6 @@ void update_sprites(Sprites &sprites) {
 
             glm::mat4 transform = glm::mat4(1.0f);
             transform = glm::translate(transform, sprite.position);
-            transform = glm::translate(transform, half_size);
             transform = glm::rotate(transform, sprite.rotation, rotation_vec);
             transform = glm::translate(transform, -half_size);
             transform = glm::scale(transform, glm::vec3((float)sprite.atlas_rect->size.x, (float)sprite.atlas_rect->size.y, 1.0f) * sprite.scale);
