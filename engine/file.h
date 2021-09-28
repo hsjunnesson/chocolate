@@ -1,4 +1,4 @@
-#pragma mark once
+#pragma once
 
 namespace foundation {
 template<typename T> struct Array;
