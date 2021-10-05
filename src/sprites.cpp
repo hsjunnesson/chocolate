@@ -261,7 +261,7 @@ void render_sprites(Engine &engine, Sprites &sprites) {
 
     const glm::mat4 projection = glm::ortho(0.0f, (float)engine.window_rect.size.x, 0.0f, (float)engine.window_rect.size.y);
     glm::mat4 view = glm::mat4(1);
-    view = glm::translate(view, glm::vec3(engine.camera_offset.x, engine.camera_offset.y, 0.0f));
+    view = glm::translate(view, glm::vec3(-engine.camera_offset.x, -engine.camera_offset.y, 0.0f));
 
     const GLuint shader_program = sprites.shader->program;
 
