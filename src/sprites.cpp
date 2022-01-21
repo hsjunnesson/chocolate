@@ -287,7 +287,7 @@ void render_sprites(Engine &engine, Sprites &sprites) {
     glUniform1i(glGetUniformLocation(shader_program, "texture0"), 0);
 
     glm::mat4 model = glm::mat4(1);
-    //    model = glm::scale(model, glm::vec3(tilesheet.tile_size * render_scale, tilesheet.tile_size * render_scale, 1));
+    model = glm::scale(model, glm::vec3(render_scale, render_scale, 1.0f));
 
     glUniformMatrix4fv(glGetUniformLocation(shader_program, "projection"), 1, GL_FALSE, glm::value_ptr(projection * view));
     glUniformMatrix4fv(glGetUniformLocation(shader_program, "model"), 1, GL_FALSE, glm::value_ptr(model));
