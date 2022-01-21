@@ -73,7 +73,8 @@ Sprites::Sprites(Allocator &allocator)
 , vbo(0)
 , vao(0)
 , ebo(0)
-, sprites(nullptr) {
+, sprites(nullptr)
+, sprite_id_counter(0) {
     shader = MAKE_NEW(allocator, Shader, nullptr, vertex_source, fragment_source);
     sprites = MAKE_NEW(allocator, Array<Sprite>, allocator);
 
@@ -192,24 +193,47 @@ void init_sprites(Sprites &sprites, const char *atlas_filename) {
     sprites.atlas = MAKE_NEW(sprites.allocator, Atlas, sprites.allocator, atlas_filename);
 }
 
-Sprite *add_sprite(Sprites &sprites, const char *sprite_name) {
+const Sprite add_sprite(Sprites &sprites, const char *sprite_name) {
     if (array::size(*sprites.sprites) > max_sprites) {
         log_fatal("Sprites already at max size");
     }
 
     const Rect *rect = atlas_rect(*sprites.atlas, sprite_name);
     if (!rect) {
-        log_error("Sprites atlas doesn't contain %s", sprite_name);
-        return nullptr;
+        log_fatal("Sprites atlas doesn't contain %s", sprite_name);
     }
 
     Sprite sprite;
+    sprite.id = ++sprites.sprite_id_counter;
     sprite.atlas_rect = rect;
+    sprite.transform = glm::mat4(1.0f);
     sprite.dirty = true;
 
     array::push_back(*sprites.sprites, sprite);
-    engine::Sprite &back = array::back(*sprites.sprites);
-    return &back;
+
+    return sprite;
+}
+
+void remove_sprite(Sprites &sprites, uint64_t id) {
+    for (engine::Sprite *iter = array::begin(*sprites.sprites); iter != array::end(*sprites.sprites); ++iter) {
+        if (iter->id == id) {
+            if (iter + 1 != array::end(*sprites.sprites)) {
+                std::swap(*iter, array::back(*sprites.sprites));
+            }
+            array::pop_back(*sprites.sprites);
+            break;
+        }
+    }
+}
+
+void transform_sprite(Sprites &sprites, uint64_t id, glm::mat4 transform) {
+    for (engine::Sprite *iter = array::begin(*sprites.sprites); iter != array::end(*sprites.sprites); ++iter) {
+        if (iter->id == id) {
+            iter->transform = transform;
+            iter->dirty = true;
+            break;
+        }
+    }
 }
 
 void update_sprites(Sprites &sprites) {
@@ -219,17 +243,9 @@ void update_sprites(Sprites &sprites) {
         Sprite &sprite = (*sprites.sprites)[i];
 
         if (sprite.dirty) {
-            glm::vec3 half_size = glm::vec3(0.5f * (float)sprite.atlas_rect->size.x, 0.5f * (float)sprite.atlas_rect->size.y, 0.0f) * sprite.scale;
-
-            glm::mat4 transform = glm::mat4(1.0f);
-            transform = glm::translate(transform, sprite.position);
-            transform = glm::rotate(transform, sprite.rotation, rotation_vec);
-            transform = glm::translate(transform, -half_size);
-            transform = glm::scale(transform, glm::vec3((float)sprite.atlas_rect->size.x, (float)sprite.atlas_rect->size.y, 1.0f) * sprite.scale);
-
             // position
             for (int ii = 0; ii < 4; ++ii) {
-                glm::vec4 position = transform * unit_quad[ii];
+                glm::vec4 position = sprite.transform * unit_quad[ii];
                 sprites.vertex_data[i * 4 + ii].position = {position.x, position.y, position.z};
             }
 
