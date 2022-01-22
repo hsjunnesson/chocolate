@@ -1,5 +1,4 @@
 #include "engine/engine.h"
-
 #include "engine/config.inl"
 #include "engine/input.h"
 #include "engine/log.h"
@@ -9,6 +8,7 @@
 #include "engine/texture.h"
 
 #include <GLFW/glfw3.h>
+#include <cassert>
 #include <fstream>
 #include <glad/glad.h>
 #include <imgui.h>
@@ -18,12 +18,6 @@
 #include <proto/engine.pb.h>
 #include <string_stream.h>
 #include <temp_allocator.h>
-
-// #include <glm/glm.hpp>
-// #include <glm/gtc/matrix_transform.hpp>
-// #include <glm/gtc/type_ptr.hpp>
-// #define GLM_ENABLE_EXPERIMENTAL
-// #include <glm/gtx/euler_angles.hpp>
 
 namespace {
 
@@ -314,6 +308,8 @@ void render(Engine &engine) {
 }
 
 int run(Engine &engine) {
+    assert(engine.engine_callbacks);
+
     float prev_frame_time = glfwGetTime();
 
     bool running = true;
@@ -322,7 +318,7 @@ int run(Engine &engine) {
     float current_frame_time = prev_frame_time;
     float delta_time = current_frame_time - prev_frame_time;
 
-    while (running) {
+    while (true) {
         // Process queued events
         if (engine.engine_callbacks && engine.engine_callbacks->on_input) {
             for (uint32_t i = 0; i < array::size(*engine.input->input_commands); ++i) {
@@ -350,7 +346,6 @@ int run(Engine &engine) {
 
         // Check terminate
         if (engine.terminating) {
-            running = false;
             break;
         }
 

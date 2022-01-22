@@ -12,6 +12,8 @@
 
 #include <cjson/cJSON.h>
 
+#include <cassert>
+
 namespace engine {
 using namespace foundation;
 
@@ -48,6 +50,7 @@ Atlas::Atlas(foundation::Allocator &allocator, const char *atlas_filename)
             log_fatal("Could not parse atlas %s: meta missing \"image\"", atlas_filename);
         }
 
+        assert(image->valuestring);
         const char *image_filename = image->valuestring;
         texture = MAKE_NEW(allocator, Texture, allocator, image_filename);
     }
