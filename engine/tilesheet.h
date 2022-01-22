@@ -10,6 +10,7 @@ template<typename T> struct Array;
 
 namespace engine {
 using namespace foundation;
+using namespace math;
 
 struct Engine;
 struct Shader;

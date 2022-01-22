@@ -3,7 +3,7 @@
 #include <inttypes.h>
 #include <algorithm>
 
-namespace engine {
+namespace math {
 
 struct Vector2 {
     int32_t x = 0;
@@ -89,4 +89,4 @@ template<typename T> constexpr T approach(T value, T target, T amount) {
     return value > target ? std::max(value - a, target) : std::min(value + a, target);
 }
 
-} // namespace engine
+} // namespace math

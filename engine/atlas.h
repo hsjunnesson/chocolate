@@ -9,6 +9,7 @@ template<typename T> struct Hash;
 
 namespace engine {
 using namespace foundation;
+using namespace math;
 
 struct Texture;
 

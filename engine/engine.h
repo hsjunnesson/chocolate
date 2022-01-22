@@ -11,6 +11,7 @@ class Allocator;
 
 namespace engine {
 using namespace foundation;
+using namespace math;
 
 class EngineParams;
 struct Engine;
