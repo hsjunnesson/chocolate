@@ -389,10 +389,13 @@ void offset_camera(Engine &engine, int32_t x, int32_t y) {
 }
 
 void zoom_camera(Engine &engine, float camera_zoom) {
-    float ratio = camera_zoom / engine.camera_zoom;
+    glm::vec2 offset = {engine.camera_offset.x, engine.camera_offset.y};
+    offset += glm::vec2 {engine.window_rect.size.x / 2.0f, engine.window_rect.size.y / 2.0f};
+    offset /= engine.camera_zoom;
     engine.camera_zoom = camera_zoom;
-    engine.camera_offset.x *= ratio;
-    engine.camera_offset.y *= ratio;
+    offset *= camera_zoom;
+    offset -= glm::vec2 {engine.window_rect.size.x / 2.0f, engine.window_rect.size.y / 2.0f};
+    move_camera(engine, offset.x, offset.y);
 }
 
 void terminate(Engine &engine) {
