@@ -51,7 +51,7 @@ in vec4 color;
 out vec4 out_color;
 
 void main() {
-    out_color = texture(texture0, uv);
+    out_color = texture(texture0, uv) * color;
 }
 )";
 
@@ -101,7 +101,7 @@ Sprites::Sprites(Allocator &allocator)
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *)0);
 
     // color
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *)offsetof(Vertex, color));
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *)offsetof(Vertex, color));
 
     // texture_coords
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *)offsetof(Vertex, texture_coords));
@@ -123,10 +123,10 @@ Sprites::Sprites(Allocator &allocator)
 
             // color
             {
-                vertex_data[i * 4 + 0].color = {1.0f, 1.0f, 1.0f};
-                vertex_data[i * 4 + 1].color = {1.0f, 1.0f, 1.0f};
-                vertex_data[i * 4 + 2].color = {1.0f, 1.0f, 1.0f};
-                vertex_data[i * 4 + 3].color = {1.0f, 1.0f, 1.0f};
+                vertex_data[i * 4 + 0].color = {1.0f, 1.0f, 1.0f, 1.0f};
+                vertex_data[i * 4 + 1].color = {1.0f, 1.0f, 1.0f, 1.0f};
+                vertex_data[i * 4 + 2].color = {1.0f, 1.0f, 1.0f, 1.0f};
+                vertex_data[i * 4 + 3].color = {1.0f, 1.0f, 1.0f, 1.0f};
             }
 
             // texture_coords
@@ -214,7 +214,7 @@ const Sprite add_sprite(Sprites &sprites, const char *sprite_name) {
     return sprite;
 }
 
-void remove_sprite(Sprites &sprites, uint64_t id) {
+void remove_sprite(Sprites &sprites, const uint64_t id) {
     for (engine::Sprite *iter = array::begin(*sprites.sprites); iter != array::end(*sprites.sprites); ++iter) {
         if (iter->id == id) {
             if (iter + 1 != array::end(*sprites.sprites)) {
@@ -226,10 +226,20 @@ void remove_sprite(Sprites &sprites, uint64_t id) {
     }
 }
 
-void transform_sprite(Sprites &sprites, uint64_t id, glm::mat4 transform) {
+void transform_sprite(Sprites &sprites, const uint64_t id, const glm::mat4 transform) {
     for (engine::Sprite *iter = array::begin(*sprites.sprites); iter != array::end(*sprites.sprites); ++iter) {
         if (iter->id == id) {
             iter->transform = transform;
+            iter->dirty = true;
+            break;
+        }
+    }
+}
+
+void color_sprite(Sprites &sprites, const uint64_t id, const Color4f color) {
+    for (engine::Sprite *iter = array::begin(*sprites.sprites); iter != array::end(*sprites.sprites); ++iter) {
+        if (iter->id == id) {
+            iter->color = color;
             iter->dirty = true;
             break;
         }
@@ -263,12 +273,18 @@ void update_sprites(Sprites &sprites) {
             sprites.vertex_data[i * 4 + 2].texture_coords = {texcoord_x, texcoord_y - texcoord_h};
             sprites.vertex_data[i * 4 + 3].texture_coords = {texcoord_x + texcoord_w, texcoord_y};
 
+            // color
+            sprites.vertex_data[i * 4 + 0].color = sprite.color;
+            sprites.vertex_data[i * 4 + 1].color = sprite.color;
+            sprites.vertex_data[i * 4 + 2].color = sprite.color;
+            sprites.vertex_data[i * 4 + 3].color = sprite.color;
+
             sprite.dirty = false;
         }
     }
 }
 
-void render_sprites(Engine &engine, Sprites &sprites) {
+void render_sprites(const Engine &engine, const Sprites &sprites) {
     if (!(sprites.shader && sprites.shader->program && sprites.vao && sprites.ebo && sprites.atlas)) {
         return;
     }

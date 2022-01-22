@@ -20,7 +20,8 @@ struct Shader;
 struct Sprite {
     uint64_t id;
     const Rect *atlas_rect = nullptr;
-    glm::mat4 transform;
+    glm::mat4 transform = glm::mat4(1.0f);
+    Color4f color = {1.0f, 1.0f, 1.0f, 1.0f};
     bool dirty = false;
 };
 
@@ -48,15 +49,18 @@ void init_sprites(Sprites &sprites, const char *atlas_filename);
 const Sprite add_sprite(Sprites &sprites, const char *sprite_name);
 
 // Remove sprite based on its id.
-void remove_sprite(Sprites &sprites, uint64_t id);
+void remove_sprite(Sprites &sprites, const uint64_t id);
 
 // Transforms a sprite.
-void transform_sprite(Sprites &sprites, uint64_t id, glm::mat4 transform);
+void transform_sprite(Sprites &sprites, const uint64_t id, const glm::mat4 transform);
+
+// Updates color of sprite.
+void color_sprite(Sprites &sprites, const uint64_t id, const Color4f color);
 
 // Updates all dirty sprites.
 void update_sprites(Sprites &sprites);
 
 // Renders the sprites.
-void render_sprites(Engine &engine, Sprites &sprites);
+void render_sprites(const Engine &engine, const Sprites &sprites);
 
 } // namespace engine

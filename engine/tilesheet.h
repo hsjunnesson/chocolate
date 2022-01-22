@@ -26,7 +26,7 @@ struct Tile {
 
     // Index in the atlas.
     uint16_t tile;
-    Vector3f color = {1.0f, 1.0f, 1.0f};
+    Color4f color = {1.0f, 1.0f, 1.0f, 1.0f};
     Flip flip = Flip::NONE;
 };
 

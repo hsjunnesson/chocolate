@@ -27,9 +27,16 @@ struct Vector3f {
     float z = 0.0f;
 };
 
+struct Color4f {
+    float r = 0.0f;
+    float g = 0.0f;
+    float b = 0.0f;
+    float a = 0.0f;
+};
+
 struct Vertex {
     Vector3f position;
-    Vector3f color;
+    Color4f color;
     Vector2f texture_coords;
 };
 
@@ -84,7 +91,7 @@ constexpr int32_t index_offset(int32_t const idx, int32_t const xoffset, int32_t
 /**
  * @brief Returns a new value that approaches a target by an amount
  */
-template<typename T> constexpr T approach(T value, T target, T amount) {
+template<typename T> T approach(T value, T target, T amount) {
     T a = amount < 0 ? -amount : amount; // abs
     return value > target ? std::max(value - a, target) : std::min(value + a, target);
 }
