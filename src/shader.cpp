@@ -1,6 +1,6 @@
+#include "engine/shader.h"
 #include "engine/file.h"
 #include "engine/log.h"
-#include "engine/shader.h"
 
 #include <GLFW/glfw3.h>
 #include <array.h>
