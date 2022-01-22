@@ -171,14 +171,15 @@ Engine::Engine(Allocator &allocator, const char *params_path)
 , glfw_window(nullptr)
 , window_rect({{0, 0}, {0, 0}})
 , input(nullptr)
-, camera_zoom(1)
+, camera_zoom(1.0f)
+, render_scale(1.0f)
 , camera_offset({0, 0})
 , terminating(false)
 , sprites(nullptr) {
     params = MAKE_NEW(allocator, EngineParams);
     config::read(params_path, params);
 
-    camera_zoom = params->render_scale();
+    render_scale = params->render_scale();
 
     // glfw
     {
@@ -385,6 +386,13 @@ void move_camera(Engine &engine, int32_t x, int32_t y) {
 void offset_camera(Engine &engine, int32_t x, int32_t y) {
     engine.camera_offset.x += x;
     engine.camera_offset.y += y;
+}
+
+void zoom_camera(Engine &engine, float camera_zoom) {
+    float ratio = camera_zoom / engine.camera_zoom;
+    engine.camera_zoom = camera_zoom;
+    engine.camera_offset.x *= ratio;
+    engine.camera_offset.y *= ratio;
 }
 
 void terminate(Engine &engine) {

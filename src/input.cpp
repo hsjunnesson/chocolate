@@ -101,6 +101,26 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
     array::push_back(*engine->input->input_commands, input_command);
 }
 
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+    Engine *engine = (Engine *)glfwGetWindowUserPointer(window);
+
+    if (!engine) {
+        return;
+    }
+
+    Input &input = *engine->input;
+
+    ScrollState scroll_state;
+    scroll_state.x_offset = xoffset;
+    scroll_state.y_offset = yoffset;
+
+    InputCommand input_command;
+    input_command.input_type = InputType::Scroll;
+    input_command.scroll_state = scroll_state;
+
+    array::push_back(*engine->input->input_commands, input_command);
+}
+
 Input::Input(Allocator &allocator, GLFWwindow *glfw_window)
 : allocator(allocator)
 , input_commands(nullptr)
@@ -108,6 +128,7 @@ Input::Input(Allocator &allocator, GLFWwindow *glfw_window)
     glfwSetKeyCallback(glfw_window, key_callback);
     glfwSetCursorPosCallback(glfw_window, cursor_callback);
     glfwSetMouseButtonCallback(glfw_window, mouse_button_callback);
+    glfwSetScrollCallback(glfw_window, scroll_callback);
     input_commands = MAKE_NEW(allocator, Array<InputCommand>, allocator);
 }
 

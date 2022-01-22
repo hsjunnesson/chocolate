@@ -64,6 +64,24 @@ constexpr void coord(uint32_t const index, uint32_t &x, uint32_t &y, uint32_t co
 }
 
 /**
+ * @brief Returns a new index offset by x and y coordinates.
+ * Careful with wrapping, since coordinates are unsigned.
+ * 
+ * @param idx The index.
+ * @param xoffset The x offset.
+ * @param yoffset They y offset.
+ * @param max_width The maximum width.
+ * @return The index.
+ */
+constexpr int32_t index_offset(int32_t const idx, int32_t const xoffset, int32_t const yoffset, uint32_t const max_width) {
+    uint32_t x = 0;
+    uint32_t y = 0;
+    coord(idx, x, y, max_width);
+
+    return index(x + xoffset, y + yoffset, max_width);
+}
+
+/**
  * @brief Returns a new value that approaches a target by an amount
  */
 template<typename T> constexpr T approach(T value, T target, T amount) {

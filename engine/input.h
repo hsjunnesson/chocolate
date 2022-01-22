@@ -17,7 +17,8 @@ struct Window;
 enum class InputType {
     None,
     Mouse,
-    Key
+    Key,
+    Scroll,
 };
 
 enum class MouseAction {
@@ -46,12 +47,18 @@ struct MouseState {
     TriggerState mouse_right_state = TriggerState::None;
 };
 
+struct ScrollState {
+    double x_offset;
+    double y_offset;
+};
+
 struct InputCommand {
     InputType input_type = InputType::None;
 
     union {
         KeyState key_state;
         MouseState mouse_state;
+        ScrollState scroll_state;
     };
 
     InputCommand() {};

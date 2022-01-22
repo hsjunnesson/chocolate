@@ -273,7 +273,7 @@ void render_sprites(Engine &engine, Sprites &sprites) {
         return;
     }
 
-    const float render_scale = engine.camera_zoom;
+    const float render_scale = engine.camera_zoom * engine.render_scale;
 
     const glm::mat4 projection = glm::ortho(0.0f, (float)engine.window_rect.size.x, 0.0f, (float)engine.window_rect.size.y, 0.1f, 100.0f);
     glm::mat4 view = glm::mat4(1);

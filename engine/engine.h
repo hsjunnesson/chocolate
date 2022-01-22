@@ -39,6 +39,7 @@ struct Engine {
     Rect window_rect;
     Input *input;
     float camera_zoom;
+    float render_scale;
     Vector2 camera_offset;
     bool terminating;
     Sprites *sprites;
@@ -52,6 +53,9 @@ void move_camera(Engine &engine, int32_t x, int32_t y);
 
 // Offsets a camera by pixels.
 void offset_camera(Engine &engine, int32_t x, int32_t y);
+
+// Change camera zoom level.
+void zoom_camera(Engine &engine, float camera_zoom);
 
 // Flag the engine to terminate
 void terminate(Engine &engine);
