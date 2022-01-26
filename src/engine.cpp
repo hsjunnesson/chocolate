@@ -334,7 +334,8 @@ int run(Engine &engine) {
         }
 
         if (engine.sprites) {
-            update_sprites(*engine.sprites);
+            update_sprites(*engine.sprites, current_frame_time, delta_time);
+            commit_sprites(*engine.sprites);
         }
 
         if (glfwWindowShouldClose(engine.glfw_window)) {

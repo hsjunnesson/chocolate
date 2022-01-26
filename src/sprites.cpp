@@ -74,9 +74,15 @@ Sprites::Sprites(Allocator &allocator)
 , vao(0)
 , ebo(0)
 , sprites(nullptr)
-, sprite_id_counter(0) {
+, time(0)
+, sprite_id_counter(0)
+, animation_id_counter(0)
+, animations(nullptr)
+, done_animations(nullptr) {
     shader = MAKE_NEW(allocator, Shader, nullptr, vertex_source, fragment_source);
     sprites = MAKE_NEW(allocator, Array<Sprite>, allocator);
+    animations = MAKE_NEW(allocator, Array<SpriteAnimation>, allocator);
+    done_animations = MAKE_NEW(allocator, Array<SpriteAnimation>, allocator);
 
     const size_t vertex_count = 4 * max_sprites;
     const size_t vertex_data_size = sizeof(Vertex) * vertex_count;
@@ -187,6 +193,14 @@ Sprites::~Sprites() {
     if (atlas) {
         MAKE_DELETE(allocator, Atlas, atlas);
     }
+
+    if (animations) {
+        MAKE_DELETE(allocator, Array, animations);
+    }
+
+    if (done_animations) {
+        MAKE_DELETE(allocator, Array, done_animations);
+    }
 }
 
 void init_sprites(Sprites &sprites, const char *atlas_filename) {
@@ -226,6 +240,16 @@ void remove_sprite(Sprites &sprites, const uint64_t id) {
     }
 }
 
+const Sprite *get_sprite(const Sprites &sprites, const uint64_t id) {
+    for (Sprite *iter = array::begin(*sprites.sprites); iter != array::end(*sprites.sprites); ++iter) {
+        if (iter->id == id) {
+            return iter;
+        }
+    }
+
+    return nullptr;
+}
+
 void transform_sprite(Sprites &sprites, const uint64_t id, const glm::mat4 transform) {
     for (engine::Sprite *iter = array::begin(*sprites.sprites); iter != array::end(*sprites.sprites); ++iter) {
         if (iter->id == id) {
@@ -246,7 +270,103 @@ void color_sprite(Sprites &sprites, const uint64_t id, const Color4f color) {
     }
 }
 
-void update_sprites(Sprites &sprites) {
+const Array<SpriteAnimation> &done_sprite_animations(Sprites &sprites) {
+    return *sprites.done_animations;
+}
+
+uint64_t animate_sprite_position(Sprites &sprites, const uint64_t sprite_id, const glm::vec3 to_position, float duration) {
+    Sprite *sprite = nullptr;
+
+    for (Sprite *iter = array::begin(*sprites.sprites); iter != array::end(*sprites.sprites); ++iter) {
+        if (iter->id == sprite_id) {
+            sprite = iter;
+            break;
+        }
+    }
+
+    if (!sprite) {
+        return 0;
+    }
+
+    SpriteAnimation animation;
+    animation.animation_id = ++sprites.animation_id_counter;
+    animation.sprite_id = sprite_id;
+    animation.completed = false;
+    animation.type = SpriteAnimation::Type::Position;
+    animation.start_time = sprites.time;
+    animation.duration = duration;
+    animation.completed = false;
+    animation.from_transform = sprite->transform;
+
+    glm::vec3 pos = animation.from_transform[3];
+    glm::mat4 delta(1.0f);
+    delta = glm::translate(delta, to_position - pos);
+
+    animation.to_transform = delta * animation.from_transform;
+    const glm::vec3 two = animation.to_transform[3];
+
+    array::push_back(*sprites.animations, animation);
+
+    return animation.animation_id;
+}
+
+void update_sprites(Sprites &sprites, float t, float dt) {
+    sprites.time = t;
+
+    bool dirty = false;
+
+    array::clear(*sprites.done_animations);
+
+    for (SpriteAnimation *animation = array::begin(*sprites.animations); animation != array::end(*sprites.animations); ++animation) {
+        bool completed = false;
+        float a = (t - animation->start_time) / animation->duration;
+        if (a > 1.0f) {
+            a = 1.0f;
+            completed = true;
+        }
+
+        switch (animation->type) {
+        case SpriteAnimation::Type::Position: {
+            const glm::vec3 from_pos = animation->from_transform[3];
+            const glm::vec3 to_pos = animation->to_transform[3];
+            const glm::vec3 mixed_pos = glm::mix(from_pos, to_pos, a);
+
+            glm::mat4 delta(1.0f);
+            delta = glm::translate(delta, -from_pos);
+            delta = glm::translate(delta, mixed_pos);
+
+            transform_sprite(sprites, animation->sprite_id, delta * animation->from_transform);
+            break;
+        }
+        case SpriteAnimation::Type::Rotation: {
+            // TODO: Implement
+            break;
+        }
+        }
+
+        if (completed) {
+            animation->completed = true;
+            dirty = true;
+        }
+    }
+
+    if (dirty) {
+        Array<SpriteAnimation> animations(sprites.allocator);
+        array::reserve(animations, array::size(*sprites.animations));
+
+        for (SpriteAnimation *animation = array::begin(*sprites.animations); animation != array::end(*sprites.animations); ++animation) {
+            if (animation->completed) {
+                array::push_back(*sprites.done_animations, *animation);
+            } else {
+                array::push_back(animations, *animation);
+            }
+        }
+
+        *sprites.animations = animations;
+    }
+}
+
+void commit_sprites(Sprites &sprites) {
     const static glm::vec3 rotation_vec = glm::vec3(0.0f, 0.0f, -1.0f);
 
     for (uint32_t i = 0; i < array::size(*sprites.sprites); ++i) {

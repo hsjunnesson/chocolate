@@ -2,12 +2,8 @@
 
 #include "math.inl"
 #include <inttypes.h>
+#include <collection_types.h>
 #include <glm/glm.hpp>
-
-namespace foundation {
-class Allocator;
-template<typename T> struct Array;
-}
 
 namespace engine {
 using namespace foundation;
@@ -25,6 +21,22 @@ struct Sprite {
     bool dirty = false;
 };
 
+struct SpriteAnimation {
+    enum class Type {
+        Position,
+        Rotation
+    };
+
+    uint64_t animation_id;
+    uint64_t sprite_id;
+    Type type;
+    float start_time;
+    float duration;
+    bool completed;
+    glm::mat4 from_transform;
+    glm::mat4 to_transform;
+};
+
 // A collection of sprites that share an atlas.
 struct Sprites {
     Sprites(Allocator &allocator);
@@ -40,6 +52,11 @@ struct Sprites {
 
     Array<Sprite> *sprites;
     uint64_t sprite_id_counter;
+
+    float time;
+    uint64_t animation_id_counter;
+    Array<SpriteAnimation> *animations;
+    Array<SpriteAnimation> *done_animations; // The list of done animations since last frame
 };
 
 // Initializes this Sprites with an atlas. Required before rendering.
@@ -51,14 +68,34 @@ const Sprite add_sprite(Sprites &sprites, const char *sprite_name);
 // Remove sprite based on its id.
 void remove_sprite(Sprites &sprites, const uint64_t id);
 
+// Returns a pointer to a sprite by its id.
+const Sprite *get_sprite(const Sprites &sprites, const uint64_t id);
+
 // Transforms a sprite.
 void transform_sprite(Sprites &sprites, const uint64_t id, const glm::mat4 transform);
 
 // Updates color of sprite.
 void color_sprite(Sprites &sprites, const uint64_t id, const Color4f color);
 
-// Updates all dirty sprites.
-void update_sprites(Sprites &sprites);
+// Returns the array of done animation since last frame.
+const Array<SpriteAnimation> &done_sprite_animations(Sprites &sprites);
+
+/**
+ * @brief Creates a sprite animation for position.
+ * 
+ * @param sprites The Sprites.
+ * @param sprite_id The sprite id
+ * @param to_position The position to animate to.
+ * @param duration The duration in seconds.
+ * @return uint64_t The id of the SpriteAnimation. 0 on errors.
+ */
+uint64_t animate_sprite_position(Sprites &sprites, const uint64_t sprite_id, const glm::vec3 to_position, float duration);
+
+// Updates animations.
+void update_sprites(Sprites &sprites, float t, float dt);
+
+// Commits all dirty sprites.
+void commit_sprites(Sprites &sprites);
 
 // Renders the sprites.
 void render_sprites(const Engine &engine, const Sprites &sprites);
