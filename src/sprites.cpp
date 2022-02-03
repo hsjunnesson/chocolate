@@ -433,8 +433,13 @@ void render_sprites(const Engine &engine, const Sprites &sprites) {
 
     uint64_t quads = array::size(*sprites.sprites);
 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+
     glDrawElements(GL_TRIANGLES, 6 * quads, GL_UNSIGNED_INT, (void *)0);
 
+    glDisable(GL_BLEND);
+    
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
