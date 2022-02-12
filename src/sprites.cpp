@@ -8,6 +8,8 @@
 #include <array.h>
 #include <memory.h>
 
+#include <algorithm>
+
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 
@@ -27,7 +29,7 @@ uniform mat4 projection;
 uniform mat4 model;
 
 layout (location = 0) in vec3 in_position;
-layout (location = 1) in vec3 in_color;
+layout (location = 1) in vec4 in_color;
 layout (location = 2) in vec2 in_texture_coords;
 
 smooth out vec2 uv;
@@ -37,7 +39,7 @@ void main() {
     mat4 mvp = projection * model;
     gl_Position = mvp * vec4(in_position, 1.0);
     uv = in_texture_coords;
-    color = vec4(in_color, 1.0);
+    color = in_color;
 }
 )";
 
@@ -51,7 +53,7 @@ in vec4 color;
 out vec4 out_color;
 
 void main() {
-    out_color = texture(texture0, uv) * color;
+    out_color = color * texture(texture0, uv);
 }
 )";
 
@@ -88,7 +90,7 @@ Sprites::Sprites(Allocator &allocator)
     const size_t vertex_data_size = sizeof(Vertex) * vertex_count;
 
     size_t index_count = 6 * max_sprites;
-    GLuint *index_data = (GLuint *)allocator.allocate(sizeof(GLuint) * index_count);
+    GLuint *index_data = (GLuint *)allocator.allocate(sizeof(GLuint) * (uint32_t)index_count);
 
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
@@ -408,13 +410,14 @@ void update_sprites(Sprites &sprites, float t, float dt) {
 void commit_sprites(Sprites &sprites) {
     const static glm::vec3 rotation_vec = glm::vec3(0.0f, 0.0f, -1.0f);
 
-    for (uint32_t i = 0; i < array::size(*sprites.sprites); ++i) {
-        Sprite &sprite = (*sprites.sprites)[i];
+    bool did_update = false;
 
-        if (sprite.dirty) {
+    int i = 0;
+    for (engine::Sprite *sprite = array::begin(*sprites.sprites); sprite != array::end(*sprites.sprites); ++sprite) {
+        if (sprite->dirty) {
             // position
             for (int ii = 0; ii < 4; ++ii) {
-                glm::vec4 position = sprite.transform * unit_quad[ii];
+                glm::vec4 position = sprite->transform * unit_quad[ii];
                 sprites.vertex_data[i * 4 + ii].position = {position.x, position.y, position.z};
             }
 
@@ -422,10 +425,10 @@ void commit_sprites(Sprites &sprites) {
             const int atlas_width = sprites.atlas->texture->width;
             const int atlas_height = sprites.atlas->texture->height;
 
-            float texcoord_x = (float)sprite.atlas_rect->origin.x / atlas_width;
-            float texcoord_y = (float)(sprite.atlas_rect->origin.y + sprite.atlas_rect->size.y) / atlas_height;
-            float texcoord_w = (float)sprite.atlas_rect->size.x / atlas_width;
-            float texcoord_h = (float)sprite.atlas_rect->size.y / atlas_height;
+            float texcoord_x = (float)sprite->atlas_rect->origin.x / atlas_width;
+            float texcoord_y = (float)(sprite->atlas_rect->origin.y + sprite->atlas_rect->size.y) / atlas_height;
+            float texcoord_w = (float)sprite->atlas_rect->size.x / atlas_width;
+            float texcoord_h = (float)sprite->atlas_rect->size.y / atlas_height;
 
             sprites.vertex_data[i * 4 + 0].texture_coords = {texcoord_x, texcoord_y};
             sprites.vertex_data[i * 4 + 1].texture_coords = {texcoord_x + texcoord_w, texcoord_y - texcoord_h};
@@ -433,13 +436,22 @@ void commit_sprites(Sprites &sprites) {
             sprites.vertex_data[i * 4 + 3].texture_coords = {texcoord_x + texcoord_w, texcoord_y};
 
             // color
-            sprites.vertex_data[i * 4 + 0].color = sprite.color;
-            sprites.vertex_data[i * 4 + 1].color = sprite.color;
-            sprites.vertex_data[i * 4 + 2].color = sprite.color;
-            sprites.vertex_data[i * 4 + 3].color = sprite.color;
+            sprites.vertex_data[i * 4 + 0].color = sprite->color;
+            sprites.vertex_data[i * 4 + 1].color = sprite->color;
+            sprites.vertex_data[i * 4 + 2].color = sprite->color;
+            sprites.vertex_data[i * 4 + 3].color = sprite->color;
 
-            sprite.dirty = false;
+            sprite->dirty = false;
+            did_update = true;
         }
+
+        ++i;
+    }
+
+    if (did_update) {
+        // std::partition(array::begin(*sprites.sprites), array::end(*sprites.sprites), [](engine::Sprite &sprite) {
+        //     return 1.0f - sprite.color.a < std::numeric_limits<float>::epsilon();
+        // });
     }
 }
 
@@ -473,7 +485,9 @@ void render_sprites(const Engine &engine, const Sprites &sprites) {
     uint64_t quads = array::size(*sprites.sprites);
 
     glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+//    glEnable(GL_DEPTH_TEST);
+
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glDrawElements(GL_TRIANGLES, 6 * quads, GL_UNSIGNED_INT, (void *)0);
 

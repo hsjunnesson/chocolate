@@ -179,7 +179,7 @@ Engine::Engine(Allocator &allocator, const char *params_path)
     params = MAKE_NEW(allocator, EngineParams);
     config::read(params_path, params);
 
-    render_scale = params->render_scale();
+    render_scale = (float)params->render_scale();
 
     // glfw
     {
@@ -311,7 +311,7 @@ void render(Engine &engine) {
 int run(Engine &engine) {
     assert(engine.engine_callbacks);
 
-    float prev_frame_time = glfwGetTime();
+    float prev_frame_time = (float)glfwGetTime();
 
     bool running = true;
     int exit_code = 0;
@@ -356,7 +356,7 @@ int run(Engine &engine) {
         process_events(*engine.input);
 
         // Calculate frame times
-        current_frame_time = glfwGetTime();
+        current_frame_time = (float)glfwGetTime();
         delta_time = current_frame_time - prev_frame_time;
         prev_frame_time = current_frame_time;
 
@@ -396,7 +396,7 @@ void zoom_camera(Engine &engine, float camera_zoom) {
     engine.camera_zoom = camera_zoom;
     offset *= camera_zoom;
     offset -= glm::vec2 {engine.window_rect.size.x / 2.0f, engine.window_rect.size.y / 2.0f};
-    move_camera(engine, offset.x, offset.y);
+    move_camera(engine, (int32_t)offset.x, (int32_t)offset.y);
 }
 
 void terminate(Engine &engine) {
