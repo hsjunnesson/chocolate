@@ -1,9 +1,12 @@
 #pragma mark once
 
 #include "math.inl"
-#include <inttypes.h>
+
+#pragma warning(push, 0)
+#include < inttypes.h>
 #include <collection_types.h>
 #include <glm/glm.hpp>
+#pragma warning(pop)
 
 namespace engine {
 using namespace foundation;

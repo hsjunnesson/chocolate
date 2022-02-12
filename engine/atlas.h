@@ -1,6 +1,6 @@
 #pragma mark once
 
-#include "engine/math.inl"
+#include "math.inl"
 
 namespace foundation {
 class Allocator;
