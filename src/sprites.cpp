@@ -274,7 +274,7 @@ const Array<SpriteAnimation> &done_sprite_animations(Sprites &sprites) {
     return *sprites.done_animations;
 }
 
-uint64_t animate_sprite_position(Sprites &sprites, const uint64_t sprite_id, const glm::vec3 to_position, float duration) {
+uint64_t animate_sprite_position(Sprites &sprites, const uint64_t sprite_id, const glm::vec3 to_position, const float duration, const float delay) {
     Sprite *sprite = nullptr;
 
     for (Sprite *iter = array::begin(*sprites.sprites); iter != array::end(*sprites.sprites); ++iter) {
@@ -291,9 +291,8 @@ uint64_t animate_sprite_position(Sprites &sprites, const uint64_t sprite_id, con
     SpriteAnimation animation;
     animation.animation_id = ++sprites.animation_id_counter;
     animation.sprite_id = sprite_id;
-    animation.completed = false;
     animation.type = SpriteAnimation::Type::Position;
-    animation.start_time = sprites.time;
+    animation.start_time = sprites.time + delay;
     animation.duration = duration;
     animation.completed = false;
     animation.from_transform = sprite->transform;
@@ -310,6 +309,35 @@ uint64_t animate_sprite_position(Sprites &sprites, const uint64_t sprite_id, con
     return animation.animation_id;
 }
 
+uint64_t animate_sprite_color(Sprites &sprites, const uint64_t sprite_id, const Color4f to_color, const float duration, const float delay) {
+    Sprite *sprite = nullptr;
+
+    for (Sprite *iter = array::begin(*sprites.sprites); iter != array::end(*sprites.sprites); ++iter) {
+        if (iter->id == sprite_id) {
+            sprite = iter;
+            break;
+        }
+    }
+
+    if (!sprite) {
+        return 0;
+    }
+
+    SpriteAnimation animation;
+    animation.animation_id = ++sprites.animation_id_counter;
+    animation.sprite_id = sprite_id;
+    animation.type = SpriteAnimation::Type::Color;
+    animation.start_time = sprites.time + delay;
+    animation.duration = duration;
+    animation.completed = false;
+    animation.from_color = sprite->color;
+    animation.to_color = to_color;
+
+    array::push_back(*sprites.animations, animation);
+
+    return animation.animation_id;
+}
+
 void update_sprites(Sprites &sprites, float t, float dt) {
     sprites.time = t;
 
@@ -318,6 +346,10 @@ void update_sprites(Sprites &sprites, float t, float dt) {
     array::clear(*sprites.done_animations);
 
     for (SpriteAnimation *animation = array::begin(*sprites.animations); animation != array::end(*sprites.animations); ++animation) {
+        if (t < animation->start_time) {
+            continue;
+        }
+        
         bool completed = false;
         float a = (t - animation->start_time) / animation->duration;
         if (a > 1.0f) {
@@ -339,8 +371,15 @@ void update_sprites(Sprites &sprites, float t, float dt) {
             break;
         }
         case SpriteAnimation::Type::Rotation: {
+            log_fatal("Sprite rotation animation not implemented");
             // TODO: Implement
             break;
+        }
+        case SpriteAnimation::Type::Color: {
+            const Color4f from_color = animation->from_color;
+            const Color4f to_color = animation->to_color;
+            const Color4f mixed_color = math::mix(from_color, to_color, a);
+            color_sprite(sprites, animation->sprite_id, mixed_color);
         }
         }
 

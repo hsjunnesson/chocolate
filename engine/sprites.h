@@ -24,7 +24,8 @@ struct Sprite {
 struct SpriteAnimation {
     enum class Type {
         Position,
-        Rotation
+        Rotation,
+        Color,
     };
 
     uint64_t animation_id;
@@ -35,6 +36,8 @@ struct SpriteAnimation {
     bool completed;
     glm::mat4 from_transform;
     glm::mat4 to_transform;
+    Color4f from_color;
+    Color4f to_color;
 };
 
 // A collection of sprites that share an atlas.
@@ -87,9 +90,22 @@ const Array<SpriteAnimation> &done_sprite_animations(Sprites &sprites);
  * @param sprite_id The sprite id
  * @param to_position The position to animate to.
  * @param duration The duration in seconds.
+ * @param delay The delay before starting animation in seconds.
  * @return uint64_t The id of the SpriteAnimation. 0 on errors.
  */
-uint64_t animate_sprite_position(Sprites &sprites, const uint64_t sprite_id, const glm::vec3 to_position, float duration);
+uint64_t animate_sprite_position(Sprites &sprites, const uint64_t sprite_id, const glm::vec3 to_position, const float duration, const float delay = 0.0f);
+
+/**
+ * @brief Creates a sprite animation for color.
+ * 
+ * @param sprites The sprites.
+ * @param sprite_id The sprite id.
+ * @param to_color The color to animate to.
+ * @param duration The duration in seconds.
+ * @param delay The delay before starting animation in seconds.
+ * @return uint64_t The id of the SpriteAnimation. 0 on errors.
+ */
+uint64_t animate_sprite_color(Sprites &sprites, const uint64_t sprite_id, const Color4f to_color, const float duration, const float delay = 0.0f);
 
 // Updates animations.
 void update_sprites(Sprites &sprites, float t, float dt);

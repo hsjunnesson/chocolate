@@ -46,6 +46,24 @@ struct Rect {
 };
 
 /**
+ * @brief Mixes two colors.
+ * 
+ * @param x Color x.
+ * @param y Color y.
+ * @param a The ratio of blending.
+ * @return constexpr Color4f The mixed color.
+ */
+constexpr Color4f mix(const Color4f x, const Color4f y, const float a) {
+    const float ratio = 1.0f - a;
+    Color4f res;
+    res.r = x.r * ratio + y.r * a;
+    res.g = x.g * ratio + y.g * a;
+    res.b = x.b * ratio + y.b * a;
+    res.a = x.a * ratio + y.a * a;
+    return res;
+}
+
+/**
  * @brief Returns the index of an x, y coordinate
  * 
  * @param x The x coord
