@@ -8,8 +8,6 @@
 #include <array.h>
 #include <memory.h>
 
-#include <algorithm>
-
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 
@@ -410,8 +408,6 @@ void update_sprites(Sprites &sprites, float t, float dt) {
 void commit_sprites(Sprites &sprites) {
     const static glm::vec3 rotation_vec = glm::vec3(0.0f, 0.0f, -1.0f);
 
-    bool did_update = false;
-
     int i = 0;
     for (engine::Sprite *sprite = array::begin(*sprites.sprites); sprite != array::end(*sprites.sprites); ++sprite) {
         if (sprite->dirty) {
@@ -442,16 +438,9 @@ void commit_sprites(Sprites &sprites) {
             sprites.vertex_data[i * 4 + 3].color = sprite->color;
 
             sprite->dirty = false;
-            did_update = true;
         }
 
         ++i;
-    }
-
-    if (did_update) {
-        // std::partition(array::begin(*sprites.sprites), array::end(*sprites.sprites), [](engine::Sprite &sprite) {
-        //     return 1.0f - sprite.color.a < std::numeric_limits<float>::epsilon();
-        // });
     }
 }
 
@@ -485,7 +474,6 @@ void render_sprites(const Engine &engine, const Sprites &sprites) {
     uint64_t quads = array::size(*sprites.sprites);
 
     glEnable(GL_BLEND);
-//    glEnable(GL_DEPTH_TEST);
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
