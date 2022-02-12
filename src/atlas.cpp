@@ -19,7 +19,8 @@ using namespace foundation;
 
 Atlas::Atlas(foundation::Allocator &allocator, const char *atlas_filename)
 : allocator(allocator)
-, frames(nullptr) {
+, frames(nullptr)
+, texture(nullptr) {
     frames = MAKE_NEW(allocator, Hash<Rect>, allocator);
 
     string_stream::Buffer data(allocator);
