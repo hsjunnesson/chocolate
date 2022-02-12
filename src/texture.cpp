@@ -29,7 +29,7 @@ void *__realloc(void *ptr, size_t new_size) {
     void *new_ptr = allocator.allocate(new_size);
     size_t old_size = allocator.allocated_size(ptr);
     memcpy(new_ptr, ptr, std::min(old_size, new_size));
-    allocator.deallocate(ptr);
+    allocator.deallocate(ptr); // TODO: This triggers asan
 
     return new_ptr;
 }
@@ -43,9 +43,9 @@ void __free(void *ptr) {
 
 } // namespace
 
-#define STBI_MALLOC(size) __malloc(size)
-#define STBI_REALLOC(ptr, new_size) __realloc(ptr, new_size)
-#define STBI_FREE(ptr) __free(ptr)
+//#define STBI_MALLOC(size) __malloc(size)
+//#define STBI_REALLOC(ptr, new_size) __realloc(ptr, new_size)
+//#define STBI_FREE(ptr) __free(ptr)
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "engine/stb_image.h"

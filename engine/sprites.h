@@ -8,6 +8,10 @@
 #include <glm/glm.hpp>
 #pragma warning(pop)
 
+namespace std {
+class mutex;
+}
+
 namespace engine {
 using namespace foundation;
 using namespace math;
@@ -58,6 +62,7 @@ struct Sprites {
 
     Array<Sprite> *sprites;
     uint64_t sprite_id_counter;
+    std::mutex *sprites_mutex;
 
     float time;
     uint64_t animation_id_counter;

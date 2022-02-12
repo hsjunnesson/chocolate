@@ -8,6 +8,8 @@
 #include <array.h>
 #include <memory.h>
 
+#include <mutex>
+
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 
@@ -76,11 +78,13 @@ Sprites::Sprites(Allocator &allocator)
 , sprites(nullptr)
 , time(0)
 , sprite_id_counter(0)
+, sprites_mutex(nullptr)
 , animation_id_counter(0)
 , animations(nullptr)
 , done_animations(nullptr) {
     shader = MAKE_NEW(allocator, Shader, nullptr, vertex_source, fragment_source);
     sprites = MAKE_NEW(allocator, Array<Sprite>, allocator);
+    sprites_mutex = MAKE_NEW(allocator, std::mutex);
     animations = MAKE_NEW(allocator, Array<SpriteAnimation>, allocator);
     done_animations = MAKE_NEW(allocator, Array<SpriteAnimation>, allocator);
 
@@ -190,6 +194,10 @@ Sprites::~Sprites() {
         MAKE_DELETE(allocator, Array, sprites);
     }
 
+    if (sprites_mutex) {
+        MAKE_DELETE(allocator, mutex, sprites_mutex);
+    }
+
     if (atlas) {
         MAKE_DELETE(allocator, Atlas, atlas);
     }
@@ -208,6 +216,8 @@ void init_sprites(Sprites &sprites, const char *atlas_filename) {
 }
 
 const Sprite add_sprite(Sprites &sprites, const char *sprite_name) {
+    std::scoped_lock lock(*sprites.sprites_mutex);
+
     if (array::size(*sprites.sprites) > max_sprites) {
         log_fatal("Sprites already at max size");
     }
@@ -229,6 +239,8 @@ const Sprite add_sprite(Sprites &sprites, const char *sprite_name) {
 }
 
 void remove_sprite(Sprites &sprites, const uint64_t id) {
+    std::scoped_lock lock(*sprites.sprites_mutex);
+
     for (engine::Sprite *iter = array::begin(*sprites.sprites); iter != array::end(*sprites.sprites); ++iter) {
         if (iter->id == id) {
             if (iter + 1 != array::end(*sprites.sprites)) {
@@ -241,6 +253,8 @@ void remove_sprite(Sprites &sprites, const uint64_t id) {
 }
 
 const Sprite *get_sprite(const Sprites &sprites, const uint64_t id) {
+    std::scoped_lock lock(*sprites.sprites_mutex);
+
     for (Sprite *iter = array::begin(*sprites.sprites); iter != array::end(*sprites.sprites); ++iter) {
         if (iter->id == id) {
             return iter;
@@ -251,6 +265,8 @@ const Sprite *get_sprite(const Sprites &sprites, const uint64_t id) {
 }
 
 void transform_sprite(Sprites &sprites, const uint64_t id, const glm::mat4 transform) {
+    std::scoped_lock lock(*sprites.sprites_mutex);
+
     for (engine::Sprite *iter = array::begin(*sprites.sprites); iter != array::end(*sprites.sprites); ++iter) {
         if (iter->id == id) {
             iter->transform = transform;
@@ -261,6 +277,8 @@ void transform_sprite(Sprites &sprites, const uint64_t id, const glm::mat4 trans
 }
 
 void color_sprite(Sprites &sprites, const uint64_t id, const Color4f color) {
+    std::scoped_lock lock(*sprites.sprites_mutex);
+
     for (engine::Sprite *iter = array::begin(*sprites.sprites); iter != array::end(*sprites.sprites); ++iter) {
         if (iter->id == id) {
             iter->color = color;
@@ -275,15 +293,7 @@ const Array<SpriteAnimation> &done_sprite_animations(Sprites &sprites) {
 }
 
 uint64_t animate_sprite_position(Sprites &sprites, const uint64_t sprite_id, const glm::vec3 to_position, const float duration, const float delay) {
-    Sprite *sprite = nullptr;
-
-    for (Sprite *iter = array::begin(*sprites.sprites); iter != array::end(*sprites.sprites); ++iter) {
-        if (iter->id == sprite_id) {
-            sprite = iter;
-            break;
-        }
-    }
-
+    const Sprite *sprite = get_sprite(sprites, sprite_id);
     if (!sprite) {
         return 0;
     }
@@ -310,15 +320,7 @@ uint64_t animate_sprite_position(Sprites &sprites, const uint64_t sprite_id, con
 }
 
 uint64_t animate_sprite_color(Sprites &sprites, const uint64_t sprite_id, const Color4f to_color, const float duration, const float delay) {
-    Sprite *sprite = nullptr;
-
-    for (Sprite *iter = array::begin(*sprites.sprites); iter != array::end(*sprites.sprites); ++iter) {
-        if (iter->id == sprite_id) {
-            sprite = iter;
-            break;
-        }
-    }
-
+    const Sprite *sprite = get_sprite(sprites, sprite_id);
     if (!sprite) {
         return 0;
     }
@@ -406,6 +408,8 @@ void update_sprites(Sprites &sprites, float t, float dt) {
 }
 
 void commit_sprites(Sprites &sprites) {
+    std::scoped_lock lock(*sprites.sprites_mutex);
+
     const static glm::vec3 rotation_vec = glm::vec3(0.0f, 0.0f, -1.0f);
 
     int i = 0;
@@ -445,6 +449,8 @@ void commit_sprites(Sprites &sprites) {
 }
 
 void render_sprites(const Engine &engine, const Sprites &sprites) {
+    std::scoped_lock lock(*sprites.sprites_mutex);
+
     if (!(sprites.shader && sprites.shader->program && sprites.vao && sprites.ebo && sprites.atlas)) {
         return;
     }
