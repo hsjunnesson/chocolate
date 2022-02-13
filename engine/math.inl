@@ -136,6 +136,13 @@ constexpr int32_t index_offset(int32_t const idx, int32_t const xoffset, int32_t
 }
 
 /**
+ * @brief Linear interpolation.
+ */
+template<typename T> T lerp(T a, T b, float ratio) {
+    return a + ratio * (b - a);
+}
+
+/**
  * @brief Returns a new value that approaches a target by an amount
  */
 template<typename T> T approach(T value, T target, T amount) {
