@@ -317,7 +317,7 @@ uint64_t animate_sprite_position(Sprites &sprites, const uint64_t sprite_id, con
 
         const glm::mat4 to_transform_mat4 = delta * from_transform_mat4;
         const float *to_transform_mat4_value_ptr = glm::value_ptr(to_transform_mat4);
-        memcpy(animation.to_transform.m, to_transform_mat4_value_ptr, 16);
+        memcpy(animation.to_transform.m, to_transform_mat4_value_ptr, sizeof(float) * 16);
     }
 
     array::push_back(*sprites.animations, animation);
@@ -458,7 +458,7 @@ void commit_sprites(Sprites &sprites) {
                 sprites.vertex_data[i * 4 + 2].color = sprite->color;
                 sprites.vertex_data[i * 4 + 3].color = sprite->color;
             }
-            
+
             sprite->dirty = false;
         }
 
