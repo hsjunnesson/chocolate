@@ -1,7 +1,7 @@
 #pragma once
 
-#include <inttypes.h>
 #include <algorithm>
+#include <inttypes.h>
 
 namespace math {
 
@@ -38,13 +38,11 @@ struct Matrix4f {
     float m[16];
 
     Matrix4f()
-    : m {
-            0.0f, 0.0f, 0.0f, 0.0f,
-            0.0f, 0.0f, 0.0f, 0.0f,
-            0.0f, 0.0f, 0.0f, 0.0f,
-            0.0f, 0.0f, 0.0f, 0.0f
-        }
-    {}
+    : m{
+          0.0f, 0.0f, 0.0f, 0.0f,
+          0.0f, 0.0f, 0.0f, 0.0f,
+          0.0f, 0.0f, 0.0f, 0.0f,
+          0.0f, 0.0f, 0.0f, 0.0f} {}
 
     Matrix4f(const float *float_data) {
         memcpy(m, float_data, sizeof(float) * 16);
@@ -56,8 +54,7 @@ struct Matrix4f {
             1.0f, 0.0f, 0.0f, 0.0f,
             0.0f, 1.0f, 0.0f, 0.0f,
             0.0f, 0.0f, 1.0f, 0.0f,
-            0.0f, 0.0f, 0.0f, 1.0f
-        };
+            0.0f, 0.0f, 0.0f, 1.0f};
         memcpy(mat4.m, m, sizeof(m));
         return mat4;
     }
@@ -138,14 +135,14 @@ constexpr int32_t index_offset(int32_t const idx, int32_t const xoffset, int32_t
 /**
  * @brief Linear interpolation.
  */
-template<typename T> T lerp(T a, T b, float ratio) {
+template <typename T> T lerp(T a, T b, float ratio) {
     return a + ratio * (b - a);
 }
 
 /**
  * @brief Returns a new value that approaches a target by an amount
  */
-template<typename T> T approach(T value, T target, T amount) {
+template <typename T> T approach(T value, T target, T amount) {
     T a = amount < 0 ? -amount : amount; // abs
     return value > target ? std::max(value - a, target) : std::min(value + a, target);
 }

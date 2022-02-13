@@ -101,7 +101,7 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
     array::push_back(*engine->input->input_commands, input_command);
 }
 
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
     Engine *engine = (Engine *)glfwGetWindowUserPointer(window);
 
     if (!engine) {

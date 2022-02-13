@@ -7,11 +7,11 @@
 #include "engine/sprites.h"
 #include "engine/texture.h"
 
-#include <glm/glm.hpp>
 #include <GLFW/glfw3.h>
 #include <cassert>
 #include <fstream>
 #include <glad/glad.h>
+#include <glm/glm.hpp>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
@@ -392,11 +392,11 @@ void offset_camera(Engine &engine, int32_t x, int32_t y) {
 
 void zoom_camera(Engine &engine, float camera_zoom) {
     glm::vec2 offset = {engine.camera_offset.x, engine.camera_offset.y};
-    offset += glm::vec2 {engine.window_rect.size.x / 2.0f, engine.window_rect.size.y / 2.0f};
+    offset += glm::vec2{engine.window_rect.size.x / 2.0f, engine.window_rect.size.y / 2.0f};
     offset /= engine.camera_zoom;
     engine.camera_zoom = camera_zoom;
     offset *= camera_zoom;
-    offset -= glm::vec2 {engine.window_rect.size.x / 2.0f, engine.window_rect.size.y / 2.0f};
+    offset -= glm::vec2{engine.window_rect.size.x / 2.0f, engine.window_rect.size.y / 2.0f};
     move_camera(engine, (int32_t)floor(offset.x), (int32_t)floor(offset.y));
 }
 

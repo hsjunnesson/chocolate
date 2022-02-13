@@ -1,7 +1,7 @@
 #pragma once
 
 namespace foundation {
-template<typename T> struct Array;
+template <typename T> struct Array;
 }
 
 namespace engine {

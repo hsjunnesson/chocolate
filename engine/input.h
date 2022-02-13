@@ -6,8 +6,8 @@ struct GLFWwindow;
 
 namespace foundation {
 class Allocator;
-template<typename T> struct Array;
-}
+template <typename T> struct Array;
+} // namespace foundation
 
 namespace engine {
 using namespace foundation;
@@ -62,14 +62,14 @@ struct InputCommand {
         ScrollState scroll_state;
     };
 
-    InputCommand() {};
+    InputCommand(){};
 };
 
 // The input system that keeps track of the state of inputs.
 struct Input {
     Input(Allocator &allocator, GLFWwindow *glfw_window);
     ~Input();
-    
+
     Allocator &allocator;
 
     // Current set of input commands.

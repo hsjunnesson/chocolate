@@ -5,8 +5,8 @@
 
 namespace foundation {
 class Allocator;
-template<typename T> struct Array;
-}
+template <typename T> struct Array;
+} // namespace foundation
 
 namespace engine {
 using namespace foundation;
@@ -41,7 +41,7 @@ struct Tilesheet {
     uint32_t tilesheet_vbo;
     uint32_t tilesheet_vao;
     uint32_t tilesheet_ebo;
-    
+
     Texture *tilesheet_atlas;
     uint32_t tile_size; // Size in pixels
 

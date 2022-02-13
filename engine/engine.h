@@ -1,7 +1,7 @@
 #pragma once
 
-#include <inttypes.h>
 #include "math.inl"
+#include <inttypes.h>
 
 struct GLFWwindow;
 

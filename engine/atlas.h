@@ -4,8 +4,8 @@
 
 namespace foundation {
 class Allocator;
-template<typename T> struct Hash;
-}
+template <typename T> struct Hash;
+} // namespace foundation
 
 namespace engine {
 using namespace foundation;

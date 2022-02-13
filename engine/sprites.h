@@ -3,8 +3,8 @@
 #include "math.inl"
 
 #pragma warning(push, 0)
-#include <inttypes.h>
 #include <collection_types.h>
+#include <inttypes.h>
 #pragma warning(pop)
 
 namespace std {

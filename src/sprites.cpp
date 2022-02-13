@@ -14,7 +14,6 @@
 #include <glad/glad.h>
 
 #include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
@@ -357,7 +356,7 @@ void update_sprites(Sprites &sprites, float t, float dt) {
         if (t < animation->start_time) {
             continue;
         }
-        
+
         bool completed = false;
         float a = (t - animation->start_time) / animation->duration;
         if (a > 1.0f) {
@@ -504,7 +503,7 @@ void render_sprites(const Engine &engine, const Sprites &sprites) {
     glDrawElements(GL_TRIANGLES, 6 * (GLsizei)quads, GL_UNSIGNED_INT, (void *)0);
 
     glDisable(GL_BLEND);
-    
+
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
