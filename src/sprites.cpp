@@ -14,6 +14,7 @@
 #include <glad/glad.h>
 
 #include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
@@ -146,13 +147,13 @@ Sprites::Sprites(Allocator &allocator)
                 vertex_data[i * 4 + 2].texture_coords = {0.0, 0.0};
                 vertex_data[i * 4 + 3].texture_coords = {0.0, 0.0};
 
-                index_data[i * 6 + 0] = i * 4 + 0;
-                index_data[i * 6 + 1] = i * 4 + 1;
-                index_data[i * 6 + 2] = i * 4 + 2;
+                index_data[i * 6 + 0] = (GLuint)i * 4 + 0;
+                index_data[i * 6 + 1] = (GLuint)i * 4 + 1;
+                index_data[i * 6 + 2] = (GLuint)i * 4 + 2;
 
-                index_data[i * 6 + 3] = i * 4 + 0;
-                index_data[i * 6 + 4] = i * 4 + 3;
-                index_data[i * 6 + 5] = i * 4 + 1;
+                index_data[i * 6 + 3] = (GLuint)i * 4 + 0;
+                index_data[i * 6 + 4] = (GLuint)i * 4 + 3;
+                index_data[i * 6 + 5] = (GLuint)i * 4 + 1;
             }
         }
     }
@@ -230,7 +231,7 @@ const Sprite add_sprite(Sprites &sprites, const char *sprite_name) {
     Sprite sprite;
     sprite.id = ++sprites.sprite_id_counter;
     sprite.atlas_rect = rect;
-    sprite.transform = glm::mat4(1.0f);
+    sprite.transform = Matrix4f::identity();
     sprite.dirty = true;
 
     array::push_back(*sprites.sprites, sprite);
@@ -264,7 +265,7 @@ const Sprite *get_sprite(const Sprites &sprites, const uint64_t id) {
     return nullptr;
 }
 
-void transform_sprite(Sprites &sprites, const uint64_t id, const glm::mat4 transform) {
+void transform_sprite(Sprites &sprites, const uint64_t id, const Matrix4f transform) {
     std::scoped_lock lock(*sprites.sprites_mutex);
 
     for (engine::Sprite *iter = array::begin(*sprites.sprites); iter != array::end(*sprites.sprites); ++iter) {
@@ -292,7 +293,7 @@ const Array<SpriteAnimation> &done_sprite_animations(Sprites &sprites) {
     return *sprites.done_animations;
 }
 
-uint64_t animate_sprite_position(Sprites &sprites, const uint64_t sprite_id, const glm::vec3 to_position, const float duration, const float delay) {
+uint64_t animate_sprite_position(Sprites &sprites, const uint64_t sprite_id, const Vector3 to_position, const float duration, const float delay) {
     const Sprite *sprite = get_sprite(sprites, sprite_id);
     if (!sprite) {
         return 0;
@@ -307,12 +308,17 @@ uint64_t animate_sprite_position(Sprites &sprites, const uint64_t sprite_id, con
     animation.completed = false;
     animation.from_transform = sprite->transform;
 
-    glm::vec3 pos = animation.from_transform[3];
-    glm::mat4 delta(1.0f);
-    delta = glm::translate(delta, to_position - pos);
+    {
+        glm::vec3 to_position_vec3 = glm::vec3(to_position.x, to_position.y, to_position.z);
+        glm::mat4 from_transform_mat4 = glm::make_mat4(animation.from_transform.m);
+        glm::vec3 from_position_vec3 = from_transform_mat4[3];
+        glm::mat4 delta(1.0f);
+        delta = glm::translate(delta, to_position_vec3 - from_position_vec3);
 
-    animation.to_transform = delta * animation.from_transform;
-    const glm::vec3 two = animation.to_transform[3];
+        const glm::mat4 to_transform_mat4 = delta * from_transform_mat4;
+        const float *to_transform_mat4_value_ptr = glm::value_ptr(to_transform_mat4);
+        memcpy(animation.to_transform.m, to_transform_mat4_value_ptr, 16);
+    }
 
     array::push_back(*sprites.animations, animation);
 
@@ -361,15 +367,19 @@ void update_sprites(Sprites &sprites, float t, float dt) {
 
         switch (animation->type) {
         case SpriteAnimation::Type::Position: {
-            const glm::vec3 from_pos = animation->from_transform[3];
-            const glm::vec3 to_pos = animation->to_transform[3];
+            const glm::vec3 from_pos = glm::make_mat4(animation->from_transform.m)[3];
+            const glm::vec3 to_pos = glm::make_mat4(animation->to_transform.m)[3];
             const glm::vec3 mixed_pos = glm::mix(from_pos, to_pos, a);
 
             glm::mat4 delta(1.0f);
             delta = glm::translate(delta, -from_pos);
             delta = glm::translate(delta, mixed_pos);
 
-            transform_sprite(sprites, animation->sprite_id, delta * animation->from_transform);
+            const glm::mat4 mixed_transform = delta * glm::make_mat4(animation->from_transform.m);
+            const float *mixed_transform_value_ptr = glm::value_ptr(mixed_transform);
+            const Matrix4f final_transform(mixed_transform_value_ptr);
+
+            transform_sprite(sprites, animation->sprite_id, final_transform);
             break;
         }
         case SpriteAnimation::Type::Rotation: {
@@ -416,31 +426,39 @@ void commit_sprites(Sprites &sprites) {
     for (engine::Sprite *sprite = array::begin(*sprites.sprites); sprite != array::end(*sprites.sprites); ++sprite) {
         if (sprite->dirty) {
             // position
-            for (int ii = 0; ii < 4; ++ii) {
-                glm::vec4 position = sprite->transform * unit_quad[ii];
-                sprites.vertex_data[i * 4 + ii].position = {position.x, position.y, position.z};
+            {
+                const glm::mat4 sprite_transform = glm::make_mat4(sprite->transform.m);
+
+                for (int ii = 0; ii < 4; ++ii) {
+                    const glm::vec4 position = sprite_transform * unit_quad[ii];
+                    sprites.vertex_data[i * 4 + ii].position = {position.x, position.y, position.z};
+                }
             }
 
             // texture coords
-            const int atlas_width = sprites.atlas->texture->width;
-            const int atlas_height = sprites.atlas->texture->height;
+            {
+                const int atlas_width = sprites.atlas->texture->width;
+                const int atlas_height = sprites.atlas->texture->height;
 
-            float texcoord_x = (float)sprite->atlas_rect->origin.x / atlas_width;
-            float texcoord_y = (float)(sprite->atlas_rect->origin.y + sprite->atlas_rect->size.y) / atlas_height;
-            float texcoord_w = (float)sprite->atlas_rect->size.x / atlas_width;
-            float texcoord_h = (float)sprite->atlas_rect->size.y / atlas_height;
+                float texcoord_x = (float)sprite->atlas_rect->origin.x / atlas_width;
+                float texcoord_y = (float)(sprite->atlas_rect->origin.y + sprite->atlas_rect->size.y) / atlas_height;
+                float texcoord_w = (float)sprite->atlas_rect->size.x / atlas_width;
+                float texcoord_h = (float)sprite->atlas_rect->size.y / atlas_height;
 
-            sprites.vertex_data[i * 4 + 0].texture_coords = {texcoord_x, texcoord_y};
-            sprites.vertex_data[i * 4 + 1].texture_coords = {texcoord_x + texcoord_w, texcoord_y - texcoord_h};
-            sprites.vertex_data[i * 4 + 2].texture_coords = {texcoord_x, texcoord_y - texcoord_h};
-            sprites.vertex_data[i * 4 + 3].texture_coords = {texcoord_x + texcoord_w, texcoord_y};
+                sprites.vertex_data[i * 4 + 0].texture_coords = {texcoord_x, texcoord_y};
+                sprites.vertex_data[i * 4 + 1].texture_coords = {texcoord_x + texcoord_w, texcoord_y - texcoord_h};
+                sprites.vertex_data[i * 4 + 2].texture_coords = {texcoord_x, texcoord_y - texcoord_h};
+                sprites.vertex_data[i * 4 + 3].texture_coords = {texcoord_x + texcoord_w, texcoord_y};
+            }
 
             // color
-            sprites.vertex_data[i * 4 + 0].color = sprite->color;
-            sprites.vertex_data[i * 4 + 1].color = sprite->color;
-            sprites.vertex_data[i * 4 + 2].color = sprite->color;
-            sprites.vertex_data[i * 4 + 3].color = sprite->color;
-
+            {
+                sprites.vertex_data[i * 4 + 0].color = sprite->color;
+                sprites.vertex_data[i * 4 + 1].color = sprite->color;
+                sprites.vertex_data[i * 4 + 2].color = sprite->color;
+                sprites.vertex_data[i * 4 + 3].color = sprite->color;
+            }
+            
             sprite->dirty = false;
         }
 
@@ -483,7 +501,7 @@ void render_sprites(const Engine &engine, const Sprites &sprites) {
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glDrawElements(GL_TRIANGLES, 6 * quads, GL_UNSIGNED_INT, (void *)0);
+    glDrawElements(GL_TRIANGLES, 6 * (GLsizei)quads, GL_UNSIGNED_INT, (void *)0);
 
     glDisable(GL_BLEND);
     

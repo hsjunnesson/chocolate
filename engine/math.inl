@@ -34,6 +34,35 @@ struct Color4f {
     float a = 0.0f;
 };
 
+struct Matrix4f {
+    float m[16];
+
+    Matrix4f()
+    : m {
+            0.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 0.0f
+        }
+    {}
+
+    Matrix4f(const float *float_data) {
+        memcpy(m, float_data, sizeof(float) * 16);
+    }
+
+    static Matrix4f identity() {
+        Matrix4f mat4;
+        float m[16] = {
+            1.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 1.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 1.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f
+        };
+        memcpy(mat4.m, m, sizeof(m));
+        return mat4;
+    }
+};
+
 struct Vertex {
     Vector3f position;
     Color4f color;

@@ -7,6 +7,7 @@
 #include "engine/sprites.h"
 #include "engine/texture.h"
 
+#include <glm/glm.hpp>
 #include <GLFW/glfw3.h>
 #include <cassert>
 #include <fstream>
@@ -172,7 +173,7 @@ Engine::Engine(Allocator &allocator, const char *params_path)
 , window_rect({{0, 0}, {0, 0}})
 , input(nullptr)
 , camera_zoom(1.0f)
-, render_scale(1.0f)
+, render_scale(1)
 , camera_offset({0, 0})
 , terminating(false)
 , sprites(nullptr) {
@@ -396,7 +397,7 @@ void zoom_camera(Engine &engine, float camera_zoom) {
     engine.camera_zoom = camera_zoom;
     offset *= camera_zoom;
     offset -= glm::vec2 {engine.window_rect.size.x / 2.0f, engine.window_rect.size.y / 2.0f};
-    move_camera(engine, (int32_t)offset.x, (int32_t)offset.y);
+    move_camera(engine, (int32_t)floor(offset.x), (int32_t)floor(offset.y));
 }
 
 void terminate(Engine &engine) {

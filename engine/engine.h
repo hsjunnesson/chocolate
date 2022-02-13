@@ -40,7 +40,7 @@ struct Engine {
     Rect window_rect;
     Input *input;
     float camera_zoom;
-    float render_scale;
+    int32_t render_scale;
     Vector2 camera_offset;
     bool terminating;
     Sprites *sprites;
