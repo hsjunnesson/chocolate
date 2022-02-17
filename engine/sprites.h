@@ -7,9 +7,15 @@
 #include <inttypes.h>
 #pragma warning(pop)
 
+// Mac doesn't like this, says std::mutex is ambiguous :shrug:
+#if defined(__APPLE__)
+#include <mutex>
+#else
 namespace std {
 class mutex;
 }
+#endif
+
 
 namespace engine {
 using namespace foundation;
