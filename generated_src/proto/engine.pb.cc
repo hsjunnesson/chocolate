@@ -14,42 +14,41 @@
 #include <google/protobuf/wire_format.h>
 // @@protoc_insertion_point(includes)
 #include <google/protobuf/port_def.inc>
+
+PROTOBUF_PRAGMA_INIT_SEG
 namespace engine {
-class TilesheetParamsDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<TilesheetParams> _instance;
-} _TilesheetParams_default_instance_;
-class EngineParamsDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<EngineParams> _instance;
-} _EngineParams_default_instance_;
+constexpr TilesheetParams::TilesheetParams(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : atlas_filename_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , tile_size_(0)
+  , tiles_width_(0)
+  , tiles_height_(0)
+  , atlas_gutter_(0){}
+struct TilesheetParamsDefaultTypeInternal {
+  constexpr TilesheetParamsDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~TilesheetParamsDefaultTypeInternal() {}
+  union {
+    TilesheetParams _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT TilesheetParamsDefaultTypeInternal _TilesheetParams_default_instance_;
+constexpr EngineParams::EngineParams(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : title_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , window_width_(0)
+  , window_height_(0)
+  , render_scale_(0){}
+struct EngineParamsDefaultTypeInternal {
+  constexpr EngineParamsDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~EngineParamsDefaultTypeInternal() {}
+  union {
+    EngineParams _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT EngineParamsDefaultTypeInternal _EngineParams_default_instance_;
 }  // namespace engine
-static void InitDefaultsscc_info_EngineParams_proto_2fengine_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::engine::_EngineParams_default_instance_;
-    new (ptr) ::engine::EngineParams();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_EngineParams_proto_2fengine_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_EngineParams_proto_2fengine_2eproto}, {}};
-
-static void InitDefaultsscc_info_TilesheetParams_proto_2fengine_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::engine::_TilesheetParams_default_instance_;
-    new (ptr) ::engine::TilesheetParams();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_TilesheetParams_proto_2fengine_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_TilesheetParams_proto_2fengine_2eproto}, {}};
-
 static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_proto_2fengine_2eproto[2];
 static constexpr ::PROTOBUF_NAMESPACE_ID::EnumDescriptor const** file_level_enum_descriptors_proto_2fengine_2eproto = nullptr;
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_proto_2fengine_2eproto = nullptr;
@@ -60,6 +59,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_proto_2fengine_2eproto::offset
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
   PROTOBUF_FIELD_OFFSET(::engine::TilesheetParams, atlas_filename_),
   PROTOBUF_FIELD_OFFSET(::engine::TilesheetParams, tile_size_),
   PROTOBUF_FIELD_OFFSET(::engine::TilesheetParams, tiles_width_),
@@ -70,14 +70,15 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_proto_2fengine_2eproto::offset
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
   PROTOBUF_FIELD_OFFSET(::engine::EngineParams, window_width_),
   PROTOBUF_FIELD_OFFSET(::engine::EngineParams, window_height_),
   PROTOBUF_FIELD_OFFSET(::engine::EngineParams, render_scale_),
   PROTOBUF_FIELD_OFFSET(::engine::EngineParams, title_),
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  { 0, -1, sizeof(::engine::TilesheetParams)},
-  { 10, -1, sizeof(::engine::EngineParams)},
+  { 0, -1, -1, sizeof(::engine::TilesheetParams)},
+  { 11, -1, -1, sizeof(::engine::EngineParams)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -94,22 +95,19 @@ const char descriptor_table_protodef_proto_2fengine_2eproto[] PROTOBUF_SECTION_V
   "dow_height\030\002 \001(\005\022\024\n\014render_scale\030\003 \001(\005\022\r"
   "\n\005title\030\004 \001(\tb\006proto3"
   ;
-static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_proto_2fengine_2eproto_deps[1] = {
-};
-static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_proto_2fengine_2eproto_sccs[2] = {
-  &scc_info_EngineParams_proto_2fengine_2eproto.base,
-  &scc_info_TilesheetParams_proto_2fengine_2eproto.base,
-};
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_proto_2fengine_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_proto_2fengine_2eproto = {
-  false, false, descriptor_table_protodef_proto_2fengine_2eproto, "proto/engine.proto", 261,
-  &descriptor_table_proto_2fengine_2eproto_once, descriptor_table_proto_2fengine_2eproto_sccs, descriptor_table_proto_2fengine_2eproto_deps, 2, 0,
+  false, false, 261, descriptor_table_protodef_proto_2fengine_2eproto, "proto/engine.proto", 
+  &descriptor_table_proto_2fengine_2eproto_once, nullptr, 0, 2,
   schemas, file_default_instances, TableStruct_proto_2fengine_2eproto::offsets,
-  file_level_metadata_proto_2fengine_2eproto, 2, file_level_enum_descriptors_proto_2fengine_2eproto, file_level_service_descriptors_proto_2fengine_2eproto,
+  file_level_metadata_proto_2fengine_2eproto, file_level_enum_descriptors_proto_2fengine_2eproto, file_level_service_descriptors_proto_2fengine_2eproto,
 };
+PROTOBUF_ATTRIBUTE_WEAK const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable* descriptor_table_proto_2fengine_2eproto_getter() {
+  return &descriptor_table_proto_2fengine_2eproto;
+}
 
 // Force running AddDescriptors() at dynamic initialization time.
-static bool dynamic_init_dummy_proto_2fengine_2eproto = (static_cast<void>(::PROTOBUF_NAMESPACE_ID::internal::AddDescriptors(&descriptor_table_proto_2fengine_2eproto)), true);
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY static ::PROTOBUF_NAMESPACE_ID::internal::AddDescriptorsRunner dynamic_init_dummy_proto_2fengine_2eproto(&descriptor_table_proto_2fengine_2eproto);
 namespace engine {
 
 // ===================================================================
@@ -118,10 +116,13 @@ class TilesheetParams::_Internal {
  public:
 };
 
-TilesheetParams::TilesheetParams(::PROTOBUF_NAMESPACE_ID::Arena* arena)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+TilesheetParams::TilesheetParams(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
   SharedCtor();
-  RegisterArenaDtor(arena);
+  if (!is_message_owned) {
+    RegisterArenaDtor(arena);
+  }
   // @@protoc_insertion_point(arena_constructor:engine.TilesheetParams)
 }
 TilesheetParams::TilesheetParams(const TilesheetParams& from)
@@ -130,7 +131,7 @@ TilesheetParams::TilesheetParams(const TilesheetParams& from)
   atlas_filename_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   if (!from._internal_atlas_filename().empty()) {
     atlas_filename_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_atlas_filename(), 
-      GetArena());
+      GetArenaForAllocation());
   }
   ::memcpy(&tile_size_, &from.tile_size_,
     static_cast<size_t>(reinterpret_cast<char*>(&atlas_gutter_) -
@@ -139,22 +140,22 @@ TilesheetParams::TilesheetParams(const TilesheetParams& from)
 }
 
 void TilesheetParams::SharedCtor() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_TilesheetParams_proto_2fengine_2eproto.base);
-  atlas_filename_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
-      reinterpret_cast<char*>(&tile_size_) - reinterpret_cast<char*>(this)),
-      0, static_cast<size_t>(reinterpret_cast<char*>(&atlas_gutter_) -
-      reinterpret_cast<char*>(&tile_size_)) + sizeof(atlas_gutter_));
+atlas_filename_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
+    reinterpret_cast<char*>(&tile_size_) - reinterpret_cast<char*>(this)),
+    0, static_cast<size_t>(reinterpret_cast<char*>(&atlas_gutter_) -
+    reinterpret_cast<char*>(&tile_size_)) + sizeof(atlas_gutter_));
 }
 
 TilesheetParams::~TilesheetParams() {
   // @@protoc_insertion_point(destructor:engine.TilesheetParams)
+  if (GetArenaForAllocation() != nullptr) return;
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void TilesheetParams::SharedDtor() {
-  GOOGLE_DCHECK(GetArena() == nullptr);
+inline void TilesheetParams::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
   atlas_filename_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
@@ -167,11 +168,6 @@ void TilesheetParams::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
 void TilesheetParams::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
-const TilesheetParams& TilesheetParams::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_TilesheetParams_proto_2fengine_2eproto.base);
-  return *internal_default_instance();
-}
-
 
 void TilesheetParams::Clear() {
 // @@protoc_insertion_point(message_clear_start:engine.TilesheetParams)
@@ -191,7 +187,6 @@ const char* TilesheetParams::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPAC
   while (!ctx->Done(&ptr)) {
     ::PROTOBUF_NAMESPACE_ID::uint32 tag;
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
-    CHK_(ptr);
     switch (tag >> 3) {
       // string atlas_filename = 1;
       case 1:
@@ -200,55 +195,61 @@ const char* TilesheetParams::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPAC
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "engine.TilesheetParams.atlas_filename"));
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // int32 tile_size = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
           tile_size_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // int32 tiles_width = 3;
       case 3:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
           tiles_width_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // int32 tiles_height = 4;
       case 4:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 32)) {
           tiles_height_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // int32 atlas_gutter = 5;
       case 5:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 40)) {
           atlas_gutter_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
-      default: {
-      handle_unusual:
-        if ((tag & 7) == 4 || tag == 0) {
-          ctx->SetLastTag(tag);
-          goto success;
-        }
-        ptr = UnknownFieldParse(tag,
-            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-            ptr, ctx);
-        CHK_(ptr != nullptr);
-        continue;
-      }
+      default:
+        goto handle_unusual;
     }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
   }  // while
-success:
+message_done:
   return ptr;
 failure:
   ptr = nullptr;
-  goto success;
+  goto message_done;
 #undef CHK_
 }
 
@@ -259,7 +260,7 @@ failure:
   (void) cached_has_bits;
 
   // string atlas_filename = 1;
-  if (this->atlas_filename().size() > 0) {
+  if (!this->_internal_atlas_filename().empty()) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_atlas_filename().data(), static_cast<int>(this->_internal_atlas_filename().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
@@ -269,25 +270,25 @@ failure:
   }
 
   // int32 tile_size = 2;
-  if (this->tile_size() != 0) {
+  if (this->_internal_tile_size() != 0) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(2, this->_internal_tile_size(), target);
   }
 
   // int32 tiles_width = 3;
-  if (this->tiles_width() != 0) {
+  if (this->_internal_tiles_width() != 0) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(3, this->_internal_tiles_width(), target);
   }
 
   // int32 tiles_height = 4;
-  if (this->tiles_height() != 0) {
+  if (this->_internal_tiles_height() != 0) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(4, this->_internal_tiles_height(), target);
   }
 
   // int32 atlas_gutter = 5;
-  if (this->atlas_gutter() != 0) {
+  if (this->_internal_atlas_gutter() != 0) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(5, this->_internal_atlas_gutter(), target);
   }
@@ -309,93 +310,70 @@ size_t TilesheetParams::ByteSizeLong() const {
   (void) cached_has_bits;
 
   // string atlas_filename = 1;
-  if (this->atlas_filename().size() > 0) {
+  if (!this->_internal_atlas_filename().empty()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
         this->_internal_atlas_filename());
   }
 
   // int32 tile_size = 2;
-  if (this->tile_size() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-        this->_internal_tile_size());
+  if (this->_internal_tile_size() != 0) {
+    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32SizePlusOne(this->_internal_tile_size());
   }
 
   // int32 tiles_width = 3;
-  if (this->tiles_width() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-        this->_internal_tiles_width());
+  if (this->_internal_tiles_width() != 0) {
+    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32SizePlusOne(this->_internal_tiles_width());
   }
 
   // int32 tiles_height = 4;
-  if (this->tiles_height() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-        this->_internal_tiles_height());
+  if (this->_internal_tiles_height() != 0) {
+    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32SizePlusOne(this->_internal_tiles_height());
   }
 
   // int32 atlas_gutter = 5;
-  if (this->atlas_gutter() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-        this->_internal_atlas_gutter());
+  if (this->_internal_atlas_gutter() != 0) {
+    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32SizePlusOne(this->_internal_atlas_gutter());
   }
 
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
-        _internal_metadata_, total_size, &_cached_size_);
-  }
-  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
-  SetCachedSize(cached_size);
-  return total_size;
+  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
 }
 
-void TilesheetParams::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:engine.TilesheetParams)
-  GOOGLE_DCHECK_NE(&from, this);
-  const TilesheetParams* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<TilesheetParams>(
-          &from);
-  if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:engine.TilesheetParams)
-    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
-  } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:engine.TilesheetParams)
-    MergeFrom(*source);
-  }
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData TilesheetParams::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    TilesheetParams::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*TilesheetParams::GetClassData() const { return &_class_data_; }
+
+void TilesheetParams::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
+                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+  static_cast<TilesheetParams *>(to)->MergeFrom(
+      static_cast<const TilesheetParams &>(from));
 }
+
 
 void TilesheetParams::MergeFrom(const TilesheetParams& from) {
 // @@protoc_insertion_point(class_specific_merge_from_start:engine.TilesheetParams)
   GOOGLE_DCHECK_NE(&from, this);
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (from.atlas_filename().size() > 0) {
+  if (!from._internal_atlas_filename().empty()) {
     _internal_set_atlas_filename(from._internal_atlas_filename());
   }
-  if (from.tile_size() != 0) {
+  if (from._internal_tile_size() != 0) {
     _internal_set_tile_size(from._internal_tile_size());
   }
-  if (from.tiles_width() != 0) {
+  if (from._internal_tiles_width() != 0) {
     _internal_set_tiles_width(from._internal_tiles_width());
   }
-  if (from.tiles_height() != 0) {
+  if (from._internal_tiles_height() != 0) {
     _internal_set_tiles_height(from._internal_tiles_height());
   }
-  if (from.atlas_gutter() != 0) {
+  if (from._internal_atlas_gutter() != 0) {
     _internal_set_atlas_gutter(from._internal_atlas_gutter());
   }
-}
-
-void TilesheetParams::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:engine.TilesheetParams)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void TilesheetParams::CopyFrom(const TilesheetParams& from) {
@@ -411,8 +389,14 @@ bool TilesheetParams::IsInitialized() const {
 
 void TilesheetParams::InternalSwap(TilesheetParams* other) {
   using std::swap;
-  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
-  atlas_filename_.Swap(&other->atlas_filename_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  auto* lhs_arena = GetArenaForAllocation();
+  auto* rhs_arena = other->GetArenaForAllocation();
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
+      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      &atlas_filename_, lhs_arena,
+      &other->atlas_filename_, rhs_arena
+  );
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
       PROTOBUF_FIELD_OFFSET(TilesheetParams, atlas_gutter_)
       + sizeof(TilesheetParams::atlas_gutter_)
@@ -422,9 +406,10 @@ void TilesheetParams::InternalSwap(TilesheetParams* other) {
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata TilesheetParams::GetMetadata() const {
-  return GetMetadataStatic();
+  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+      &descriptor_table_proto_2fengine_2eproto_getter, &descriptor_table_proto_2fengine_2eproto_once,
+      file_level_metadata_proto_2fengine_2eproto[0]);
 }
-
 
 // ===================================================================
 
@@ -432,10 +417,13 @@ class EngineParams::_Internal {
  public:
 };
 
-EngineParams::EngineParams(::PROTOBUF_NAMESPACE_ID::Arena* arena)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+EngineParams::EngineParams(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
   SharedCtor();
-  RegisterArenaDtor(arena);
+  if (!is_message_owned) {
+    RegisterArenaDtor(arena);
+  }
   // @@protoc_insertion_point(arena_constructor:engine.EngineParams)
 }
 EngineParams::EngineParams(const EngineParams& from)
@@ -444,7 +432,7 @@ EngineParams::EngineParams(const EngineParams& from)
   title_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   if (!from._internal_title().empty()) {
     title_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_title(), 
-      GetArena());
+      GetArenaForAllocation());
   }
   ::memcpy(&window_width_, &from.window_width_,
     static_cast<size_t>(reinterpret_cast<char*>(&render_scale_) -
@@ -453,22 +441,22 @@ EngineParams::EngineParams(const EngineParams& from)
 }
 
 void EngineParams::SharedCtor() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_EngineParams_proto_2fengine_2eproto.base);
-  title_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
-      reinterpret_cast<char*>(&window_width_) - reinterpret_cast<char*>(this)),
-      0, static_cast<size_t>(reinterpret_cast<char*>(&render_scale_) -
-      reinterpret_cast<char*>(&window_width_)) + sizeof(render_scale_));
+title_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
+    reinterpret_cast<char*>(&window_width_) - reinterpret_cast<char*>(this)),
+    0, static_cast<size_t>(reinterpret_cast<char*>(&render_scale_) -
+    reinterpret_cast<char*>(&window_width_)) + sizeof(render_scale_));
 }
 
 EngineParams::~EngineParams() {
   // @@protoc_insertion_point(destructor:engine.EngineParams)
+  if (GetArenaForAllocation() != nullptr) return;
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void EngineParams::SharedDtor() {
-  GOOGLE_DCHECK(GetArena() == nullptr);
+inline void EngineParams::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
   title_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
@@ -481,11 +469,6 @@ void EngineParams::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
 void EngineParams::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
-const EngineParams& EngineParams::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_EngineParams_proto_2fengine_2eproto.base);
-  return *internal_default_instance();
-}
-
 
 void EngineParams::Clear() {
 // @@protoc_insertion_point(message_clear_start:engine.EngineParams)
@@ -505,28 +488,30 @@ const char* EngineParams::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_I
   while (!ctx->Done(&ptr)) {
     ::PROTOBUF_NAMESPACE_ID::uint32 tag;
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
-    CHK_(ptr);
     switch (tag >> 3) {
       // int32 window_width = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
           window_width_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // int32 window_height = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
           window_height_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // int32 render_scale = 3;
       case 3:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
           render_scale_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // string title = 4;
       case 4:
@@ -535,27 +520,29 @@ const char* EngineParams::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_I
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "engine.EngineParams.title"));
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
-      default: {
-      handle_unusual:
-        if ((tag & 7) == 4 || tag == 0) {
-          ctx->SetLastTag(tag);
-          goto success;
-        }
-        ptr = UnknownFieldParse(tag,
-            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-            ptr, ctx);
-        CHK_(ptr != nullptr);
-        continue;
-      }
+      default:
+        goto handle_unusual;
     }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
   }  // while
-success:
+message_done:
   return ptr;
 failure:
   ptr = nullptr;
-  goto success;
+  goto message_done;
 #undef CHK_
 }
 
@@ -566,25 +553,25 @@ failure:
   (void) cached_has_bits;
 
   // int32 window_width = 1;
-  if (this->window_width() != 0) {
+  if (this->_internal_window_width() != 0) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(1, this->_internal_window_width(), target);
   }
 
   // int32 window_height = 2;
-  if (this->window_height() != 0) {
+  if (this->_internal_window_height() != 0) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(2, this->_internal_window_height(), target);
   }
 
   // int32 render_scale = 3;
-  if (this->render_scale() != 0) {
+  if (this->_internal_render_scale() != 0) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(3, this->_internal_render_scale(), target);
   }
 
   // string title = 4;
-  if (this->title().size() > 0) {
+  if (!this->_internal_title().empty()) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_title().data(), static_cast<int>(this->_internal_title().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
@@ -610,83 +597,62 @@ size_t EngineParams::ByteSizeLong() const {
   (void) cached_has_bits;
 
   // string title = 4;
-  if (this->title().size() > 0) {
+  if (!this->_internal_title().empty()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
         this->_internal_title());
   }
 
   // int32 window_width = 1;
-  if (this->window_width() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-        this->_internal_window_width());
+  if (this->_internal_window_width() != 0) {
+    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32SizePlusOne(this->_internal_window_width());
   }
 
   // int32 window_height = 2;
-  if (this->window_height() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-        this->_internal_window_height());
+  if (this->_internal_window_height() != 0) {
+    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32SizePlusOne(this->_internal_window_height());
   }
 
   // int32 render_scale = 3;
-  if (this->render_scale() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-        this->_internal_render_scale());
+  if (this->_internal_render_scale() != 0) {
+    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32SizePlusOne(this->_internal_render_scale());
   }
 
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
-        _internal_metadata_, total_size, &_cached_size_);
-  }
-  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
-  SetCachedSize(cached_size);
-  return total_size;
+  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
 }
 
-void EngineParams::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:engine.EngineParams)
-  GOOGLE_DCHECK_NE(&from, this);
-  const EngineParams* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<EngineParams>(
-          &from);
-  if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:engine.EngineParams)
-    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
-  } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:engine.EngineParams)
-    MergeFrom(*source);
-  }
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData EngineParams::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    EngineParams::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*EngineParams::GetClassData() const { return &_class_data_; }
+
+void EngineParams::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
+                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+  static_cast<EngineParams *>(to)->MergeFrom(
+      static_cast<const EngineParams &>(from));
 }
+
 
 void EngineParams::MergeFrom(const EngineParams& from) {
 // @@protoc_insertion_point(class_specific_merge_from_start:engine.EngineParams)
   GOOGLE_DCHECK_NE(&from, this);
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (from.title().size() > 0) {
+  if (!from._internal_title().empty()) {
     _internal_set_title(from._internal_title());
   }
-  if (from.window_width() != 0) {
+  if (from._internal_window_width() != 0) {
     _internal_set_window_width(from._internal_window_width());
   }
-  if (from.window_height() != 0) {
+  if (from._internal_window_height() != 0) {
     _internal_set_window_height(from._internal_window_height());
   }
-  if (from.render_scale() != 0) {
+  if (from._internal_render_scale() != 0) {
     _internal_set_render_scale(from._internal_render_scale());
   }
-}
-
-void EngineParams::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:engine.EngineParams)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void EngineParams::CopyFrom(const EngineParams& from) {
@@ -702,8 +668,14 @@ bool EngineParams::IsInitialized() const {
 
 void EngineParams::InternalSwap(EngineParams* other) {
   using std::swap;
-  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
-  title_.Swap(&other->title_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  auto* lhs_arena = GetArenaForAllocation();
+  auto* rhs_arena = other->GetArenaForAllocation();
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
+      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      &title_, lhs_arena,
+      &other->title_, rhs_arena
+  );
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
       PROTOBUF_FIELD_OFFSET(EngineParams, render_scale_)
       + sizeof(EngineParams::render_scale_)
@@ -713,9 +685,10 @@ void EngineParams::InternalSwap(EngineParams* other) {
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata EngineParams::GetMetadata() const {
-  return GetMetadataStatic();
+  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+      &descriptor_table_proto_2fengine_2eproto_getter, &descriptor_table_proto_2fengine_2eproto_once,
+      file_level_metadata_proto_2fengine_2eproto[1]);
 }
-
 
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace engine
