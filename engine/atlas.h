@@ -1,4 +1,4 @@
-#pragma mark once
+#pragma once
 
 #include "math.inl"
 
