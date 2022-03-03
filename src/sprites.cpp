@@ -5,6 +5,7 @@
 #include "engine/shader.h"
 #include "engine/texture.h"
 
+#pragma warning(push, 0)
 #include <array.h>
 #include <memory.h>
 
@@ -18,6 +19,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/euler_angles.hpp>
+#pragma warning(pop)
 
 namespace {
 const uint64_t max_sprites = 65536;

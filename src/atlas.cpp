@@ -3,6 +3,7 @@
 #include "engine/log.h"
 #include "engine/texture.h"
 
+#pragma warning(push, 0)
 #include <collection_types.h>
 #include <hash.h>
 #include <memory.h>
@@ -13,6 +14,7 @@
 #include <cjson/cJSON.h>
 
 #include <cassert>
+#pragma warning(pop)
 
 namespace engine {
 using namespace foundation;

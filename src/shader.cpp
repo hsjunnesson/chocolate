@@ -2,6 +2,7 @@
 #include "engine/file.h"
 #include "engine/log.h"
 
+#pragma warning(push, 0)
 #include <GLFW/glfw3.h>
 #include <array.h>
 #include <glad/glad.h>
@@ -10,6 +11,7 @@
 #include <temp_allocator.h>
 
 #include <fstream>
+#pragma warning(pop)
 
 namespace engine {
 

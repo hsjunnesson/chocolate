@@ -1,6 +1,8 @@
 #pragma once
 
+#pragma warning(push, 0)
 #include <inttypes.h>
+#pragma warning(pop)
 
 namespace engine {
 

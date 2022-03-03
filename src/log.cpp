@@ -1,5 +1,6 @@
 #include "engine/log.h"
 
+#pragma warning(push, 0)
 #include <iomanip>
 #include <stdarg.h>
 #include <stdio.h>
@@ -10,6 +11,7 @@
 #include <memory.h>
 #include <string_stream.h>
 #include <temp_allocator.h>
+#pragma warning(pop)
 
 using namespace foundation;
 using namespace foundation::string_stream;

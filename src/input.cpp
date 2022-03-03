@@ -2,9 +2,11 @@
 #include "engine/engine.h"
 #include "engine/log.h"
 
+#pragma warning(push, 0)
 #include <array.h>
 
 #include <GLFW/glfw3.h>
+#pragma warning(pop)
 
 namespace engine {
 

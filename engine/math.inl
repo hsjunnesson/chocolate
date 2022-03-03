@@ -1,7 +1,9 @@
 #pragma once
 
+#pragma warning(push, 0)
 #include <algorithm>
 #include <inttypes.h>
+#pragma warning(pop)
 
 namespace math {
 

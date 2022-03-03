@@ -1,6 +1,7 @@
 #include "engine/file.h"
 #include "engine/log.h"
 
+#pragma warning(push, 0)
 #include <array.h>
 #include <memory.h>
 #include <string_stream.h>
@@ -14,6 +15,7 @@
 #include <sys/stat.h>
 #endif
 // clang-format on
+#pragma warning(pop)
 
 namespace engine {
 namespace file {

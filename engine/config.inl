@@ -1,10 +1,12 @@
 #pragma once
 
+#pragma warning(push, 0)
 #include <fstream>
 #include <string>
 
 #include <google/protobuf/message.h>
 #include <google/protobuf/util/json_util.h>
+#pragma warning(pop)
 
 #include "log.h"
 

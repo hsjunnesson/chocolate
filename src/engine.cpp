@@ -7,6 +7,7 @@
 #include "engine/sprites.h"
 #include "engine/texture.h"
 
+#pragma warning(push, 0)
 #include <GLFW/glfw3.h>
 #include <cassert>
 #include <fstream>
@@ -19,6 +20,7 @@
 #include <proto/engine.pb.h>
 #include <string_stream.h>
 #include <temp_allocator.h>
+#pragma warning(pop)
 
 namespace {
 

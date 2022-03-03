@@ -1,7 +1,7 @@
 #include "engine/texture.h"
-
 #include "engine/log.h"
 
+#pragma warning(push, 0)
 #include <memory.h>
 
 #include <GLFW/glfw3.h>
@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <cstring>
+#pragma warning(pop)
 
 using namespace foundation;
 
