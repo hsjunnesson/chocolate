@@ -3,6 +3,7 @@
 #pragma warning(push, 0)
 #include <algorithm>
 #include <inttypes.h>
+#include <assert.h>
 #pragma warning(pop)
 
 namespace math {
@@ -97,9 +98,10 @@ constexpr Color4f mix(const Color4f x, const Color4f y, const float a) {
  * @param x The x coord
  * @param y The y coord
  * @param max_width The maximum width.
- * @return constexpr uint32_t The index.
+ * @return constexpr int32_t The index.
  */
-constexpr uint32_t index(uint32_t const x, uint32_t const y, uint32_t const max_width) {
+constexpr int32_t index(int32_t const x, int32_t const y, int32_t const max_width) {
+    assert((x + max_width * y) >= 0);
     return x + max_width * y;
 }
 
@@ -111,7 +113,7 @@ constexpr uint32_t index(uint32_t const x, uint32_t const y, uint32_t const max_
  * @param y The pass-by-reference y coord to calculate.
  * @param max_width The maximum width.
  */
-constexpr void coord(uint32_t const index, uint32_t &x, uint32_t &y, uint32_t const max_width) {
+constexpr void coord(int32_t const index, int32_t &x, int32_t &y, int32_t const max_width) {
     x = index % max_width;
     y = index / max_width;
 }
@@ -126,9 +128,9 @@ constexpr void coord(uint32_t const index, uint32_t &x, uint32_t &y, uint32_t co
  * @param max_width The maximum width.
  * @return The index.
  */
-constexpr int32_t index_offset(int32_t const idx, int32_t const xoffset, int32_t const yoffset, uint32_t const max_width) {
-    uint32_t x = 0;
-    uint32_t y = 0;
+constexpr int32_t index_offset(int32_t const idx, int32_t const xoffset, int32_t const yoffset, int32_t const max_width) {
+    int32_t x = 0;
+    int32_t y = 0;
     coord(idx, x, y, max_width);
 
     return index(x + xoffset, y + yoffset, max_width);

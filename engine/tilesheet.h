@@ -46,15 +46,15 @@ struct Tilesheet {
     uint32_t tilesheet_ebo;
 
     Texture *tilesheet_atlas;
-    uint32_t tile_size; // Size in pixels
+    int32_t tile_size; // Size in pixels
 
-    uint32_t tiles_width;
-    uint32_t tiles_height;
+    int32_t tiles_width;
+    int32_t tiles_height;
     Array<Tile> *tiles;
 };
 
 // Inits a proper size tilesheet.
-void init_tilesheet(Tilesheet &tilesheet, uint32_t tiles_width, uint32_t tiles_height);
+void init_tilesheet(Tilesheet &tilesheet, int32_t tiles_width, int32_t tiles_height);
 
 // Creates and initializes the tilesheet buffer objects and data.
 void commit_tilesheet(Tilesheet &tilesheet);

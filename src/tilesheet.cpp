@@ -112,7 +112,7 @@ Tilesheet::~Tilesheet() {
     }
 }
 
-void init_tilesheet(Tilesheet &tilesheet, uint32_t tiles_width, uint32_t tiles_height) {
+void init_tilesheet(Tilesheet &tilesheet, int32_t tiles_width, int32_t tiles_height) {
     tilesheet.tiles_width = tiles_width;
     tilesheet.tiles_height = tiles_height;
 
@@ -140,14 +140,14 @@ void commit_tilesheet(Tilesheet &tilesheet) {
     size_t tiles_count = array::size(tiles);
 
     size_t vertex_count = 4 * tiles_count;
-    Vertex *vertex_data = (Vertex *)allocator.allocate(sizeof(Vertex) * vertex_count);
+    Vertex *vertex_data = (Vertex *)allocator.allocate(sizeof(Vertex) * (uint32_t)vertex_count);
 
     size_t index_count = 6 * tiles_count;
-    GLuint *index_data = (GLuint *)allocator.allocate(sizeof(GLuint) * index_count);
+    GLuint *index_data = (GLuint *)allocator.allocate(sizeof(GLuint) * (uint32_t)index_count);
 
-    for (uint32_t i = 0; i < tiles_count; ++i) {
+    for (int32_t i = 0; i < tiles_count; ++i) {
         Tile &tile = tiles[i];
-        uint32_t x, y;
+        int32_t x, y;
         coord(i, x, y, tiles_width);
 
         // position
@@ -168,8 +168,8 @@ void commit_tilesheet(Tilesheet &tilesheet) {
 
         // texture_coords
         {
-            uint32_t texcoord_x, texcoord_y;
-            const uint32_t tilesheet_width_tiles = tilesheet.params->tiles_width();
+            int32_t texcoord_x, texcoord_y;
+            const int32_t tilesheet_width_tiles = tilesheet.params->tiles_width();
             coord(tile.tile, texcoord_x, texcoord_y, tilesheet_width_tiles);
 
             texcoord_x = texcoord_x * (tilesheet.params->tile_size() + tilesheet.params->atlas_gutter());
