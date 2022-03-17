@@ -2,6 +2,7 @@
 #include "engine/file.h"
 #include "engine/log.h"
 #include "engine/texture.h"
+#include "engine/math.inl"
 
 #pragma warning(push, 0)
 #include <collection_types.h>
@@ -14,15 +15,22 @@
 #include <cjson/cJSON.h>
 
 #include <cassert>
+
+#define __STDC_WANT_LIB_EXT1__ 1
+#include <string.h>
 #pragma warning(pop)
 
 namespace engine {
 using namespace foundation;
+using namespace foundation::string_stream;
+using namespace math;
 
 Atlas::Atlas(foundation::Allocator &allocator, const char *atlas_filename)
 : allocator(allocator)
+, sprite_names(nullptr)
 , frames(nullptr)
 , texture(nullptr) {
+    sprite_names = MAKE_NEW(allocator, Array<Buffer *>, allocator);
     frames = MAKE_NEW(allocator, Hash<Rect>, allocator);
 
     string_stream::Buffer data(allocator);
@@ -103,28 +111,33 @@ Atlas::Atlas(foundation::Allocator &allocator, const char *atlas_filename)
             r.size.x = w->valueint;
             r.size.y = h->valueint;
 
-            uint64_t key = murmur_hash_64(filename->valuestring, strlen(filename->valuestring), 0);
+            Buffer *sprite_name = MAKE_NEW(allocator, Buffer, allocator);
+            *sprite_name << filename->valuestring;
+            array::push_back(*sprite_names, sprite_name);
+
+            uint64_t key = murmur_hash_64(c_str(*sprite_name), array::size(*sprite_name), 0);
             hash::set(*this->frames, key, r);
         }
     }
 }
 
 Atlas::~Atlas() {
-    if (frames) {
-        MAKE_DELETE(allocator, Hash, frames);
+    for (uint32_t i = 0; i < array::size(*sprite_names); ++i) {
+        Buffer *b = (*sprite_names)[i];
+        MAKE_DELETE(allocator, Buffer, b);
     }
 
-    if (texture) {
-        MAKE_DELETE(allocator, Texture, texture);
-    }
+    MAKE_DELETE(allocator, Array, sprite_names);
+    MAKE_DELETE(allocator, Hash, frames);
+    MAKE_DELETE(allocator, Texture, texture);
 }
 
-const Rect *atlas_rect(const Atlas &atlas, const char *filename) {
-    if (!filename) {
+const Rect *atlas_rect(const Atlas &atlas, const char *sprite_name) {
+    if (!sprite_name) {
         return nullptr;
     }
 
-    uint64_t key = murmur_hash_64(filename, strlen(filename), 0);
+    uint64_t key = murmur_hash_64(sprite_name, strlen(sprite_name), 0);
     for (auto i = hash::begin(*atlas.frames); i != hash::end(*atlas.frames); ++i) {
         if (i->key == key) {
             return &(i->value);

@@ -44,6 +44,8 @@ void __free(void *ptr) {
 
 } // namespace
 
+// TODO: fix memory management
+
 //#define STBI_MALLOC(size) __malloc(size)
 //#define STBI_REALLOC(ptr, new_size) __realloc(ptr, new_size)
 //#define STBI_FREE(ptr) __free(ptr)
