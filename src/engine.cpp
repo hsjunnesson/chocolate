@@ -1,13 +1,16 @@
 #include "engine/engine.h"
-#include "engine/config.inl"
+#include "engine/config.h"
 #include "engine/input.h"
 #include "engine/log.h"
 #include "engine/math.inl"
 #include "engine/shader.h"
 #include "engine/sprites.h"
 #include "engine/texture.h"
+#include "engine/file.h"
 
 #pragma warning(push, 0)
+#include "engine/ini.h"
+
 #include <GLFW/glfw3.h>
 #include <cassert>
 #include <fstream>
@@ -17,9 +20,10 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include <memory.h>
-#include <proto/engine.pb.h>
 #include <string_stream.h>
 #include <temp_allocator.h>
+#include <stdlib.h>
+#include <functional>
 #pragma warning(pop)
 
 namespace {
@@ -153,7 +157,9 @@ void wait_buffer() {
     }
 }
 
+
 } // namespace
+
 
 namespace engine {
 using namespace foundation;
@@ -165,9 +171,8 @@ static const double Update_Rate = 60;
 static const double Desired_Frametime = 1.0 / Update_Rate;
 #endif
 
-Engine::Engine(Allocator &allocator, const char *params_path)
+Engine::Engine(Allocator &allocator, const char *config_path)
 : allocator(allocator)
-, params(nullptr)
 , engine_callbacks(nullptr)
 , game_object(nullptr)
 , frames(0)
@@ -179,10 +184,54 @@ Engine::Engine(Allocator &allocator, const char *params_path)
 , camera_offset({0, 0})
 , terminating(false)
 , sprites(nullptr) {
-    params = MAKE_NEW(allocator, EngineParams);
-    config::read(params_path, params);
+    TempAllocator1024 ta;
 
-    render_scale = (float)params->render_scale();
+    int window_width, window_height;
+    string_stream::Buffer window_title(ta);
+
+    // Load config
+    {
+        string_stream::Buffer buffer(ta);
+
+        if (!file::read(buffer, config_path)) {
+            log_fatal("Could not open config file %s", config_path);
+        }
+
+        ini_t *ini = ini_load(c_str(buffer), nullptr);
+        
+        if (!ini) {
+            log_fatal("Could not parse config file %s", config_path);
+        }
+
+        auto read_property = [&ini](const char *section, const char *property, const std::function<void(const char *)> success) {
+            const char *s = config::read_property(ini, section, property);
+            if (s) {
+                success(s);
+            } else {
+                if (!section) {
+                    section = "global property";
+                }
+
+                log_fatal("Invalid config file, missing [%s] %s", section, property);
+            }
+        };
+
+        read_property("engine", "render_scale", [this](const char *property) {
+            this->render_scale = atoi(property);
+        });
+
+        read_property("engine", "window_width", [&window_width](const char *property) {
+            window_width = atoi(property);
+        });
+
+        read_property("engine", "window_height", [&window_height](const char *property) {
+            window_height = atoi(property);
+        });
+
+        read_property("engine", "title", [&window_title](const char *property) {
+            window_title << property;
+        });
+    }
 
     // glfw
     {
@@ -198,7 +247,7 @@ Engine::Engine(Allocator &allocator, const char *params_path)
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 
-        glfw_window = glfwCreateWindow(params->window_width(), params->window_height(), params->title().c_str(), nullptr, nullptr);
+        glfw_window = glfwCreateWindow(window_width, window_height, c_str(window_title), nullptr, nullptr);
         if (!glfw_window) {
             glfwTerminate();
             log_fatal("Unable to create GLFW window");
@@ -231,7 +280,7 @@ Engine::Engine(Allocator &allocator, const char *params_path)
         glfwSetWindowUserPointer(glfw_window, this);
 
         glfwSetFramebufferSizeCallback(glfw_window, framebuffer_size_callback);
-        framebuffer_size_callback(glfw_window, params->window_width(), params->window_height());
+        framebuffer_size_callback(glfw_window, window_width, window_height);
     }
 
     input = MAKE_NEW(allocator, Input, allocator, glfw_window);
@@ -253,10 +302,6 @@ Engine::Engine(Allocator &allocator, const char *params_path)
 }
 
 Engine::~Engine() {
-    if (params) {
-        MAKE_DELETE(allocator, EngineParams, params);
-    }
-
     if (input) {
         MAKE_DELETE(allocator, Input, input);
     }

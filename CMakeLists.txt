@@ -10,7 +10,6 @@ set(LIB_NAME ${PROJECT_NAME})
 
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
-find_package(Protobuf CONFIG REQUIRED)
 find_package(cJSON CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
 
@@ -49,15 +48,7 @@ if (NOT date_POPULATED)
 endif()
 
 
-# Generated protobuf implementation
-
-file(GLOB_RECURSE SRC_Generated
-    "generated_src/*.cc"
-    "generated_src/*.h"
-)
-
-
-# Chocholate sources
+# Chocolate sources
 file(GLOB_RECURSE SRC_Chocolate
     "src/*.c"
     "src/*.cpp"
@@ -84,7 +75,6 @@ file(GLOB_RECURSE SRC_Imgui
 # Create library
 add_library(${LIB_NAME} STATIC
     ${SRC_Chocolate}
-    ${SRC_Generated}
     ${SRC_Imgui}
     ${HEADERS}
 )
@@ -103,12 +93,10 @@ set_target_properties(
 
 # Includes
 target_include_directories(${LIB_NAME} PUBLIC ${PROJECT_SOURCE_DIR})
-target_include_directories(${LIB_NAME} SYSTEM PRIVATE ${PROJECT_SOURCE_DIR}/generated_src)
 target_include_directories(${LIB_NAME} SYSTEM PUBLIC ${bitsquidfoundation_SOURCE_DIR})
 target_include_directories(${LIB_NAME} SYSTEM PRIVATE ${backward_SOURCE_DIR})
 target_include_directories(${LIB_NAME} SYSTEM PRIVATE ${date_SOURCE_DIR})
 target_include_directories(${LIB_NAME} SYSTEM PRIVATE ${PROJECT_SOURCE_DIR}/glad/include)
-target_include_directories(${LIB_NAME} SYSTEM PRIVATE ${PROJECT_SOURCE_DIR}/generated_src)
 
 target_compile_definitions(${LIB_NAME} PRIVATE "GLFW_INCLUDE_NONE")
 
@@ -119,7 +107,6 @@ target_link_libraries(${LIB_NAME}
     bitsquid-foundation
     glfw
     glm::glm
-    protobuf::libprotobuf
     date::date
     cjson
     imgui::imgui

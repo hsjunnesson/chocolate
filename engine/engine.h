@@ -31,11 +31,10 @@ struct EngineCallbacks {
 };
 
 struct Engine {
-    Engine(Allocator &allocator, const char *params_path);
+    Engine(Allocator &allocator, const char *config_path);
     ~Engine();
 
     Allocator &allocator;
-    EngineParams *params;
     EngineCallbacks *engine_callbacks;
     void *game_object;
     uint64_t frames;
