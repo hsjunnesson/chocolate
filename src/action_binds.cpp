@@ -1,16 +1,17 @@
 #include "engine/action_binds.h"
-#include "engine/log.h"
-#include "engine/file.h"
 #include "engine/config.h"
+#include "engine/file.h"
 #include "engine/ini.h"
+#include "engine/log.h"
 
 #pragma warning(push, 0)
+#include <GLFW/glfw3.h>
 #include <array.h>
 #include <hash.h>
 #include <memory.h>
-#include <temp_allocator.h>
-#include <string_stream.h>
 #include <murmur_hash.h>
+#include <string_stream.h>
+#include <temp_allocator.h>
 
 #define __STDC_WANT_LIB_EXT1__ 1
 #include <string.h>
@@ -24,86 +25,77 @@ ActionBindsBind bind_from_descriptor(const char *);
 const char *bind_descriptor(const ActionBindsBind);
 
 ActionBinds::ActionBinds(foundation::Allocator &allocator, const char *config_path)
-: allocator(allocator)
-, actions(allocator)
-, action_binds(allocator) {
+: action_binds(allocator)
+, bind_actions(allocator) {
     TempAllocator1024 ta;
 
-    // Parse config file
-    {
-        string_stream::Buffer buffer(ta);
-        if (!file::read(buffer, config_path)) {
-            log_fatal("Could not open config file %s", config_path);
-        }
+    string_stream::Buffer buffer(ta);
+    if (!file::read(buffer, config_path)) {
+        log_fatal("Could not open config file %s", config_path);
+    }
 
-        ini_t *ini = ini_load(string_stream::c_str(buffer), nullptr);
-        
-        if (!ini) {
-            log_fatal("Could not parse config file %s", config_path);
-        }
+    ini_t *ini = ini_load(string_stream::c_str(buffer), nullptr);
 
-        int section = ini_find_section(ini, "actionbinds", 0);
-        if (section == INI_NOT_FOUND) {
-            log_error("Config file %s missing [actionbinds]");
-        } else {
-            for (int property = 0; property < ini_property_count(ini, section); ++property) {
-                const char *name = ini_property_name(ini, section, property);
-                const char *value = ini_property_value(ini, section, property);
+    if (!ini) {
+        log_fatal("Could not parse config file %s", config_path);
+    }
+
+    int section = ini_find_section(ini, "actionbinds", 0);
+    if (section == INI_NOT_FOUND) {
+        log_error("Config file %s missing [actionbinds]");
+    } else {
+        Hash<bool> found_actions(ta);
+
+        for (int property = 0; property < ini_property_count(ini, section); ++property) {
+            const char *name = ini_property_name(ini, section, property);
+            const char *value = ini_property_value(ini, section, property);
+
+            if (name && value) {
+                size_t name_len = strlen(name);
                 size_t value_len = strlen(value);
 
-                if (name && value) {
-                    {
-                        Buffer *action = MAKE_NEW(allocator, Buffer, allocator);
-                        *action << name;
-                        array::push_back(actions, action);
-                    }
+                // Trim off trailing space when you do "NAME = VALUE"
+                if (name[name_len - 1] == ' ') {
+                    --name_len;
+                }
 
-                    uint64_t actions_index = array::size(actions) - 1;
+                uint64_t action_key = murmur_hash_64(name, name_len, 0);
 
-                    char *buf = (char *)ta.allocate((uint32_t)value_len + 1);
-                    strncpy_s(buf, value_len + 1, value, value_len);
+                if (hash::has(found_actions, action_key)) {
+                    log_fatal("Invalid [actionbinds] defining multiples of action %s", name);
+                } else {
+                    hash::set(found_actions, action_key, true);
+                }
 
-                    char *context = nullptr;
-                    buf = strtok_s(buf, ",", &context);
+                char *buf = (char *)ta.allocate((uint32_t)value_len + 1);
+                strncpy_s(buf, value_len + 1, value, value_len);
 
-                    while (buf) {
-                        ActionBindsBind bind = bind_from_descriptor(buf);
-                        if (bind == ActionBindsBind::NOT_FOUND) {
-                            log_fatal("Invalid actionbinds %s = %s", name, buf);
+                char *context = nullptr;
+                buf = strtok_s(buf, ",", &context);
+
+                while (buf) {
+                    ActionBindsBind bind = bind_from_descriptor(buf);
+                    if (bind == ActionBindsBind::NOT_FOUND) {
+                        log_fatal("Invalid [actionbinds] %s = %s", name, buf);
+                    } else {
+                        multi_hash::insert(action_binds, action_key, bind);
+
+                        uint64_t bind_key = static_cast<uint64_t>(bind);
+
+                        if (hash::has(bind_actions, bind_key)) {
+                            log_fatal("invalid [actionbinds] defining multiple of bind %s", buf);
                         } else {
-                            multi_hash::insert(action_binds, actions_index, bind);
+                            hash::set(bind_actions, bind_key, action_key);
                         }
-
-                        buf = strtok_s(NULL, ",", &context);
                     }
+
+                    buf = strtok_s(NULL, ",", &context);
                 }
             }
         }
-
-        ini_destroy(ini);
     }
 
-    // Validate actionbinds
-    {
-        Hash<bool> found_actions(ta);
-
-        for (uint32_t i = 0; i < array::size(actions); ++i) {
-            Buffer *b = actions[i];
-            uint64_t key = murmur_hash_64(array::begin(*b), array::size(*b), 0);
-            if (hash::has(found_actions, key)) {
-                log_fatal("Invalid actionbinds, multiple actions %s", c_str(*b));
-            }
-
-            hash::set(found_actions, key, true);
-        }
-    }
-}
-
-ActionBinds::~ActionBinds() {
-    for (uint32_t i = 0; i < array::size(actions); ++i) {
-        Buffer *b = actions[i];
-        MAKE_DELETE(allocator, Buffer, b);
-    }
+    ini_destroy(ini);
 }
 
 /// Returns the Bind from a descriptor. or NOT_FOUND if not a valid descriptor.
@@ -468,6 +460,247 @@ const char *bind_descriptor(const ActionBindsBind bind) {
     default:
         return nullptr;
     }
+}
+
+const ActionBindsBind bind_for_keycode(const int16_t keycode) {
+    switch (keycode) {
+    case GLFW_KEY_SPACE:
+        return ActionBindsBind::KEY_SPACE;
+    case GLFW_KEY_APOSTROPHE:
+        return ActionBindsBind::KEY_APOSTROPHE;
+    case GLFW_KEY_COMMA:
+        return ActionBindsBind::KEY_COMMA;
+    case GLFW_KEY_MINUS:
+        return ActionBindsBind::KEY_MINUS;
+    case GLFW_KEY_PERIOD:
+        return ActionBindsBind::KEY_PERIOD;
+    case GLFW_KEY_SLASH:
+        return ActionBindsBind::KEY_SLASH;
+    case GLFW_KEY_0:
+        return ActionBindsBind::KEY_0;
+    case GLFW_KEY_1:
+        return ActionBindsBind::KEY_1;
+    case GLFW_KEY_2:
+        return ActionBindsBind::KEY_2;
+    case GLFW_KEY_3:
+        return ActionBindsBind::KEY_3;
+    case GLFW_KEY_4:
+        return ActionBindsBind::KEY_4;
+    case GLFW_KEY_5:
+        return ActionBindsBind::KEY_5;
+    case GLFW_KEY_6:
+        return ActionBindsBind::KEY_6;
+    case GLFW_KEY_7:
+        return ActionBindsBind::KEY_7;
+    case GLFW_KEY_8:
+        return ActionBindsBind::KEY_8;
+    case GLFW_KEY_9:
+        return ActionBindsBind::KEY_9;
+    case GLFW_KEY_SEMICOLON:
+        return ActionBindsBind::KEY_SEMICOLON;
+    case GLFW_KEY_EQUAL:
+        return ActionBindsBind::KEY_EQUAL;
+    case GLFW_KEY_A:
+        return ActionBindsBind::KEY_A;
+    case GLFW_KEY_B:
+        return ActionBindsBind::KEY_B;
+    case GLFW_KEY_C:
+        return ActionBindsBind::KEY_C;
+    case GLFW_KEY_D:
+        return ActionBindsBind::KEY_D;
+    case GLFW_KEY_E:
+        return ActionBindsBind::KEY_E;
+    case GLFW_KEY_F:
+        return ActionBindsBind::KEY_F;
+    case GLFW_KEY_G:
+        return ActionBindsBind::KEY_G;
+    case GLFW_KEY_H:
+        return ActionBindsBind::KEY_H;
+    case GLFW_KEY_I:
+        return ActionBindsBind::KEY_I;
+    case GLFW_KEY_J:
+        return ActionBindsBind::KEY_J;
+    case GLFW_KEY_K:
+        return ActionBindsBind::KEY_K;
+    case GLFW_KEY_L:
+        return ActionBindsBind::KEY_L;
+    case GLFW_KEY_M:
+        return ActionBindsBind::KEY_M;
+    case GLFW_KEY_N:
+        return ActionBindsBind::KEY_N;
+    case GLFW_KEY_O:
+        return ActionBindsBind::KEY_O;
+    case GLFW_KEY_P:
+        return ActionBindsBind::KEY_P;
+    case GLFW_KEY_Q:
+        return ActionBindsBind::KEY_Q;
+    case GLFW_KEY_R:
+        return ActionBindsBind::KEY_R;
+    case GLFW_KEY_S:
+        return ActionBindsBind::KEY_S;
+    case GLFW_KEY_T:
+        return ActionBindsBind::KEY_T;
+    case GLFW_KEY_U:
+        return ActionBindsBind::KEY_U;
+    case GLFW_KEY_V:
+        return ActionBindsBind::KEY_V;
+    case GLFW_KEY_W:
+        return ActionBindsBind::KEY_W;
+    case GLFW_KEY_X:
+        return ActionBindsBind::KEY_X;
+    case GLFW_KEY_Y:
+        return ActionBindsBind::KEY_Y;
+    case GLFW_KEY_Z:
+        return ActionBindsBind::KEY_Z;
+    case GLFW_KEY_LEFT_BRACKET:
+        return ActionBindsBind::KEY_LEFT_BRACKET;
+    case GLFW_KEY_BACKSLASH:
+        return ActionBindsBind::KEY_BACKSLASH;
+    case GLFW_KEY_RIGHT_BRACKET:
+        return ActionBindsBind::KEY_RIGHT_BRACKET;
+    case GLFW_KEY_GRAVE_ACCENT:
+        return ActionBindsBind::KEY_GRAVE_ACCENT;
+    case GLFW_KEY_ESCAPE:
+        return ActionBindsBind::KEY_ESCAPE;
+    case GLFW_KEY_ENTER:
+        return ActionBindsBind::KEY_ENTER;
+    case GLFW_KEY_TAB:
+        return ActionBindsBind::KEY_TAB;
+    case GLFW_KEY_BACKSPACE:
+        return ActionBindsBind::KEY_BACKSPACE;
+    case GLFW_KEY_INSERT:
+        return ActionBindsBind::KEY_INSERT;
+    case GLFW_KEY_DELETE:
+        return ActionBindsBind::KEY_DELETE;
+    case GLFW_KEY_RIGHT:
+        return ActionBindsBind::KEY_RIGHT;
+    case GLFW_KEY_LEFT:
+        return ActionBindsBind::KEY_LEFT;
+    case GLFW_KEY_DOWN:
+        return ActionBindsBind::KEY_DOWN;
+    case GLFW_KEY_UP:
+        return ActionBindsBind::KEY_UP;
+    case GLFW_KEY_PAGE_UP:
+        return ActionBindsBind::KEY_PAGE_UP;
+    case GLFW_KEY_PAGE_DOWN:
+        return ActionBindsBind::KEY_PAGE_DOWN;
+    case GLFW_KEY_HOME:
+        return ActionBindsBind::KEY_HOME;
+    case GLFW_KEY_END:
+        return ActionBindsBind::KEY_END;
+    case GLFW_KEY_CAPS_LOCK:
+        return ActionBindsBind::KEY_CAPS_LOCK;
+    case GLFW_KEY_SCROLL_LOCK:
+        return ActionBindsBind::KEY_SCROLL_LOCK;
+    case GLFW_KEY_NUM_LOCK:
+        return ActionBindsBind::KEY_NUM_LOCK;
+    case GLFW_KEY_PRINT_SCREEN:
+        return ActionBindsBind::KEY_PRINT_SCREEN;
+    case GLFW_KEY_PAUSE:
+        return ActionBindsBind::KEY_PAUSE;
+    case GLFW_KEY_F1:
+        return ActionBindsBind::KEY_F1;
+    case GLFW_KEY_F2:
+        return ActionBindsBind::KEY_F2;
+    case GLFW_KEY_F3:
+        return ActionBindsBind::KEY_F3;
+    case GLFW_KEY_F4:
+        return ActionBindsBind::KEY_F4;
+    case GLFW_KEY_F5:
+        return ActionBindsBind::KEY_F5;
+    case GLFW_KEY_F6:
+        return ActionBindsBind::KEY_F6;
+    case GLFW_KEY_F7:
+        return ActionBindsBind::KEY_F7;
+    case GLFW_KEY_F8:
+        return ActionBindsBind::KEY_F8;
+    case GLFW_KEY_F9:
+        return ActionBindsBind::KEY_F9;
+    case GLFW_KEY_F10:
+        return ActionBindsBind::KEY_F10;
+    case GLFW_KEY_F11:
+        return ActionBindsBind::KEY_F11;
+    case GLFW_KEY_F12:
+        return ActionBindsBind::KEY_F12;
+    case GLFW_KEY_F13:
+        return ActionBindsBind::KEY_F13;
+    case GLFW_KEY_F14:
+        return ActionBindsBind::KEY_F14;
+    case GLFW_KEY_F15:
+        return ActionBindsBind::KEY_F15;
+    case GLFW_KEY_F16:
+        return ActionBindsBind::KEY_F16;
+    case GLFW_KEY_F17:
+        return ActionBindsBind::KEY_F17;
+    case GLFW_KEY_F18:
+        return ActionBindsBind::KEY_F18;
+    case GLFW_KEY_F19:
+        return ActionBindsBind::KEY_F19;
+    case GLFW_KEY_F20:
+        return ActionBindsBind::KEY_F20;
+    case GLFW_KEY_F21:
+        return ActionBindsBind::KEY_F21;
+    case GLFW_KEY_F22:
+        return ActionBindsBind::KEY_F22;
+    case GLFW_KEY_F23:
+        return ActionBindsBind::KEY_F23;
+    case GLFW_KEY_F24:
+        return ActionBindsBind::KEY_F24;
+    case GLFW_KEY_F25:
+        return ActionBindsBind::KEY_F25;
+    case GLFW_KEY_KP_0:
+        return ActionBindsBind::KEY_KP_0;
+    case GLFW_KEY_KP_1:
+        return ActionBindsBind::KEY_KP_1;
+    case GLFW_KEY_KP_2:
+        return ActionBindsBind::KEY_KP_2;
+    case GLFW_KEY_KP_3:
+        return ActionBindsBind::KEY_KP_3;
+    case GLFW_KEY_KP_4:
+        return ActionBindsBind::KEY_KP_4;
+    case GLFW_KEY_KP_5:
+        return ActionBindsBind::KEY_KP_5;
+    case GLFW_KEY_KP_6:
+        return ActionBindsBind::KEY_KP_6;
+    case GLFW_KEY_KP_7:
+        return ActionBindsBind::KEY_KP_7;
+    case GLFW_KEY_KP_8:
+        return ActionBindsBind::KEY_KP_8;
+    case GLFW_KEY_KP_9:
+        return ActionBindsBind::KEY_KP_9;
+    case GLFW_KEY_KP_DECIMAL:
+        return ActionBindsBind::KEY_KP_DECIMAL;
+    case GLFW_KEY_KP_DIVIDE:
+        return ActionBindsBind::KEY_KP_DIVIDE;
+    case GLFW_KEY_KP_MULTIPLY:
+        return ActionBindsBind::KEY_KP_MULTIPLY;
+    case GLFW_KEY_KP_SUBTRACT:
+        return ActionBindsBind::KEY_KP_SUBTRACT;
+    case GLFW_KEY_KP_ADD:
+        return ActionBindsBind::KEY_KP_ADD;
+    case GLFW_KEY_KP_ENTER:
+        return ActionBindsBind::KEY_KP_ENTER;
+    case GLFW_KEY_KP_EQUAL:
+        return ActionBindsBind::KEY_KP_EQUAL;
+    case GLFW_KEY_LEFT_SHIFT:
+        return ActionBindsBind::KEY_LEFT_SHIFT;
+    case GLFW_KEY_LEFT_CONTROL:
+        return ActionBindsBind::KEY_LEFT_CONTROL;
+    case GLFW_KEY_LEFT_ALT:
+        return ActionBindsBind::KEY_LEFT_ALT;
+    case GLFW_KEY_LEFT_SUPER:
+        return ActionBindsBind::KEY_LEFT_SUPER;
+    case GLFW_KEY_RIGHT_SHIFT:
+        return ActionBindsBind::KEY_RIGHT_SHIFT;
+    case GLFW_KEY_RIGHT_CONTROL:
+        return ActionBindsBind::KEY_RIGHT_CONTROL;
+    case GLFW_KEY_RIGHT_ALT:
+        return ActionBindsBind::KEY_RIGHT_ALT;
+    case GLFW_KEY_RIGHT_SUPER:
+        return ActionBindsBind::KEY_RIGHT_SUPER;
+    }
+
+    return ActionBindsBind::NOT_FOUND;
 }
 
 } // namespace engine

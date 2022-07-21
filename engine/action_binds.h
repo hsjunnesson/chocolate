@@ -192,21 +192,22 @@ enum class ActionBindsBind {
 /// ActionBinds contain key value mapping of binds to game actions.
 struct ActionBinds {
     ActionBinds(foundation::Allocator &allocator, const char *config_path);
-    ~ActionBinds();
 
-    foundation::Allocator &allocator;
-    foundation::Array<foundation::string_stream::Buffer *> actions;
-
-    /// Hash of action to binds. This is a multi hash where each action can have multiple binds.
-    // These action binds are keys which correspond to indices in the binds array, and values which
-    // correspond to indices in the actions array.
+    /// Hash of action strings to binds. This is a multi hash where each action can have multiple binds.
+    // The keys are murmur hashed action strings.
+    // e.g.: murmur_hash(QUIT): KEY_ESCAPE,KEY_Q
     foundation::Hash<ActionBindsBind> action_binds;
+
+    /// Hash of binds to actions.
+    // The keys are ActionBindsBind enums, values are hashed action strings.
+    // e.g.: KEY_Q: murmur_hash(QUIT)
+    foundation::Hash<uint64_t> bind_actions;
 };
 
 /// Returns the string descriptor corresponding to the Bind. Nullptr on invalid bind.
 const char *bind_descriptor(const ActionBindsBind bind);
 
-/// Returns the action corresponding to a particlar bind. Or nullptr if missing.
-const char *action_for_bind(const ActionBinds &action_binds, const ActionBindsBind bind);
+/// Returns the corresponding bind for a keycode. Or NOT_FOUND if not found.
+const ActionBindsBind bind_for_keycode(const int16_t keycode);
 
 } // namespace engine
