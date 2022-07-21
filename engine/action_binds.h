@@ -6,7 +6,7 @@ namespace foundation {
 namespace string_stream {
 typedef foundation::Array<char> Buffer;
 }
-}
+} // namespace foundation
 
 namespace engine {
 
@@ -185,8 +185,8 @@ enum class ActionBindsBind {
     JOYSTICK_14,
     JOYSTICK_15,
     JOYSTICK_16,
-    LAST,        /* Special enum, don't use. */
-    NOT_FOUND,   /* Special enum, don't use. */
+    LAST,      /* Special enum, don't use. */
+    NOT_FOUND, /* Special enum, don't use. */
 };
 
 /// ActionBinds contain key value mapping of binds to game actions.
