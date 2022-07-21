@@ -229,6 +229,8 @@ Engine::Engine(Allocator &allocator, const char *config_path)
         read_property("engine", "title", [&window_title](const char *property) {
             window_title << property;
         });
+
+        ini_destroy(ini);
     }
 
     // glfw
