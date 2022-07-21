@@ -5,4 +5,5 @@ ColumnLimit:     0
 IndentWidth:     4
 BreakConstructorInitializers: BeforeComma
 ConstructorInitializerIndentWidth: 0
+AlwaysBreakTemplateDeclarations: No
 ...

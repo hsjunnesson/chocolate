@@ -11,7 +11,6 @@ namespace std {
 class mutex;
 } // namespace std
 
-
 namespace engine {
 using namespace foundation;
 using namespace math;
@@ -93,7 +92,7 @@ const Array<SpriteAnimation> &done_sprite_animations(Sprites &sprites);
 
 /**
  * @brief Creates a sprite animation for position.
- * 
+ *
  * @param sprites The Sprites.
  * @param sprite_id The sprite id
  * @param to_position The position to animate to.
@@ -105,7 +104,7 @@ uint64_t animate_sprite_position(Sprites &sprites, const uint64_t sprite_id, con
 
 /**
  * @brief Creates a sprite animation for color.
- * 
+ *
  * @param sprites The sprites.
  * @param sprite_id The sprite id.
  * @param to_color The color to animate to.

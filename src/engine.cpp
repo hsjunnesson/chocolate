@@ -1,12 +1,12 @@
 #include "engine/engine.h"
 #include "engine/config.h"
+#include "engine/file.h"
 #include "engine/input.h"
 #include "engine/log.h"
 #include "engine/math.inl"
 #include "engine/shader.h"
 #include "engine/sprites.h"
 #include "engine/texture.h"
-#include "engine/file.h"
 
 #pragma warning(push, 0)
 #include "engine/ini.h"
@@ -14,16 +14,16 @@
 #include <GLFW/glfw3.h>
 #include <cassert>
 #include <fstream>
+#include <functional>
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include <memory.h>
+#include <stdlib.h>
 #include <string_stream.h>
 #include <temp_allocator.h>
-#include <stdlib.h>
-#include <functional>
 #pragma warning(pop)
 
 namespace {
@@ -157,9 +157,7 @@ void wait_buffer() {
     }
 }
 
-
 } // namespace
-
 
 namespace engine {
 using namespace foundation;
@@ -198,7 +196,7 @@ Engine::Engine(Allocator &allocator, const char *config_path)
         }
 
         ini_t *ini = ini_load(c_str(buffer), nullptr);
-        
+
         if (!ini) {
             log_fatal("Could not parse config file %s", config_path);
         }

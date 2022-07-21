@@ -1,8 +1,8 @@
 #include "engine/atlas.h"
 #include "engine/file.h"
 #include "engine/log.h"
-#include "engine/texture.h"
 #include "engine/math.inl"
+#include "engine/texture.h"
 
 #pragma warning(push, 0)
 #include <collection_types.h>

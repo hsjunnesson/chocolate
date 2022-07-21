@@ -2,8 +2,8 @@
 
 #pragma warning(push, 0)
 #include <algorithm>
-#include <inttypes.h>
 #include <assert.h>
+#include <inttypes.h>
 #pragma warning(pop)
 
 namespace math {
@@ -76,7 +76,7 @@ struct Rect {
 
 /**
  * @brief Mixes two colors.
- * 
+ *
  * @param x Color x.
  * @param y Color y.
  * @param a The ratio of blending.
@@ -94,7 +94,7 @@ constexpr Color4f mix(const Color4f x, const Color4f y, const float a) {
 
 /**
  * @brief Returns the index of an x, y coordinate
- * 
+ *
  * @param x The x coord
  * @param y The y coord
  * @param max_width The maximum width.
@@ -107,7 +107,7 @@ constexpr int32_t index(int32_t const x, int32_t const y, int32_t const max_widt
 
 /**
  * @brief Calculates the x, y coordinates based on an index.
- * 
+ *
  * @param index The index.
  * @param x The pass-by-reference x coord to calculate.
  * @param y The pass-by-reference y coord to calculate.
@@ -121,7 +121,7 @@ constexpr void coord(int32_t const index, int32_t &x, int32_t &y, int32_t const 
 /**
  * @brief Returns a new index offset by x and y coordinates.
  * Careful with wrapping, since coordinates are unsigned.
- * 
+ *
  * @param idx The index.
  * @param xoffset The x offset.
  * @param yoffset They y offset.
@@ -139,14 +139,16 @@ constexpr int32_t index_offset(int32_t const idx, int32_t const xoffset, int32_t
 /**
  * @brief Linear interpolation.
  */
-template <typename T> T lerp(T a, T b, float ratio) {
+template <typename T>
+T lerp(T a, T b, float ratio) {
     return a + ratio * (b - a);
 }
 
 /**
  * @brief Returns a new value that approaches a target by an amount
  */
-template <typename T> T approach(T value, T target, T amount) {
+template <typename T>
+T approach(T value, T target, T amount) {
     T a = amount < 0 ? -amount : amount; // abs
     return value > target ? std::max(value - a, target) : std::min(value + a, target);
 }

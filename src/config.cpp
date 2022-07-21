@@ -14,7 +14,6 @@ void __config_free(void *ptr);
 #include <memory.h>
 #pragma warning(pop)
 
-
 void *__config_malloc(size_t size) {
     foundation::Allocator &allocator = foundation::memory_globals::default_allocator();
     return allocator.allocate((uint32_t)size);
@@ -26,7 +25,6 @@ void __config_free(void *ptr) {
         allocator.deallocate(ptr);
     }
 }
-
 
 namespace engine {
 namespace config {
@@ -46,7 +44,7 @@ const char *read_property(ini_t *ini, const char *section, const char *property)
     }
 
     int property_index = ini_find_property(ini, section_index, property, 0);
-    
+
     if (property_index == INI_NOT_FOUND) {
         return nullptr;
     }
