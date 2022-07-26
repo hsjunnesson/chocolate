@@ -7,9 +7,13 @@
 #include <inttypes.h>
 #pragma warning(pop)
 
+#ifdef __APPLE__
+#include <mutex>
+#else
 namespace std {
 class mutex;
 } // namespace std
+#endif
 
 namespace engine {
 using namespace foundation;

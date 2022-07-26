@@ -67,29 +67,41 @@ ActionBinds::ActionBinds(foundation::Allocator &allocator, const char *config_pa
                     hash::set(found_actions, action_key, true);
                 }
 
-                char *buf = (char *)ta.allocate((uint32_t)value_len + 1);
-                strncpy_s(buf, value_len + 1, value, value_len);
+                Buffer buf(ta);
+                array::resize(buf, value_len);
+                array::push_back(buf, '\0');
+                memcpy(array::begin(buf), value, value_len);
 
+                char *str = array::begin(buf);
                 char *context = nullptr;
-                buf = strtok_s(buf, ",", &context);
 
-                while (buf) {
-                    ActionBindsBind bind = bind_from_descriptor(buf);
+#ifdef __APPLE__
+                str = strtok_r(str, ",", &context);
+#else
+                str = strtok_s(str, ",", &context);
+#endif
+
+                while (str) {
+                    ActionBindsBind bind = bind_from_descriptor(str);
                     if (bind == ActionBindsBind::NOT_FOUND) {
-                        log_fatal("Invalid [actionbinds] %s = %s", name, buf);
+                        log_fatal("Invalid [actionbinds] %s = %s", name, str);
                     } else {
                         multi_hash::insert(action_binds, action_key, bind);
 
                         uint64_t bind_key = static_cast<uint64_t>(bind);
 
                         if (hash::has(bind_actions, bind_key)) {
-                            log_fatal("invalid [actionbinds] defining multiple of bind %s", buf);
+                            log_fatal("invalid [actionbinds] defining multiple of bind %s", str);
                         } else {
                             hash::set(bind_actions, bind_key, action_key);
                         }
                     }
 
-                    buf = strtok_s(NULL, ",", &context);
+#ifdef __APPLE__
+                    str = strtok_r(NULL, ",", &context);
+#else
+                    str = strtok_s(NULL, ",", &context);
+#endif
                 }
             }
         }

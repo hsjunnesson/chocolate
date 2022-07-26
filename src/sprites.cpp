@@ -25,7 +25,7 @@ namespace {
 const uint64_t max_sprites = 65536;
 
 const char *vertex_source = R"(
-#version 440 core
+#version 410 core
 
 uniform mat4 projection;
 uniform mat4 model;
@@ -46,7 +46,7 @@ void main() {
 )";
 
 const char *fragment_source = R"(
-#version 440 core
+#version 410 core
 
 uniform sampler2D texture0;
 in vec2 uv;

@@ -45,7 +45,7 @@ struct Engine {
     int32_t render_scale;
     Vector2 camera_offset;
     bool terminating;
-    Sprites *sprites;
+//    Sprites *sprites;
 };
 
 // Runs the engine, returns the exit code.

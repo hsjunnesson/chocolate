@@ -58,13 +58,23 @@ void internal_log(LoggingSeverity severity, const char *format, ...) {
 
     ss << severity_prefix;
 
-    va_list(args);
+#ifdef __APPLE__
+    char buffer[1024];
+    va_list args;
     va_start(args, format);
-    ss = vprintf(ss, format, args);
+    vsnprintf(buffer, 1024, format, args);
+    ss << buffer;
     va_end(args);
+#else
+    ss << severity_prefix;
+
+    va_list args;
+    va_start(args, format);
+    ss = string_stream::vprintf(ss, format, args);
+    va_end(args);
+#endif
 
     ss << "\n";
-
     fprintf(stream, "%s", c_str(ss));
 
     if (severity == LoggingSeverity::Fatal || severity == LoggingSeverity::Error) {

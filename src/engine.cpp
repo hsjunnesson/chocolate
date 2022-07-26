@@ -181,7 +181,7 @@ Engine::Engine(Allocator &allocator, const char *config_path)
 , render_scale(1)
 , camera_offset({0, 0})
 , terminating(false)
-, sprites(nullptr) {
+{
     TempAllocator1024 ta;
 
     int window_width, window_height;
@@ -285,8 +285,6 @@ Engine::Engine(Allocator &allocator, const char *config_path)
 
     input = MAKE_NEW(allocator, Input, allocator, glfw_window);
 
-    sprites = MAKE_NEW(allocator, Sprites, allocator);
-
     // imgui
     {
         if (!IMGUI_CHECKVERSION()) {
@@ -304,10 +302,6 @@ Engine::Engine(Allocator &allocator, const char *config_path)
 Engine::~Engine() {
     if (input) {
         MAKE_DELETE(allocator, Input, input);
-    }
-
-    if (sprites) {
-        MAKE_DELETE(allocator, Sprites, sprites);
     }
 
     // imgui
@@ -338,7 +332,7 @@ void render(Engine &engine) {
         ImGui::NewFrame();
     }
 
-    render_sprites(engine, *engine.sprites);
+//    render_sprites(engine, *engine.sprites);
 
     if (engine.engine_callbacks && engine.engine_callbacks->render) {
         engine.engine_callbacks->render(engine, engine.game_object);
@@ -384,10 +378,10 @@ int run(Engine &engine) {
             engine.engine_callbacks->update(engine, engine.game_object, current_frame_time, delta_time);
         }
 
-        if (engine.sprites) {
-            update_sprites(*engine.sprites, current_frame_time, delta_time);
-            commit_sprites(*engine.sprites);
-        }
+        // if (engine.sprites) {
+        //     update_sprites(*engine.sprites, current_frame_time, delta_time);
+        //     commit_sprites(*engine.sprites);
+        // }
 
         if (glfwWindowShouldClose(engine.glfw_window)) {
             if (engine.engine_callbacks && engine.engine_callbacks->on_shutdown) {

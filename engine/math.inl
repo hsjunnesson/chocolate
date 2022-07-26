@@ -31,10 +31,16 @@ struct Vector3f {
 };
 
 struct Color4f {
-    float r = 0.0f;
-    float g = 0.0f;
-    float b = 0.0f;
-    float a = 0.0f;
+    float r = 0;
+    float g = 0;
+    float b = 0;
+    float a = 0;
+
+    // constexpr Color4f(float r = 0.0f, float g = 0.0f, float b = 0.0f, float a = 0.0f)
+    // : r(r)
+    // , g(g)
+    // , b(b)
+    // , a(a) {}
 };
 
 struct Matrix4f {

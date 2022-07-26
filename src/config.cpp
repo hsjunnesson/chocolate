@@ -1,6 +1,8 @@
 #include "engine/config.h"
 #include "engine/log.h"
 
+#include <stddef.h>
+
 void *__config_malloc(size_t size);
 void __config_free(void *ptr);
 
