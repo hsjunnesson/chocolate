@@ -5,7 +5,6 @@
 #include "engine/log.h"
 #include "engine/math.inl"
 #include "engine/shader.h"
-#include "engine/sprites.h"
 #include "engine/texture.h"
 
 #pragma warning(push, 0)
@@ -332,8 +331,6 @@ void render(Engine &engine) {
         ImGui::NewFrame();
     }
 
-//    render_sprites(engine, *engine.sprites);
-
     if (engine.engine_callbacks && engine.engine_callbacks->render) {
         engine.engine_callbacks->render(engine, engine.game_object);
     }
@@ -377,11 +374,6 @@ int run(Engine &engine) {
         if (engine.engine_callbacks && engine.engine_callbacks->update) {
             engine.engine_callbacks->update(engine, engine.game_object, current_frame_time, delta_time);
         }
-
-        // if (engine.sprites) {
-        //     update_sprites(*engine.sprites, current_frame_time, delta_time);
-        //     commit_sprites(*engine.sprites);
-        // }
 
         if (glfwWindowShouldClose(engine.glfw_window)) {
             if (engine.engine_callbacks && engine.engine_callbacks->on_shutdown) {

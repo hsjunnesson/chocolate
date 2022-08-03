@@ -23,9 +23,10 @@ struct Canvas {
     Allocator &allocator;
     Color4f col;
     Shader *shader;
-    uint32_t texture;
-    uint32_t vbo;
-    uint32_t vao;
+    unsigned int texture;
+    unsigned int vao;
+    unsigned int vbo;
+    unsigned int ebo;
     Array<uint8_t> data;
 };
 

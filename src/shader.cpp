@@ -19,7 +19,7 @@ using namespace foundation;
 using namespace array;
 using namespace string_stream;
 
-Shader::Shader(const char *geometry_source, const char *vertex_source, const char *fragment_source, ShaderPreLink *pre_link)
+Shader::Shader(const char *geometry_source, const char *vertex_source, const char *fragment_source)
 : program(0) {
     program = glCreateProgram();
 
@@ -65,10 +65,6 @@ Shader::Shader(const char *geometry_source, const char *vertex_source, const cha
 
     if (fragment_source) {
         fragment_shader = compile_shader(fragment_source, GL_FRAGMENT_SHADER);
-    }
-
-    if (pre_link) {
-        (*pre_link)(program);
     }
 
     glLinkProgram(program);

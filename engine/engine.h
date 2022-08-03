@@ -20,7 +20,6 @@ class EngineParams;
 struct Engine;
 struct Input;
 struct InputCommand;
-struct Sprites;
 
 struct EngineCallbacks {
     void (*on_input)(Engine &engine, void *game_object, InputCommand &input_command) = nullptr;
@@ -45,7 +44,6 @@ struct Engine {
     int32_t render_scale;
     Vector2 camera_offset;
     bool terminating;
-//    Sprites *sprites;
 };
 
 // Runs the engine, returns the exit code.

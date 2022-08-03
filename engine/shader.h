@@ -6,10 +6,8 @@
 
 namespace engine {
 
-typedef void (*ShaderPreLink)(unsigned int program);
-
 struct Shader {
-    Shader(const char *geometry_source, const char *vertex_source, const char *fragment_source, ShaderPreLink *pre_link = nullptr);
+    Shader(const char *geometry_source, const char *vertex_source, const char *fragment_source);
     ~Shader();
 
     uint32_t program;

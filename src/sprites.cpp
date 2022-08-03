@@ -506,7 +506,6 @@ void render_sprites(const Engine &engine, const Sprites &sprites) {
 
     glDisable(GL_BLEND);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
 
