@@ -19,7 +19,7 @@ using namespace foundation;
 using namespace array;
 using namespace string_stream;
 
-Shader::Shader(const char *geometry_source, const char *vertex_source, const char *fragment_source)
+Shader::Shader(const char *geometry_source, const char *vertex_source, const char *fragment_source, ShaderPreLink *pre_link)
 : program(0) {
     program = glCreateProgram();
 
@@ -67,6 +67,10 @@ Shader::Shader(const char *geometry_source, const char *vertex_source, const cha
         fragment_shader = compile_shader(fragment_source, GL_FRAGMENT_SHADER);
     }
 
+    if (pre_link) {
+        (*pre_link)(program);
+    }
+
     glLinkProgram(program);
 
     if (geometry_shader) {
@@ -89,6 +93,10 @@ Shader::~Shader() {
     if (program) {
         glDeleteProgram(program);
     }
+}
+
+void link_shader(Shader &shader) {
+
 }
 
 } // namespace engine
