@@ -90,6 +90,8 @@ Canvas::Canvas(Allocator &allocator)
 , vbo(0)
 , ebo(0)
 , data(allocator)
+, width(0)
+, height(0)
 {
     shader = MAKE_NEW(allocator, Shader, nullptr, vertex_source, fragment_source);
 
@@ -144,18 +146,14 @@ void init_canvas(const Engine &engine, Canvas &canvas) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    int32_t size = (engine.window_rect.size.x / engine.render_scale) * (engine.window_rect.size.y / engine.render_scale) * 4;
+    canvas.width = engine.window_rect.size.x / engine.render_scale;
+    canvas.height = engine.window_rect.size.y / engine.render_scale;
+    int32_t size = canvas.width * canvas.height * 4;
     array::resize(canvas.data, size);
 
-    for (int32_t i = 0; i < size; i += 4) {
-        canvas.data[i] = 0;
-        canvas.data[i+1] = 0;
-        canvas.data[i+2] = 0;
-        canvas.data[i+3] = 255;
-    }
+    canvas::clear(canvas);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, engine.window_rect.size.x, engine.window_rect.size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, array::begin(canvas.data));
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, canvas.width, canvas.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, array::begin(canvas.data));
 }
 
 void render_canvas(const Engine &engine, Canvas &canvas) {
@@ -167,6 +165,12 @@ void render_canvas(const Engine &engine, Canvas &canvas) {
     glBindVertexArray(canvas.vao);
 
     glActiveTexture(GL_TEXTURE0);
+
+    // TODO: Add a subimage uint8_t buffer. Rename subimage to subimage_rect. Draw operations work only in the subimage.
+    // Enqueue draw operations
+    // Calculate the whole bounds of the draw operation
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, canvas.width, canvas.height, GL_RGBA, GL_UNSIGNED_BYTE, array::begin(canvas.data));
+
     glBindTexture(GL_TEXTURE_2D, canvas.texture);
     glUniform1i(glGetUniformLocation(shader_program, "texture0"), 0);
 
@@ -181,9 +185,45 @@ void render_canvas(const Engine &engine, Canvas &canvas) {
 
 void canvas::pset(Canvas &canvas, int x, int y) {
     canvas::pset(canvas, x, y, canvas.col);
+
+    // Calculate bounds
+    // if (x < canvas.subimage_x) {
+    //     canvas.subimage_x = x;
+    // }
+
+    // if (y < canvas.subimage_y) {
+    //     canvas.subimage_y = y;
+    // }
+
+    // if (x >)
 }
 
 void canvas::pset(Canvas &canvas, int x, int y, Color4f col) {
+    int32_t i = math::index(x, y, canvas.width);
+    canvas.data[i] = (uint8_t)(col.r * 255);
+    canvas.data[i+1] = (uint8_t)(col.g * 255);
+    canvas.data[i+2] = (uint8_t)(col.b * 255);
+    canvas.data[i+3] = (uint8_t)(col.a * 255);
+}
+
+void canvas::clear(Canvas &canvas) {
+    Color4f col {0.0f, 0.0f, 0.0f, 1.0f};
+    canvas::clear(canvas, col);
+}
+
+void canvas::clear(Canvas &canvas, Color4f col) {
+    uint8_t r = (uint8_t)(col.r * 255);
+    uint8_t g = (uint8_t)(col.g * 255);
+    uint8_t b = (uint8_t)(col.b * 255);
+    uint8_t a = (uint8_t)(col.a * 255);
+
+    int32_t max = canvas.width * canvas.height * 4;
+    for (int32_t i = 0; i < max; i += 4) {
+        canvas.data[i] = r;
+        canvas.data[i+1] = g;
+        canvas.data[i+2] = b;
+        canvas.data[i+3] = a;
+    }
 }
 
 } // namespace engine

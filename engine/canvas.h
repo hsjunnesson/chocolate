@@ -28,13 +28,20 @@ struct Canvas {
     unsigned int vbo;
     unsigned int ebo;
     Array<uint8_t> data;
+    int32_t width;
+    int32_t height;
 };
 
 void init_canvas(const Engine &engine, Canvas &canvas);
 void render_canvas(const Engine &engine, Canvas &canvas);
 
 namespace canvas {
+
 void pset(Canvas &canvas, int x, int y);
 void pset(Canvas &canvas, int x, int y, Color4f col);
+
+void clear(Canvas &canvas);
+void clear(Canvas &canvas, Color4f col);
+
 } // namespace canvas
 } // namespace engine
