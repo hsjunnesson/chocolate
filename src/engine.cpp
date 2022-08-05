@@ -23,6 +23,11 @@
 #include <stdlib.h>
 #include <string_stream.h>
 #include <temp_allocator.h>
+
+#if defined(SUPERLUMINAL)
+#include <cstdio>
+#include <Superluminal/PerformanceAPI.h>
+#endif
 #pragma warning(pop)
 
 namespace {
@@ -135,6 +140,7 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
     engine->window_rect.size.y = height;
 
     glViewport(0, 0, width, height);
+    engine->window_resized = true;
 }
 
 void lock_buffer() {
@@ -164,8 +170,8 @@ using namespace foundation;
 #define WAIT_VSYNC 1
 
 #if !WAIT_VSYNC
-static const double Update_Rate = 60;
-static const double Desired_Frametime = 1.0 / Update_Rate;
+static const float Update_Rate = 60;
+static const float Desired_Frametime = 1.0 / Update_Rate;
 #endif
 
 Engine::Engine(Allocator &allocator, const char *config_path)
@@ -175,6 +181,7 @@ Engine::Engine(Allocator &allocator, const char *config_path)
 , frames(0)
 , glfw_window(nullptr)
 , window_rect({{0, 0}, {0, 0}})
+, window_resized(false)
 , input(nullptr)
 , camera_zoom(1.0f)
 , render_scale(1)
@@ -279,6 +286,7 @@ Engine::Engine(Allocator &allocator, const char *config_path)
         glfwSetWindowUserPointer(glfw_window, this);
 
         glfwSetFramebufferSizeCallback(glfw_window, framebuffer_size_callback);
+
         framebuffer_size_callback(glfw_window, window_width, window_height);
     }
 
@@ -362,6 +370,12 @@ int run(Engine &engine) {
     float delta_time = current_frame_time - prev_frame_time;
 
     while (true) {
+#if defined(SUPERLUMINAL)
+        char superluminal_event_data[256];
+        snprintf(superluminal_event_data, 256, "Frame %" PRIu64 "", engine.frames);
+        PerformanceAPI_BeginEvent("frame", superluminal_event_data, PERFORMANCEAPI_DEFAULT_COLOR);
+#endif
+
         // Process queued events
         if (engine.engine_callbacks && engine.engine_callbacks->on_input) {
             for (uint32_t i = 0; i < array::size(*engine.input->input_commands); ++i) {
@@ -390,6 +404,7 @@ int run(Engine &engine) {
 
         render(engine);
 
+        engine.window_resized = false;
         process_events(*engine.input);
 
         // Calculate frame times
@@ -404,13 +419,16 @@ int run(Engine &engine) {
 
 #if !WAIT_VSYNC
         if (delta_time < Desired_Frametime) {
-            double delay = Desired_Frametime - delta_time;
+            float delay = Desired_Frametime - delta_time;
             glfwWaitEventsTimeout(delay);
             delta_time += delay;
         }
 #endif
 
         ++engine.frames;
+#if defined(SUPERLUMINAL)
+        PerformanceAPI_EndEvent();
+#endif
     }
 
     return exit_code;

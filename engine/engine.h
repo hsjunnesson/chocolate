@@ -39,6 +39,7 @@ struct Engine {
     uint64_t frames;
     GLFWwindow *glfw_window;
     Rect window_rect;
+    bool window_resized;
     Input *input;
     float camera_zoom;
     int32_t render_scale;

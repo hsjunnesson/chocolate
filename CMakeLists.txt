@@ -13,6 +13,11 @@ find_package(glm CONFIG REQUIRED)
 find_package(cJSON CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
 
+if (SUPERLUMINAL)
+    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "c:/Program Files/Superluminal/Performance/API")
+    find_package(SuperluminalAPI REQUIRED)
+endif()
+
 
 # Fetch dependencies from Github
 
@@ -98,6 +103,10 @@ target_include_directories(${LIB_NAME} SYSTEM PRIVATE ${backward_SOURCE_DIR})
 target_include_directories(${LIB_NAME} SYSTEM PRIVATE ${date_SOURCE_DIR})
 target_include_directories(${LIB_NAME} SYSTEM PRIVATE ${PROJECT_SOURCE_DIR}/glad/include)
 
+if (SUPERLUMINAL)
+    target_include_directories(${LIB_NAME} SYSTEM PRIVATE ${SuperluminalAPI_INCLUDE_DIRS})
+endif()
+
 target_compile_definitions(${LIB_NAME} PRIVATE "GLFW_INCLUDE_NONE")
 
 
@@ -111,6 +120,17 @@ target_link_libraries(${LIB_NAME}
     cjson
     imgui::imgui
 )
+
+if (SUPERLUMINAL)
+    target_link_libraries(${LIB_NAME} SuperluminalAPI)
+endif()
+
+if (MSVC)
+    if (SUPERLUMINAL)
+        target_compile_definitions(${PROJECT_NAME} PRIVATE SUPERLUMINAL=1)
+    endif()
+endif()
+
 
 # Enable tests
 
