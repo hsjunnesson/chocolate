@@ -53,7 +53,7 @@ struct Matrix4f {
           0.0f, 0.0f, 0.0f, 0.0f,
           0.0f, 0.0f, 0.0f, 0.0f} {}
 
-    Matrix4f(const float *float_data) {
+    explicit Matrix4f(const float *float_data) {
         memcpy(m, float_data, sizeof(float) * 16);
     }
 

@@ -154,6 +154,10 @@ void init_canvas(const Engine &engine, Canvas &canvas) {
     canvas::clear(canvas);
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, canvas.width, canvas.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, array::begin(canvas.data));
+
+    glUseProgram(canvas.shader->program);
+    GLint z_offset = glGetUniformLocation(canvas.shader->program, "z_offset");
+    glUniform1f(z_offset, 1.0f);
 }
 
 void render_canvas(const Engine &engine, Canvas &canvas) {
@@ -165,21 +169,17 @@ void render_canvas(const Engine &engine, Canvas &canvas) {
     glBindVertexArray(canvas.vao);
 
     glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, canvas.texture);
 
     // TODO: Add a subimage uint8_t buffer. Rename subimage to subimage_rect. Draw operations work only in the subimage.
     // Enqueue draw operations
     // Calculate the whole bounds of the draw operation
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, canvas.width, canvas.height, GL_RGBA, GL_UNSIGNED_BYTE, array::begin(canvas.data));
 
-    glBindTexture(GL_TEXTURE_2D, canvas.texture);
     glUniform1i(glGetUniformLocation(shader_program, "texture0"), 0);
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-    glDisable(GL_BLEND);
     glBindVertexArray(0);
 }
 

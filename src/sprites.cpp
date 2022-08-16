@@ -483,6 +483,7 @@ void render_sprites(const Engine &engine, const Sprites &sprites) {
     const GLuint shader_program = sprites.shader->program;
 
     glUseProgram(shader_program);
+    glBindVertexArray(sprites.vao);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, sprites.atlas->texture->texture);
     glUniform1i(glGetUniformLocation(shader_program, "texture0"), 0);
@@ -493,13 +494,10 @@ void render_sprites(const Engine &engine, const Sprites &sprites) {
     glUniformMatrix4fv(glGetUniformLocation(shader_program, "projection"), 1, GL_FALSE, glm::value_ptr(projection * view));
     glUniformMatrix4fv(glGetUniformLocation(shader_program, "model"), 1, GL_FALSE, glm::value_ptr(model));
 
-    glBindVertexArray(sprites.vao);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sprites.ebo);
 
     uint64_t quads = array::size(*sprites.sprites);
 
     glEnable(GL_BLEND);
-
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glDrawElements(GL_TRIANGLES, 6 * (GLsizei)quads, GL_UNSIGNED_INT, (void *)0);

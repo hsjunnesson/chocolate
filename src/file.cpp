@@ -71,6 +71,7 @@ bool read(string_stream::Buffer &buffer, const char *filename) {
 
     if (ferror(file) != 0) {
         log_error("Could not read file %s", filename);
+        fclose(file);
         return false;
     }
 
