@@ -30,6 +30,67 @@
 #endif
 #pragma warning(pop)
 
+namespace framebuffer {
+
+const char *vertex_source = R"(
+#version 410 core
+
+layout (location = 0) in vec3 in_position;
+layout (location = 1) in vec2 in_texture_coords;
+
+out vec2 uv;
+
+void main() {
+    gl_Position = vec4(in_position.x, in_position.y, 0.0, 1.0);
+    uv = in_texture_coords;
+}
+)";
+
+const char *fragment_source = R"(
+#version 410 core
+
+precision highp float;
+
+uniform sampler2D texture0;
+in vec2 uv;
+
+out vec4 out_color;
+
+void main() {
+    out_color = texture(texture0, uv);
+}
+)";
+
+math::Vertex vertices[] {
+    { // top right
+        {1.0f, 1.0f, 0.0f},
+        {1.0f, 1.0f, 1.0f, 1.0f},
+        {1.0f, 1.0f}
+    },
+    { // bottom right
+        {1.0f, -1.0f, 0.0f},
+        {1.0f, 1.0f, 1.0f, 1.0f},
+        {1.0f, 0.0f}
+    },
+    { // bottom left
+        {-1.0f, -1.0f, 0.0f},
+        {1.0f, 1.0f, 1.0f, 1.0f},
+        {0.0f, .0f}
+    },
+    { // top left
+        {-1.0f, 1.0f, 0.0f},
+        {1.0f, 1.0f, 1.0f, 1.0f},
+        {0.0f, 1.0f}
+    },
+};
+
+GLuint indices[] = {
+    0, 1, 3,  // first Triangle
+    1, 2, 3   // second Triangle
+};
+
+} // namespace framebuffer
+
 namespace {
 
 using namespace foundation;
@@ -182,6 +243,15 @@ Engine::Engine(Allocator &allocator, const char *config_path)
 , glfw_window(nullptr)
 , window_rect({{0, 0}, {0, 0}})
 , window_resized(false)
+, framebuffer_width(0)
+, framebuffer_height(0)
+, framebuffer_shader(nullptr)
+, framebuffer(0)
+, framebuffer_texture(0)
+, framebuffer_rbo(0)
+, framebuffer_quad_vao(0)
+, framebuffer_quad_vbo(0)
+, framebuffer_quad_ebo(0)
 , input(nullptr)
 , camera_zoom(1.0f)
 , render_scale(1)
@@ -290,6 +360,69 @@ Engine::Engine(Allocator &allocator, const char *config_path)
 
     input = MAKE_NEW(allocator, Input, allocator, glfw_window);
 
+    // Framebuffer
+    {
+        framebuffer_width = window_width;
+        framebuffer_height = window_height;
+
+        framebuffer_shader = MAKE_NEW(allocator, Shader, nullptr, framebuffer::vertex_source, framebuffer::fragment_source);
+        glGenFramebuffers(1, &framebuffer);
+        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+        glGenTextures(1, &framebuffer_texture);
+        glBindTexture(GL_TEXTURE_2D, framebuffer_texture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, framebuffer_width, framebuffer_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebuffer_texture, 0);
+
+        glGenRenderbuffers(1, &framebuffer_rbo);
+        glBindRenderbuffer(GL_RENDERBUFFER, framebuffer_rbo);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, framebuffer_width, framebuffer_height);
+        glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+        glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, framebuffer_rbo);
+
+        GLenum framebuffer_status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
+        switch (framebuffer_status) {
+        case GL_FRAMEBUFFER_COMPLETE:
+            break;
+        case GL_FRAMEBUFFER_UNSUPPORTED:
+            log_fatal("GL_DRAW_FRAMEBUFFER unsupported");
+            break;
+        default:
+            log_fatal("GL_DRAW_FRAMEBUFFER error status: %d", framebuffer_status);
+            break;
+        }
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        // Fullscreen quad
+        glGenVertexArrays(1, &framebuffer_quad_vao);
+        glGenBuffers(1, &framebuffer_quad_vbo);
+        glGenBuffers(1, &framebuffer_quad_ebo);
+        glBindVertexArray(framebuffer_quad_vao);
+
+        glBindBuffer(GL_ARRAY_BUFFER, framebuffer_quad_vbo);
+        glBufferData(GL_ARRAY_BUFFER, 4 * sizeof(math::Vertex), framebuffer::vertices, GL_STATIC_DRAW);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, framebuffer_quad_ebo);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(GLuint), framebuffer::indices, GL_STATIC_DRAW);
+
+        // position
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(math::Vertex), (const GLvoid *)0);
+        glEnableVertexAttribArray(0);
+
+        // texture_coords
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *)offsetof(Vertex, texture_coords));
+        glEnableVertexAttribArray(1);
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+    }
+
     // imgui
     {
         if (!IMGUI_CHECKVERSION()) {
@@ -305,8 +438,17 @@ Engine::Engine(Allocator &allocator, const char *config_path)
 }
 
 Engine::~Engine() {
-    if (input) {
-        MAKE_DELETE(allocator, Input, input);
+    MAKE_DELETE(allocator, Input, input);
+    MAKE_DELETE(allocator, Shader, framebuffer_shader);
+
+    // framebuffer
+    {
+        glDeleteFramebuffers(1, &framebuffer);
+        glDeleteTextures(1, &framebuffer_texture);
+        glDeleteRenderbuffers(1, &framebuffer_rbo);
+        glDeleteBuffers(1, &framebuffer_quad_vbo);
+        glDeleteBuffers(1, &framebuffer_quad_ebo);
+        glDeleteVertexArrays(1, &framebuffer_quad_vao);
     }
 
     // imgui
@@ -324,26 +466,43 @@ Engine::~Engine() {
 }
 
 void render(Engine &engine) {
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_DEPTH_TEST);
-    
     wait_buffer();
+
+    // Enable framebuffer
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER, engine.framebuffer);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_DEPTH_TEST);
+    }
+
+    // Render game
+    if (engine.engine_callbacks && engine.engine_callbacks->render) {
+        engine.engine_callbacks->render(engine, engine.game_object);
+    }
+
+    // Render framebuffer
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        glUseProgram(engine.framebuffer_shader->program);
+        glBindVertexArray(engine.framebuffer_quad_vao);
+        glDisable(GL_DEPTH_TEST);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, engine.framebuffer_texture);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
+    }
 
     // imgui
     {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-    }
 
-    if (engine.engine_callbacks && engine.engine_callbacks->render) {
-        engine.engine_callbacks->render(engine, engine.game_object);
-    }
-
-    // imgui
-    {
         if (engine.engine_callbacks->render_imgui) {
             engine.engine_callbacks->render_imgui(engine, engine.game_object);
         }
