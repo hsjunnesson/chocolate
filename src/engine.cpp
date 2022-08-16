@@ -282,12 +282,10 @@ Engine::Engine(Allocator &allocator, const char *config_path)
 #endif
 
         glfwSwapInterval(swap_interval);
-
         glfwSetWindowUserPointer(glfw_window, this);
-
         glfwSetFramebufferSizeCallback(glfw_window, framebuffer_size_callback);
-
         framebuffer_size_callback(glfw_window, window_width, window_height);
+        glfwSetWindowSizeLimits(glfw_window, window_width, window_height, GLFW_DONT_CARE, GLFW_DONT_CARE);
     }
 
     input = MAKE_NEW(allocator, Input, allocator, glfw_window);
@@ -329,7 +327,8 @@ void render(Engine &engine) {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+    glEnable(GL_DEPTH_TEST);
+    
     wait_buffer();
 
     // imgui
