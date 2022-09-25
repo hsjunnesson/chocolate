@@ -66,8 +66,6 @@ void internal_log(LoggingSeverity severity, const char *format, ...) {
     ss << buffer;
     va_end(args);
 #else
-    ss << severity_prefix;
-
     va_list args;
     va_start(args, format);
     ss = string_stream::vprintf(ss, format, args);
