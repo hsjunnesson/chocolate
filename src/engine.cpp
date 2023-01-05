@@ -290,9 +290,13 @@ Engine::Engine(Allocator &allocator, const char *config_path)
             }
         };
 
-        read_property("engine", "render_scale", [this](const char *property) {
-            this->render_scale = atoi(property);
-        });
+        if (config::has_property(ini, "engine", "render_scale")) {
+            read_property("engine", "render_scale", [this](const char *property) {
+                this->render_scale = atoi(property);
+            });
+        } else {
+            this->render_scale = 1;
+        }
 
         read_property("engine", "window_width", [&window_width](const char *property) {
             window_width = atoi(property);
