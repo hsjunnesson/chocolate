@@ -533,13 +533,13 @@ void render(Engine &engine) {
 int run(Engine &engine) {
     assert(engine.engine_callbacks);
 
-    double prev_frame_time = (float)glfwGetTime();
+    float prev_frame_time = (float)glfwGetTime();
 
     bool running = true;
     int exit_code = 0;
 
-    double current_frame_time = prev_frame_time;
-    double delta_time = current_frame_time - prev_frame_time;
+    float current_frame_time = prev_frame_time;
+    float delta_time = current_frame_time - prev_frame_time;
 
     while (true) {
 #if defined(SUPERLUMINAL)
@@ -580,7 +580,7 @@ int run(Engine &engine) {
         process_events(*engine.input);
 
         // Calculate frame times
-        current_frame_time = glfwGetTime();
+        current_frame_time = (float)glfwGetTime();
         delta_time = current_frame_time - prev_frame_time;
         prev_frame_time = current_frame_time;
 
