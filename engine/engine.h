@@ -23,7 +23,7 @@ struct Shader;
 
 struct EngineCallbacks {
     void (*on_input)(Engine &engine, void *game_object, InputCommand &input_command) = nullptr;
-    void (*update)(Engine &engine, void *game_object, float frame_time, float delta) = nullptr;
+    void (*update)(Engine &engine, void *game_object, double frame_time, double delta) = nullptr;
     void (*render)(Engine &engine, void *game_object) = nullptr;
     void (*render_imgui)(Engine &engine, void *game_object) = nullptr;
     void (*on_shutdown)(Engine &engine, void *game_object) = nullptr;
@@ -61,6 +61,8 @@ struct Engine {
     Vector2 camera_offset;
 
     bool terminating;
+    bool wait_vsync;
+    uint32_t fps_limit;
 };
 
 // Runs the engine, returns the exit code.

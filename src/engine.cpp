@@ -28,6 +28,7 @@
 #include <cstdio>
 #include <Superluminal/PerformanceAPI.h>
 #endif
+
 #pragma warning(pop)
 
 namespace framebuffer {
@@ -228,13 +229,6 @@ void wait_buffer() {
 namespace engine {
 using namespace foundation;
 
-#define WAIT_VSYNC 1
-
-#if !WAIT_VSYNC
-static const float Update_Rate = 60;
-static const float Desired_Frametime = 1.0 / Update_Rate;
-#endif
-
 Engine::Engine(Allocator &allocator, const char *config_path)
 : allocator(allocator)
 , engine_callbacks(nullptr)
@@ -257,6 +251,8 @@ Engine::Engine(Allocator &allocator, const char *config_path)
 , render_scale(1)
 , camera_offset({0, 0})
 , terminating(false)
+, wait_vsync(true)
+, fps_limit(0)
 {
     TempAllocator1024 ta;
 
@@ -294,8 +290,22 @@ Engine::Engine(Allocator &allocator, const char *config_path)
             read_property("engine", "render_scale", [this](const char *property) {
                 this->render_scale = atoi(property);
             });
-        } else {
-            this->render_scale = 1;
+        }
+
+        if (config::has_property(ini, "engine", "vsync")) {
+            read_property("engine", "vsync", [this](const char *property) {
+                if (strcmp("true", property) == 0) {
+                    this->wait_vsync = true;
+                } else {
+                    this->wait_vsync = false;
+                }
+            });
+        }
+
+        if (config::has_property(ini, "engine", "fps_limit")) {
+            read_property("engine", "fps_limit", [this](const char *property) {
+                this->fps_limit = atoi(property);
+            });
         }
 
         read_property("engine", "window_width", [&window_width](const char *property) {
@@ -351,9 +361,9 @@ Engine::Engine(Allocator &allocator, const char *config_path)
 
         int swap_interval = 0;
 
-#if WAIT_VSYNC
-        swap_interval = 1;
-#endif
+        if (wait_vsync) {
+            swap_interval = 1;
+        }
 
         glfwSwapInterval(swap_interval);
         glfwSetWindowUserPointer(glfw_window, this);
@@ -523,13 +533,13 @@ void render(Engine &engine) {
 int run(Engine &engine) {
     assert(engine.engine_callbacks);
 
-    float prev_frame_time = (float)glfwGetTime();
+    double prev_frame_time = (float)glfwGetTime();
 
     bool running = true;
     int exit_code = 0;
 
-    float current_frame_time = prev_frame_time;
-    float delta_time = current_frame_time - prev_frame_time;
+    double current_frame_time = prev_frame_time;
+    double delta_time = current_frame_time - prev_frame_time;
 
     while (true) {
 #if defined(SUPERLUMINAL)
@@ -570,7 +580,7 @@ int run(Engine &engine) {
         process_events(*engine.input);
 
         // Calculate frame times
-        current_frame_time = (float)glfwGetTime();
+        current_frame_time = glfwGetTime();
         delta_time = current_frame_time - prev_frame_time;
         prev_frame_time = current_frame_time;
 
@@ -579,13 +589,13 @@ int run(Engine &engine) {
             delta_time = 0;
         }
 
-#if !WAIT_VSYNC
-        if (delta_time < Desired_Frametime) {
-            float delay = Desired_Frametime - delta_time;
-            glfwWaitEventsTimeout(delay);
-            delta_time += delay;
+        if (!engine.wait_vsync && engine.fps_limit > 0) {
+            double desired_frametime = 1.0 / engine.fps_limit;
+            if (delta_time < desired_frametime) {
+                double delay = desired_frametime - delta_time;
+                glfwWaitEventsTimeout(delay);
+            }
         }
-#endif
 
         ++engine.frames;
 #if defined(SUPERLUMINAL)
