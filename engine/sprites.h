@@ -71,6 +71,7 @@ struct Sprites {
     uint64_t animation_id_counter;
     Array<SpriteAnimation> *animations;
     Array<SpriteAnimation> *done_animations; // The list of done animations since last frame
+	Hash<Matrix4f> *transforms; // A multihash map of sprite ids to a list of transforms waiting to be applied and cleared on commit_sprites.
 };
 
 // Initializes this Sprites with an atlas. Required before rendering.
@@ -85,7 +86,7 @@ void remove_sprite(Sprites &sprites, const uint64_t id);
 // Returns a pointer to a sprite by its id.
 const Sprite *get_sprite(const Sprites &sprites, const uint64_t id);
 
-// Transforms a sprite.
+// Transforms a sprite. Will take effect on next commit;
 void transform_sprite(Sprites &sprites, const uint64_t id, const Matrix4f transform);
 
 // Updates color of sprite.

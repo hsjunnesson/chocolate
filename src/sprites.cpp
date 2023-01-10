@@ -7,7 +7,9 @@
 
 #pragma warning(push, 0)
 #include <array.h>
+#include <hash.h>
 #include <memory.h>
+#include <temp_allocator.h>
 
 #include <mutex>
 
@@ -22,7 +24,7 @@
 #pragma warning(pop)
 
 namespace {
-const uint64_t max_sprites = 65536;
+const uint64_t max_sprites = 1000000;
 
 const char *vertex_source = R"(
 #version 410 core
@@ -83,12 +85,14 @@ Sprites::Sprites(Allocator &allocator)
 , sprites_mutex(nullptr)
 , animation_id_counter(0)
 , animations(nullptr)
-, done_animations(nullptr) {
+, done_animations(nullptr)
+, transforms(nullptr) {
     shader = MAKE_NEW(allocator, Shader, nullptr, vertex_source, fragment_source);
     sprites = MAKE_NEW(allocator, Array<Sprite>, allocator);
     sprites_mutex = MAKE_NEW(allocator, std::mutex);
     animations = MAKE_NEW(allocator, Array<SpriteAnimation>, allocator);
     done_animations = MAKE_NEW(allocator, Array<SpriteAnimation>, allocator);
+	transforms = MAKE_NEW(allocator, Hash<Matrix4f>, allocator);
 
     const size_t vertex_count = 4 * max_sprites;
     const size_t vertex_data_size = sizeof(Vertex) * vertex_count;
@@ -211,6 +215,10 @@ Sprites::~Sprites() {
     if (done_animations) {
         MAKE_DELETE(allocator, Array, done_animations);
     }
+
+	if (transforms) {
+		MAKE_DELETE(allocator, Hash, transforms);
+	}
 }
 
 void init_sprites(Sprites &sprites, const char *atlas_filename) {
@@ -268,14 +276,7 @@ const Sprite *get_sprite(const Sprites &sprites, const uint64_t id) {
 
 void transform_sprite(Sprites &sprites, const uint64_t id, const Matrix4f transform) {
     std::scoped_lock lock(*sprites.sprites_mutex);
-
-    for (engine::Sprite *iter = array::begin(*sprites.sprites); iter != array::end(*sprites.sprites); ++iter) {
-        if (iter->id == id) {
-            iter->transform = transform;
-            iter->dirty = true;
-            break;
-        }
-    }
+    multi_hash::insert(*sprites.transforms, id, transform);
 }
 
 void color_sprite(Sprites &sprites, const uint64_t id, const Color4f color) {
@@ -421,15 +422,36 @@ void update_sprites(Sprites &sprites, float t, float dt) {
 void commit_sprites(Sprites &sprites) {
     std::scoped_lock lock(*sprites.sprites_mutex);
 
-    const static glm::vec3 rotation_vec = glm::vec3(0.0f, 0.0f, -1.0f);
+    TempAllocator1024 ta;
+    Array<Matrix4f> transform_updates(ta);
 
+    const static glm::vec3 rotation_vec = glm::vec3(0.0f, 0.0f, -1.0f);
+    
     int i = 0;
     for (engine::Sprite *sprite = array::begin(*sprites.sprites); sprite != array::end(*sprites.sprites); ++sprite) {
+        multi_hash::get(*sprites.transforms, sprite->id, transform_updates);
+
+        glm::mat4 sprite_transform = glm::make_mat4(sprite->transform.m);
+        bool dirty = sprite->dirty;
+
+        if (!array::empty(transform_updates)) {
+            // Apply cummulated transform matrices
+            for (Matrix4f *transform_update = array::begin(transform_updates); transform_update != array::end(transform_updates); ++transform_update) {
+				if (transform_update == array::begin(transform_updates)) {
+					sprite_transform = glm::make_mat4(transform_update->m);
+				} else {
+					sprite_transform *= glm::make_mat4(transform_update->m);
+				}
+            }
+
+			sprite->transform = Matrix4f(glm::value_ptr(sprite_transform));
+            dirty = true;
+			array::clear(transform_updates);
+        }
+
         if (sprite->dirty) {
             // position
             {
-                const glm::mat4 sprite_transform = glm::make_mat4(sprite->transform.m);
-
                 for (int ii = 0; ii < 4; ++ii) {
                     const glm::vec4 position = sprite_transform * unit_quad[ii];
                     sprites.vertex_data[i * 4 + ii].position = {position.x, position.y, position.z};
@@ -465,6 +487,8 @@ void commit_sprites(Sprites &sprites) {
 
         ++i;
     }
+
+    hash::clear(*sprites.transforms);
 }
 
 void render_sprites(const Engine &engine, const Sprites &sprites) {
