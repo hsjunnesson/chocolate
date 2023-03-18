@@ -42,7 +42,7 @@ ActionBinds::ActionBinds(foundation::Allocator &allocator, const char *config_pa
 
     int section = ini_find_section(ini, "actionbinds", 0);
     if (section == INI_NOT_FOUND) {
-        log_error("Config file %s missing [actionbinds]");
+        log_error("Config file %s missing [actionbinds]", config_path);
     } else {
         Hash<bool> found_actions(ta);
 
