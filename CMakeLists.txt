@@ -43,45 +43,45 @@ if (NOT bitsquidfoundation_POPULATED)
 endif()
 
 
-FetchContent_Declare(
-    date
-    GIT_REPOSITORY https://github.com/HowardHinnant/date.git
-)
-
-if (NOT date_POPULATED)
-    FetchContent_MakeAvailable(date)
-endif()
-
-
 # Chocolate sources
-file(GLOB_RECURSE SRC_Chocolate
-    "src/*.c"
-    "src/*.cpp"
-    "src/*.inl"
+set(SRC_Chocolate
+    "src/action_binds.cpp"
+    "src/atlas.cpp"
+    "src/canvas.cpp"
+    "src/config.cpp"
+    "src/engine.cpp"
+    "src/file.cpp"
+    "src/input.cpp"
+    "src/log.cpp"
+    "src/shader.cpp"
+    "src/sprites.cpp"
+    "src/texture.cpp"
     "glad/src/glad.c"
 )
 
-list(FILTER SRC_Chocolate EXCLUDE REGEX ".*/main.cpp$")
-
-file(GLOB_RECURSE HEADERS
-    "include/*.h"
-    "include/*.hpp"
-    "include/*.inl"
-)
-
-file(GLOB_RECURSE SRC_Imgui
-    "bindings/imgui_impl_glfw.cpp"
-    "bindings/imgui_impl_opengl3.cpp"
-    "bindings/imgui_impl_glfw.h"
-    "bindings/imgui_impl_opengl3.h"
+set(HEADERS_Chocolate
+    "engine/action_binds.h"
+    "engine/atlas.h"
+    "engine/canvas.h"
+    "engine/color.inl"
+    "engine/config.h"
+    "engine/engine.h"
+    "engine/file.h"
+    "engine/ini.h"
+    "engine/input.h"
+    "engine/log.h"
+    "engine/math.inl"
+    "engine/shader.h"
+    "engine/sprites.h"
+    "engine/stb_image.h"
+    "engine/texture.h"
 )
 
 
 # Create library
 add_library(${LIB_NAME} STATIC
     ${SRC_Chocolate}
-    ${SRC_Imgui}
-    ${HEADERS}
+    ${HEADERS_Chocolate}
 )
 
 set_target_properties(
@@ -100,7 +100,6 @@ set_target_properties(
 target_include_directories(${LIB_NAME} PUBLIC ${PROJECT_SOURCE_DIR})
 target_include_directories(${LIB_NAME} SYSTEM PUBLIC ${bitsquidfoundation_SOURCE_DIR})
 target_include_directories(${LIB_NAME} SYSTEM PRIVATE ${backward_SOURCE_DIR})
-target_include_directories(${LIB_NAME} SYSTEM PRIVATE ${date_SOURCE_DIR})
 target_include_directories(${LIB_NAME} SYSTEM PRIVATE ${PROJECT_SOURCE_DIR}/glad/include)
 
 if (SUPERLUMINAL)
@@ -116,7 +115,6 @@ target_link_libraries(${LIB_NAME}
     bitsquid-foundation
     glfw
     glm::glm
-    date::date
     cjson
     imgui::imgui
 )

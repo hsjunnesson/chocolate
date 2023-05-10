@@ -517,7 +517,7 @@ void render(Engine &engine) {
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        if (engine.engine_callbacks->render_imgui) {
+        if (engine.engine_callbacks && engine.engine_callbacks->render_imgui) {
             engine.engine_callbacks->render_imgui(engine, engine.game_object);
         }
 

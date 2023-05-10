@@ -7,7 +7,6 @@
 #include <time.h>
 
 #include <backward.hpp>
-#include <date/date.h>
 #include <memory.h>
 #include <string_stream.h>
 #include <temp_allocator.h>
@@ -15,7 +14,6 @@
 
 using namespace foundation;
 using namespace foundation::string_stream;
-using namespace date;
 using namespace backward;
 
 void internal_log(LoggingSeverity severity, const char *format, ...) {
