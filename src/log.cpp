@@ -3,6 +3,7 @@
 #pragma warning(push, 0)
 #include <iomanip>
 #include <stdarg.h>
+#include <sstream>
 #include <stdio.h>
 #include <time.h>
 
@@ -10,6 +11,10 @@
 #include <memory.h>
 #include <string_stream.h>
 #include <temp_allocator.h>
+
+#if defined(WIN32)
+#include <windows.h>
+#endif
 #pragma warning(pop)
 
 using namespace foundation;
@@ -21,38 +26,23 @@ void internal_log(LoggingSeverity severity, const char *format, ...) {
     Buffer ss(ta);
 
     const char *severity_prefix = nullptr;
-    FILE *stream = nullptr;
 
     switch (severity) {
     case LoggingSeverity::Debug:
         severity_prefix = "[DEBUG] ";
-        stream = stdout;
         break;
     case LoggingSeverity::Info:
         severity_prefix = "[INFO] ";
-        stream = stdout;
         break;
     case LoggingSeverity::Error:
         severity_prefix = "[ERROR] ";
-        stream = stderr;
         break;
     case LoggingSeverity::Fatal:
         severity_prefix = "[FATAL] ";
-        stream = stderr;
         break;
     default:
         return;
     }
-
-    // {
-    //     auto now = std::chrono::system_clock::now();
-    //     auto now_c = std::chrono::system_clock::to_time_t(now);
-    //     auto now_tm = *std::localtime(&now_c);
-
-    //     char timebuf[100];
-    //     std::strftime(timebuf, sizeof(timebuf), "%FT%T", &now_tm);
-    //     ss << timebuf;
-    // }
 
     ss << severity_prefix;
 
@@ -71,7 +61,12 @@ void internal_log(LoggingSeverity severity, const char *format, ...) {
 #endif
 
     ss << "\n";
-    fprintf(stream, "%s", c_str(ss));
+
+    fprintf(stdout, "%s", c_str(ss));
+
+#if defined(_DEBUG) && defined(WIN32)
+    OutputDebugString(c_str(ss));
+#endif
 
     if (severity == LoggingSeverity::Fatal || severity == LoggingSeverity::Error) {
         // https://github.com/bombela/backward-cpp/issues/206
@@ -81,14 +76,17 @@ void internal_log(LoggingSeverity severity, const char *format, ...) {
         StackTrace st;
         st.load_here();
         Printer p;
-        p.color_mode = ColorMode::always;
+        p.color_mode = ColorMode::automatic;
         p.address = true;
-        p.print(st, stream);
-    }
+        p.print(st, stdout);
 
-#if defined(_DEBUG)
-    fflush(stream);
+#if defined(_DEBUG) && defined(WIN32)
+        std::ostringstream stream;
+        p.print(st, stream);
+        stream << c_str(ss);
+        OutputDebugString(stream.str().c_str());
 #endif
+    }
 
     if (severity == LoggingSeverity::Fatal) {
         exit(EXIT_FAILURE);
