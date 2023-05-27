@@ -22,6 +22,16 @@ namespace file {
 using namespace foundation;
 using namespace foundation::array;
 
+bool exist(const char *filename) {
+#if defined(_WIN32)
+    DWORD dwAttrib = GetFileAttributes(filename);
+    return (dwAttrib != INVALID_FILE_ATTRIBUTES && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+#else
+    log_fatal("Unsupported platform");
+    return false;
+#endif
+}
+
 // https://wiki.sei.cmu.edu/confluence/display/c/FIO19-C.+Do+not+use+fseek%28%29+and+ftell%28%29+to+compute+the+size+of+a+regular+file
 bool read(string_stream::Buffer &buffer, const char *filename) {
 #if defined(_WIN32)
@@ -79,7 +89,7 @@ bool read(string_stream::Buffer &buffer, const char *filename) {
 
     return true;
 #else
-    log_error("Unsupported platform");
+    log_fatal("Unsupported platform");
     return false;
 #endif
 }

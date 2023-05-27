@@ -129,6 +129,10 @@ if (MSVC)
     endif()
 endif()
 
+if (CMAKE_BUILD_TYPE MATCHES Debug)
+    target_compile_definitions(my_exe PRIVATE DEBUG=1)
+endif()
+
 
 # Enable tests
 
