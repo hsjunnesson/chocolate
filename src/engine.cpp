@@ -257,6 +257,7 @@ Engine::Engine(Allocator &allocator, const char *config_path)
     TempAllocator1024 ta;
 
     int window_width, window_height;
+    bool always_on_top = false;
     string_stream::Buffer window_title(ta);
 
     // Load config
@@ -319,7 +320,15 @@ Engine::Engine(Allocator &allocator, const char *config_path)
         read_property("engine", "title", [&window_title](const char *property) {
             window_title << property;
         });
-
+        
+        if (config::has_property(ini, "engine", "always_on_top")) {
+            read_property("engine", "always_on_top", [&always_on_top](const char *property) {
+                if (strcmp("true", property) == 0) {
+                    always_on_top = true;
+                }
+            });
+        }
+        
         ini_destroy(ini);
     }
 
@@ -336,7 +345,11 @@ Engine::Engine(Allocator &allocator, const char *config_path)
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
-
+        
+        if (always_on_top) {
+            glfwWindowHint(GLFW_FLOATING, GLFW_TRUE);
+        }
+        
         glfw_window = glfwCreateWindow(window_width, window_height, c_str(window_title), nullptr, nullptr);
         if (!glfw_window) {
             glfwTerminate();
