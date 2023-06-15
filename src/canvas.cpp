@@ -154,7 +154,7 @@ void init_canvas(const Engine &engine, Canvas &canvas) {
     canvas::clear(canvas);
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, canvas.width, canvas.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, array::begin(canvas.data));
-
+    
     glUseProgram(canvas.shader->program);
     GLint z_offset = glGetUniformLocation(canvas.shader->program, "z_offset");
     glUniform1f(z_offset, 1.0f);

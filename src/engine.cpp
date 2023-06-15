@@ -392,16 +392,17 @@ Engine::Engine(Allocator &allocator, const char *config_path)
         framebuffer_width = window_width;
         framebuffer_height = window_height;
 
-        framebuffer_shader = MAKE_NEW(allocator, Shader, nullptr, framebuffer::vertex_source, framebuffer::fragment_source);
-        glGenFramebuffers(1, &framebuffer);
-        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-
         glGenTextures(1, &framebuffer_texture);
         glBindTexture(GL_TEXTURE_2D, framebuffer_texture);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, framebuffer_width, framebuffer_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glBindTexture(GL_TEXTURE_2D, 0);
+
+        framebuffer_shader = MAKE_NEW(allocator, Shader, nullptr, framebuffer::vertex_source, framebuffer::fragment_source);
+        glGenFramebuffers(1, &framebuffer);
+        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
         glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebuffer_texture, 0);
 
@@ -498,7 +499,6 @@ void render(Engine &engine) {
     // Enable framebuffer
     {
         glBindFramebuffer(GL_FRAMEBUFFER, engine.framebuffer);
-        glBindTexture(GL_TEXTURE_2D, 0);
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
