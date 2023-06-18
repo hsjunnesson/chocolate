@@ -92,7 +92,7 @@ Sprites::Sprites(Allocator &allocator)
     sprites_mutex = MAKE_NEW(allocator, std::mutex);
     animations = MAKE_NEW(allocator, Array<SpriteAnimation>, allocator);
     done_animations = MAKE_NEW(allocator, Array<SpriteAnimation>, allocator);
-	transforms = MAKE_NEW(allocator, Hash<Matrix4f>, allocator);
+    transforms = MAKE_NEW(allocator, Hash<Matrix4f>, allocator);
 
     const size_t vertex_count = 4 * max_sprites;
     const size_t vertex_data_size = sizeof(Vertex) * vertex_count;
@@ -216,9 +216,9 @@ Sprites::~Sprites() {
         MAKE_DELETE(allocator, Array, done_animations);
     }
 
-	if (transforms) {
-		MAKE_DELETE(allocator, Hash, transforms);
-	}
+    if (transforms) {
+        MAKE_DELETE(allocator, Hash, transforms);
+    }
 }
 
 void init_sprites(Sprites &sprites, const char *atlas_filename) {
@@ -426,7 +426,7 @@ void commit_sprites(Sprites &sprites) {
     Array<Matrix4f> transform_updates(ta);
 
     const static glm::vec3 rotation_vec = glm::vec3(0.0f, 0.0f, -1.0f);
-    
+
     int i = 0;
     for (engine::Sprite *sprite = array::begin(*sprites.sprites); sprite != array::end(*sprites.sprites); ++sprite) {
         multi_hash::get(*sprites.transforms, sprite->id, transform_updates);
@@ -437,16 +437,16 @@ void commit_sprites(Sprites &sprites) {
         if (!array::empty(transform_updates)) {
             // Apply cummulated transform matrices
             for (Matrix4f *transform_update = array::begin(transform_updates); transform_update != array::end(transform_updates); ++transform_update) {
-				if (transform_update == array::begin(transform_updates)) {
-					sprite_transform = glm::make_mat4(transform_update->m);
-				} else {
-					sprite_transform *= glm::make_mat4(transform_update->m);
-				}
+                if (transform_update == array::begin(transform_updates)) {
+                    sprite_transform = glm::make_mat4(transform_update->m);
+                } else {
+                    sprite_transform *= glm::make_mat4(transform_update->m);
+                }
             }
 
-			sprite->transform = Matrix4f(glm::value_ptr(sprite_transform));
+            sprite->transform = Matrix4f(glm::value_ptr(sprite_transform));
             dirty = true;
-			array::clear(transform_updates);
+            array::clear(transform_updates);
         }
 
         if (sprite->dirty) {
@@ -517,7 +517,6 @@ void render_sprites(const Engine &engine, const Sprites &sprites) {
 
     glUniformMatrix4fv(glGetUniformLocation(shader_program, "projection"), 1, GL_FALSE, glm::value_ptr(projection * view));
     glUniformMatrix4fv(glGetUniformLocation(shader_program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-
 
     uint64_t quads = array::size(*sprites.sprites);
 

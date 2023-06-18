@@ -25,8 +25,8 @@
 #include <temp_allocator.h>
 
 #if defined(SUPERLUMINAL)
-#include <cstdio>
 #include <Superluminal/PerformanceAPI.h>
+#include <cstdio>
 #endif
 
 #pragma warning(pop)
@@ -62,32 +62,28 @@ void main() {
 }
 )";
 
-math::Vertex vertices[] {
-    { // top right
-        {1.0f, 1.0f, 0.0f},
-        {1.0f, 1.0f, 1.0f, 1.0f},
-        {1.0f, 1.0f}
-    },
-    { // bottom right
-        {1.0f, -1.0f, 0.0f},
-        {1.0f, 1.0f, 1.0f, 1.0f},
-        {1.0f, 0.0f}
-    },
-    { // bottom left
-        {-1.0f, -1.0f, 0.0f},
-        {1.0f, 1.0f, 1.0f, 1.0f},
-        {0.0f, .0f}
-    },
-    { // top left
-        {-1.0f, 1.0f, 0.0f},
-        {1.0f, 1.0f, 1.0f, 1.0f},
-        {0.0f, 1.0f}
-    },
+math::Vertex vertices[]{
+    {// top right
+     {1.0f, 1.0f, 0.0f},
+     {1.0f, 1.0f, 1.0f, 1.0f},
+     {1.0f, 1.0f}},
+    {// bottom right
+     {1.0f, -1.0f, 0.0f},
+     {1.0f, 1.0f, 1.0f, 1.0f},
+     {1.0f, 0.0f}},
+    {// bottom left
+     {-1.0f, -1.0f, 0.0f},
+     {1.0f, 1.0f, 1.0f, 1.0f},
+     {0.0f, .0f}},
+    {// top left
+     {-1.0f, 1.0f, 0.0f},
+     {1.0f, 1.0f, 1.0f, 1.0f},
+     {0.0f, 1.0f}},
 };
 
 GLuint indices[] = {
-    0, 1, 3,  // first Triangle
-    1, 2, 3   // second Triangle
+    0, 1, 3, // first Triangle
+    1, 2, 3  // second Triangle
 };
 
 } // namespace framebuffer
@@ -252,8 +248,7 @@ Engine::Engine(Allocator &allocator, const char *config_path)
 , camera_offset({0, 0})
 , terminating(false)
 , wait_vsync(true)
-, fps_limit(0)
-{
+, fps_limit(0) {
     TempAllocator1024 ta;
 
     int window_width, window_height;
@@ -320,7 +315,7 @@ Engine::Engine(Allocator &allocator, const char *config_path)
         read_property("engine", "title", [&window_title](const char *property) {
             window_title << property;
         });
-        
+
         if (config::has_property(ini, "engine", "always_on_top")) {
             read_property("engine", "always_on_top", [&always_on_top](const char *property) {
                 if (strcmp("true", property) == 0) {
@@ -328,7 +323,7 @@ Engine::Engine(Allocator &allocator, const char *config_path)
                 }
             });
         }
-        
+
         ini_destroy(ini);
     }
 
@@ -345,11 +340,11 @@ Engine::Engine(Allocator &allocator, const char *config_path)
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
-        
+
         if (always_on_top) {
             glfwWindowHint(GLFW_FLOATING, GLFW_TRUE);
         }
-        
+
         glfw_window = glfwCreateWindow(window_width, window_height, c_str(window_title), nullptr, nullptr);
         if (!glfw_window) {
             glfwTerminate();

@@ -92,7 +92,6 @@ Shader::~Shader() {
 }
 
 void link_shader(Shader &shader) {
-
 }
 
 } // namespace engine

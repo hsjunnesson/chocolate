@@ -2,8 +2,8 @@
 
 #pragma warning(push, 0)
 #include <iomanip>
-#include <stdarg.h>
 #include <sstream>
+#include <stdarg.h>
 #include <stdio.h>
 #include <time.h>
 

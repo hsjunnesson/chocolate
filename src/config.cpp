@@ -31,7 +31,7 @@ void __config_free(void *ptr) {
 namespace engine {
 namespace config {
 
-bool has_property(ini_t *ini, const char *section, const char *property) {
+bool has_property(const ini_t *ini, const char *section, const char *property) {
     assert(ini);
     assert(property);
 
@@ -50,7 +50,7 @@ bool has_property(ini_t *ini, const char *section, const char *property) {
     return property_index != INI_NOT_FOUND;
 }
 
-const char *read_property(ini_t *ini, const char *section, const char *property) {
+const char *read_property(const ini_t *ini, const char *section, const char *property) {
     assert(ini);
     assert(property);
 

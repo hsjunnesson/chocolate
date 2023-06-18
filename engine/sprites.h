@@ -71,7 +71,7 @@ struct Sprites {
     uint64_t animation_id_counter;
     Array<SpriteAnimation> *animations;
     Array<SpriteAnimation> *done_animations; // The list of done animations since last frame
-	Hash<Matrix4f> *transforms; // A multihash map of sprite ids to a list of transforms waiting to be applied and cleared on commit_sprites.
+    Hash<Matrix4f> *transforms;              // A multihash map of sprite ids to a list of transforms waiting to be applied and cleared on commit_sprites.
 };
 
 // Initializes this Sprites with an atlas. Required before rendering.
