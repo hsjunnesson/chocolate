@@ -54,12 +54,12 @@ Shader::Shader(const char *geometry_source, const char *vertex_source, const cha
 
         return shader;
     };
-    
+
     TempAllocator512 ta;
 
     if (geometry_source) {
         geometry_shader = compile_shader(geometry_source, GL_GEOMETRY_SHADER);
-        
+
         if (name) {
             Buffer name_buffer(ta);
             name_buffer << name;

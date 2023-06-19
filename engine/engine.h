@@ -44,7 +44,7 @@ struct Engine {
     Rect window_rect;
     bool window_resized;
     float target_aspect_ratio;
-    
+
     Input *input;
 
     float camera_zoom;

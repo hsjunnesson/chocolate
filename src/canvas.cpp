@@ -125,7 +125,7 @@ Canvas::Canvas(Allocator &allocator)
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-    
+
     glObjectLabel(GL_VERTEX_ARRAY, vao, -1, "Canvas Vertex Array Object");
     glObjectLabel(GL_BUFFER, vbo, -1, "Canvas Vertex Buffer Object");
     glObjectLabel(GL_BUFFER, ebo, -1, "Canvas Element Array Buffer Object");
@@ -157,7 +157,7 @@ void init_canvas(const Engine &engine, Canvas &canvas, const ini_t *config) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    
+
     canvas.width = engine.window_rect.size.x / engine.render_scale;
     canvas.height = engine.window_rect.size.y / engine.render_scale;
     int32_t size = canvas.width * canvas.height * 4;
@@ -257,7 +257,7 @@ void render_canvas(const Engine &engine, Canvas &canvas) {
     assert(canvas.texture);
 
     glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "render canvas");
-    
+
     const GLuint shader_program = canvas.shader->program;
 
     glUseProgram(shader_program);
@@ -276,7 +276,7 @@ void render_canvas(const Engine &engine, Canvas &canvas) {
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
     glBindVertexArray(0);
-    
+
     glPopDebugGroup();
 }
 

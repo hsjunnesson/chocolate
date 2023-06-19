@@ -50,12 +50,12 @@ void APIENTRY gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum se
     if (id == 131169 || id == 131185 || id == 131218 || id == 131204) {
         return;
     }
-    
+
     // ignore debug spam
     if (type == GL_DEBUG_TYPE_PUSH_GROUP || type == GL_DEBUG_TYPE_POP_GROUP || type == GL_DEBUG_TYPE_MARKER) {
         return;
     }
-    
+
     TempAllocator1024 ta;
     Buffer ss(ta);
 
@@ -145,9 +145,9 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
     engine->window_rect.size.x = width;
     engine->window_rect.size.y = height;
     engine->window_resized = true;
-    
+
     // new aspect ratio
-    float aspect = width / (float) height;
+    float aspect = width / (float)height;
 
     // viewport dimensions
     int vp_width, vp_height;
@@ -272,9 +272,9 @@ Engine::Engine(Allocator &allocator, const char *config_path)
         read_property("engine", "window_height", [&window_height](const char *property) {
             window_height = atoi(property);
         });
-        
+
         target_aspect_ratio = window_width / (float)window_height;
-        
+
         read_property("engine", "title", [&window_title](const char *property) {
             window_title << property;
         });
@@ -321,7 +321,7 @@ Engine::Engine(Allocator &allocator, const char *config_path)
             glfwTerminate();
             log_fatal("Unable to initialize glad");
         }
-        
+
 #if defined(_DEBUG) && defined(WIN32)
 #if defined(__APPLE__)
 #else
