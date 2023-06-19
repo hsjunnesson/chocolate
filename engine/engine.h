@@ -44,16 +44,6 @@ struct Engine {
     Rect window_rect;
     bool window_resized;
 
-    int32_t framebuffer_width;
-    int32_t framebuffer_height;
-    Shader *framebuffer_shader;
-    unsigned int framebuffer;
-    unsigned int framebuffer_texture;
-    unsigned int framebuffer_rbo;
-    unsigned int framebuffer_quad_vao;
-    unsigned int framebuffer_quad_vbo;
-    unsigned int framebuffer_quad_ebo;
-
     Input *input;
 
     float camera_zoom;

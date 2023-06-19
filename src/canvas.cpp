@@ -157,9 +157,9 @@ void init_canvas(const Engine &engine, Canvas &canvas, const ini_t *config) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    canvas.width = engine.framebuffer_width / engine.render_scale;
-    canvas.height = engine.framebuffer_height / engine.render_scale;
+    
+    canvas.width = engine.window_rect.size.x / engine.render_scale;
+    canvas.height = engine.window_rect.size.y / engine.render_scale;
     int32_t size = canvas.width * canvas.height * 4;
     array::resize(canvas.data, size);
 
