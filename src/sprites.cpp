@@ -87,7 +87,7 @@ Sprites::Sprites(Allocator &allocator)
 , animations(nullptr)
 , done_animations(nullptr)
 , transforms(nullptr) {
-    shader = MAKE_NEW(allocator, Shader, nullptr, vertex_source, fragment_source);
+    shader = MAKE_NEW(allocator, Shader, nullptr, vertex_source, fragment_source, "Sprites");
     sprites = MAKE_NEW(allocator, Array<Sprite>, allocator);
     sprites_mutex = MAKE_NEW(allocator, std::mutex);
     animations = MAKE_NEW(allocator, Array<SpriteAnimation>, allocator);

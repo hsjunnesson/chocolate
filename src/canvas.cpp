@@ -101,7 +101,7 @@ Canvas::Canvas(Allocator &allocator)
 , sprites_data_width(0)
 , sprites_indices(allocator)
 , sprite_size(0) {
-    shader = MAKE_NEW(allocator, Shader, nullptr, vertex_source, fragment_source);
+    shader = MAKE_NEW(allocator, Shader, nullptr, vertex_source, fragment_source, "Canvas");
 
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &vbo);
@@ -125,6 +125,10 @@ Canvas::Canvas(Allocator &allocator)
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+    
+    glObjectLabel(GL_VERTEX_ARRAY, vao, -1, "Canvas Vertex Array Object");
+    glObjectLabel(GL_BUFFER, vbo, -1, "Canvas Vertex Buffer Object");
+    glObjectLabel(GL_BUFFER, ebo, -1, "Canvas Element Array Buffer Object");
 }
 
 Canvas::~Canvas() {
@@ -162,6 +166,7 @@ void init_canvas(const Engine &engine, Canvas &canvas, const ini_t *config) {
     canvas::clear(canvas);
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, canvas.width, canvas.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, array::begin(canvas.data));
+    glObjectLabel(GL_TEXTURE, canvas.texture, -1, "Canvas Texture");
 
     glUseProgram(canvas.shader->program);
     GLint z_offset = glGetUniformLocation(canvas.shader->program, "z_offset");
@@ -251,6 +256,8 @@ void init_canvas(const Engine &engine, Canvas &canvas, const ini_t *config) {
 void render_canvas(const Engine &engine, Canvas &canvas) {
     assert(canvas.texture);
 
+    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "render canvas");
+    
     const GLuint shader_program = canvas.shader->program;
 
     glUseProgram(shader_program);
@@ -269,6 +276,8 @@ void render_canvas(const Engine &engine, Canvas &canvas) {
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
     glBindVertexArray(0);
+    
+    glPopDebugGroup();
 }
 
 void canvas::pset(Canvas &canvas, int32_t x, int32_t y, Color4f col) {

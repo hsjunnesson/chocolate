@@ -107,7 +107,12 @@ void APIENTRY gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum se
     if (id == 131169 || id == 131185 || id == 131218 || id == 131204) {
         return;
     }
-
+    
+    // ignore debug spam
+    if (type == GL_DEBUG_TYPE_PUSH_GROUP || type == GL_DEBUG_TYPE_POP_GROUP || type == GL_DEBUG_TYPE_MARKER) {
+        return;
+    }
+    
     TempAllocator1024 ta;
     Buffer ss(ta);
 
@@ -358,13 +363,15 @@ Engine::Engine(Allocator &allocator, const char *config_path)
             glfwTerminate();
             log_fatal("Unable to initialize glad");
         }
-
+        
+#if defined(_DEBUG) && defined(WIN32)
 #if defined(__APPLE__)
 #else
         glEnable(GL_DEBUG_OUTPUT);
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
         glDebugMessageCallback(gl_debug_callback, nullptr);
         glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+#endif
 #endif
 
         int swap_interval = 0;
@@ -395,7 +402,7 @@ Engine::Engine(Allocator &allocator, const char *config_path)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-        framebuffer_shader = MAKE_NEW(allocator, Shader, nullptr, framebuffer::vertex_source, framebuffer::fragment_source);
+        framebuffer_shader = MAKE_NEW(allocator, Shader, nullptr, framebuffer::vertex_source, framebuffer::fragment_source, "Framebuffer");
         glGenFramebuffers(1, &framebuffer);
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
@@ -491,6 +498,8 @@ Engine::~Engine() {
 void render(Engine &engine) {
     wait_buffer();
 
+    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "render engine");
+
     // Enable framebuffer
     {
         glBindFramebuffer(GL_FRAMEBUFFER, engine.framebuffer);
@@ -502,11 +511,14 @@ void render(Engine &engine) {
 
     // Render game
     if (engine.engine_callbacks && engine.engine_callbacks->render) {
+        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "render game");
         engine.engine_callbacks->render(engine, engine.game_object);
+        glPopDebugGroup();
     }
 
     // Render framebuffer
     {
+        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "render framebuffer");
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -517,10 +529,12 @@ void render(Engine &engine) {
         glBindTexture(GL_TEXTURE_2D, engine.framebuffer_texture);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
+        glPopDebugGroup();
     }
 
     // imgui
     {
+        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "render imgui");
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
@@ -531,7 +545,10 @@ void render(Engine &engine) {
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        glPopDebugGroup();
     }
+
+    glPopDebugGroup();
 
     lock_buffer();
 

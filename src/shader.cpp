@@ -19,7 +19,7 @@ using namespace foundation;
 using namespace array;
 using namespace string_stream;
 
-Shader::Shader(const char *geometry_source, const char *vertex_source, const char *fragment_source)
+Shader::Shader(const char *geometry_source, const char *vertex_source, const char *fragment_source, const char *name)
 : program(0) {
     program = glCreateProgram();
 
@@ -54,20 +54,50 @@ Shader::Shader(const char *geometry_source, const char *vertex_source, const cha
 
         return shader;
     };
+    
+    TempAllocator512 ta;
 
     if (geometry_source) {
         geometry_shader = compile_shader(geometry_source, GL_GEOMETRY_SHADER);
+        
+        if (name) {
+            Buffer name_buffer(ta);
+            name_buffer << name;
+            name_buffer << " Geometry Shader";
+            glObjectLabel(GL_SHADER, geometry_shader, -1, c_str(name_buffer));
+        }
     }
 
     if (vertex_source) {
         vertex_shader = compile_shader(vertex_source, GL_VERTEX_SHADER);
+
+        if (name) {
+            Buffer name_buffer(ta);
+            name_buffer << name;
+            name_buffer << " Vertex Shader";
+            glObjectLabel(GL_SHADER, vertex_shader, -1, c_str(name_buffer));
+        }
     }
 
     if (fragment_source) {
         fragment_shader = compile_shader(fragment_source, GL_FRAGMENT_SHADER);
+
+        if (name) {
+            Buffer name_buffer(ta);
+            name_buffer << name;
+            name_buffer << " Fragment Shader";
+            glObjectLabel(GL_SHADER, fragment_shader, -1, c_str(name_buffer));
+        }
     }
 
     glLinkProgram(program);
+
+    if (name) {
+        Buffer name_buffer(ta);
+        name_buffer << name;
+        name_buffer << " Program";
+        glObjectLabel(GL_PROGRAM, program, -1, c_str(name_buffer));
+    }
 
     if (geometry_shader) {
         glDetachShader(program, geometry_shader);
