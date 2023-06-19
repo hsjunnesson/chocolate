@@ -144,9 +144,30 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
 
     engine->window_rect.size.x = width;
     engine->window_rect.size.y = height;
-
-    glViewport(0, 0, width, height);
     engine->window_resized = true;
+    
+    // new aspect ratio
+    float aspect = width / (float) height;
+
+    // viewport dimensions
+    int vp_width, vp_height;
+
+    if (aspect > engine->target_aspect_ratio) {
+        // window is too wide
+        vp_height = height;
+        vp_width = (int)(engine->target_aspect_ratio * vp_height);
+    } else {
+        // window is too tall
+        vp_width = width;
+        vp_height = (int)(vp_width / engine->target_aspect_ratio);
+    }
+
+    // calculate position of viewport within window
+    int vp_x = (width - vp_width) / 2;
+    int vp_y = (height - vp_height) / 2;
+
+    // set viewport
+    glViewport(vp_x, vp_y, vp_width, vp_height);
 }
 
 void lock_buffer() {
@@ -181,6 +202,7 @@ Engine::Engine(Allocator &allocator, const char *config_path)
 , glfw_window(nullptr)
 , window_rect({{0, 0}, {0, 0}})
 , window_resized(false)
+, target_aspect_ratio(1.0f)
 , input(nullptr)
 , camera_zoom(1.0f)
 , render_scale(1)
@@ -250,7 +272,9 @@ Engine::Engine(Allocator &allocator, const char *config_path)
         read_property("engine", "window_height", [&window_height](const char *property) {
             window_height = atoi(property);
         });
-
+        
+        target_aspect_ratio = window_width / (float)window_height;
+        
         read_property("engine", "title", [&window_title](const char *property) {
             window_title << property;
         });
