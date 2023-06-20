@@ -472,7 +472,7 @@ void canvas::rectangle_fill(Canvas &canvas, int32_t x1, int32_t y1, int32_t x2, 
     }
 }
 
-void canvas::sprite(Canvas &canvas, uint32_t n, int32_t x, int32_t y, Color4f col, uint8_t w, uint8_t h, bool flip_x, bool flip_y, bool invert, bool mask, Color4f mask_col) {
+void canvas::sprite(Canvas &canvas, uint32_t n, int32_t x, int32_t y, Color4f col, uint8_t w, uint8_t h, uint8_t scale_w, uint8_t scale_h, bool flip_x, bool flip_y, bool invert, bool mask, Color4f mask_col) {
     if (array::empty(canvas.sprites_data)) {
         log_fatal("Attempting to canvas::sprite without sprites");
     }
@@ -495,14 +495,14 @@ void canvas::sprite(Canvas &canvas, uint32_t n, int32_t x, int32_t y, Color4f co
     uint8_t mask_green = static_cast<uint8_t>(255 * mask_col.g);
     uint8_t mask_blue = static_cast<uint8_t>(255 * mask_col.b);
 
-    for (int32_t jj = 0; jj < sprite_size * h; ++jj) {
-        for (int32_t ii = 0; ii < sprite_size * w; ++ii) {
-            if (x + ii < 0 || x + ii > canvas.width || y + jj < 0 || y + jj > canvas.height) {
-                return;
+    for (int32_t jj = 0; jj < sprite_height * scale_h; ++jj) {
+        for (int32_t ii = 0; ii < sprite_width * scale_w; ++ii) {
+            if (x + ii < 0 || x + ii >= canvas.width || y + jj < 0 || y + jj >= canvas.height) {
+                continue;
             }
 
-            int32_t src_ii = flip_x ? (sprite_width - ii - 1) : ii;
-            int32_t src_jj = flip_y ? (sprite_height - jj - 1) : jj;
+            int32_t src_ii = flip_x ? ((sprite_width - 1) - (ii / scale_w)) : ii / scale_w;
+            int32_t src_jj = flip_y ? ((sprite_height - 1) - (jj / scale_h)) : jj / scale_h;
 
             const int32_t src = (source_data_start * 4) + (src_ii * 4) + (src_jj * 4 * canvas.sprites_data_width);
             const int32_t dst = math::index(x + ii, y + jj, canvas.width) * 4;

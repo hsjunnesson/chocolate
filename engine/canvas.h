@@ -68,7 +68,7 @@ void rectangle(Canvas &canvas, int32_t x1, int32_t y1, int32_t x2, int32_t y2, C
 void rectangle_fill(Canvas &canvas, int32_t x1, int32_t y1, int32_t x2, int32_t y2, Color4f col);
 
 // Draw sprite at position `x`, `y`. `w` and `h` determine how many sprites wide and tall to blit.
-void sprite(Canvas &canvas, uint32_t n, int32_t x, int32_t y, Color4f col = engine::color::white, uint8_t w = 1, uint8_t h = 1, bool flip_x = false, bool flip_y = false, bool invert = false, bool mask = false, Color4f mask_col = engine::color::black);
+void sprite(Canvas &canvas, uint32_t n, int32_t x, int32_t y, Color4f col = engine::color::white, uint8_t w = 1, uint8_t h = 1, uint8_t scale_w = 1, uint8_t scale_h = 1, bool flip_x = false, bool flip_y = false, bool invert = false, bool mask = false, Color4f mask_col = engine::color::black);
 
 // Returns a key used to lookup the sprite to blit for a character using the print() function.
 constexpr const char *character_key(char c) {
