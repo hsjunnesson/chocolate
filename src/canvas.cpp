@@ -187,8 +187,6 @@ void init_canvas(const Engine &engine, Canvas &canvas, const ini_t *config) {
             }
 
             canvas.sprites_data_width = sprites_width;
-            unsigned char *padded_data = nullptr;
-
             array::resize(canvas.sprites_data, sprites_width * sprites_height * 4);
 
             if (channels == 4) {
@@ -281,7 +279,7 @@ void render_canvas(const Engine &engine, Canvas &canvas) {
 }
 
 void canvas::pset(Canvas &canvas, int32_t x, int32_t y, Color4f col) {
-    if (x < 0 || y < 0 || x > canvas.width || y > canvas.height) {
+    if (x < 0 || y < 0 || x >= canvas.width || y >= canvas.height) {
         return;
     }
 
