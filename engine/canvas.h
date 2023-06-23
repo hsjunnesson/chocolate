@@ -125,8 +125,8 @@ constexpr const char *character_key(char c) {
         return "char_y";
     case 'z':
         return "char_z";
-    case '¶':
-        return "char_paragraph";
+    // case '¶':
+    //     return "char_paragraph";
     case '!':
         return "char_exclamation";
     case '"':

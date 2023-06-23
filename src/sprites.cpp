@@ -80,9 +80,9 @@ Sprites::Sprites(Allocator &allocator)
 , vao(0)
 , ebo(0)
 , sprites(nullptr)
-, time(0)
 , sprite_id_counter(0)
 , sprites_mutex(nullptr)
+, time(0)
 , animation_id_counter(0)
 , animations(nullptr)
 , done_animations(nullptr)
@@ -349,6 +349,7 @@ uint64_t animate_sprite_color(Sprites &sprites, const uint64_t sprite_id, const 
 }
 
 void update_sprites(Sprites &sprites, float t, float dt) {
+    (void)dt;
     sprites.time = t;
 
     bool dirty = false;
@@ -432,7 +433,6 @@ void commit_sprites(Sprites &sprites) {
         multi_hash::get(*sprites.transforms, sprite->id, transform_updates);
 
         glm::mat4 sprite_transform = glm::make_mat4(sprite->transform.m);
-        bool dirty = sprite->dirty;
 
         if (!array::empty(transform_updates)) {
             // Apply cummulated transform matrices
@@ -445,7 +445,7 @@ void commit_sprites(Sprites &sprites) {
             }
 
             sprite->transform = Matrix4f(glm::value_ptr(sprite_transform));
-            dirty = true;
+            sprite->dirty = true;
             array::clear(transform_updates);
         }
 

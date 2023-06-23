@@ -27,7 +27,7 @@ Shader::Shader(const char *geometry_source, const char *vertex_source, const cha
     GLuint vertex_shader = 0;
     GLuint fragment_shader = 0;
 
-    auto compile_shader = [program = this->program](const char *shader_program_source, GLenum shader_type) -> GLint {
+    auto compile_shader = [this](const char *shader_program_source, GLenum shader_type) -> GLint {
         TempAllocator512 ta;
 
         GLuint shader = glCreateShader(shader_type);
@@ -119,9 +119,6 @@ Shader::~Shader() {
     if (program) {
         glDeleteProgram(program);
     }
-}
-
-void link_shader(Shader &shader) {
 }
 
 } // namespace engine

@@ -68,13 +68,13 @@ Atlas::Atlas(foundation::Allocator &allocator, const char *atlas_filename)
 
     // frames
     {
-        const cJSON *frames = cJSON_GetObjectItem(json, "frames");
-        if (!frames || !cJSON_IsArray(frames)) {
+        const cJSON *frames_item = cJSON_GetObjectItem(json, "frames");
+        if (!frames_item || !cJSON_IsArray(frames_item)) {
             log_fatal("Could not parse atlas %s: missing \"frames\": [...]", atlas_filename);
         }
 
         const cJSON *frame = nullptr;
-        cJSON_ArrayForEach(frame, frames) {
+        cJSON_ArrayForEach(frame, frames_item) {
             cJSON *filename = cJSON_GetObjectItemCaseSensitive(frame, "filename");
             if (!filename || !cJSON_IsString(filename)) {
                 log_fatal("Could not parse atlas %s: frame missing \"filename\": ...", atlas_filename);
@@ -137,7 +137,7 @@ const Rect *atlas_rect(const Atlas &atlas, const char *sprite_name) {
         return nullptr;
     }
 
-    uint64_t key = murmur_hash_64(sprite_name, strlen(sprite_name), 0);
+    uint64_t key = murmur_hash_64(sprite_name, (uint32_t)strlen(sprite_name), 0);
     for (auto i = hash::begin(*atlas.frames); i != hash::end(*atlas.frames); ++i) {
         if (i->key == key) {
             return &(i->value);

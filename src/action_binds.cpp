@@ -59,7 +59,7 @@ ActionBinds::ActionBinds(foundation::Allocator &allocator, const char *config_pa
                     --name_len;
                 }
 
-                uint64_t action_key = murmur_hash_64(name, name_len, 0);
+                uint64_t action_key = murmur_hash_64(name, (uint32_t)name_len, 0);
 
                 if (hash::has(found_actions, action_key)) {
                     log_fatal("Invalid [actionbinds] defining multiples of action %s", name);
@@ -68,7 +68,7 @@ ActionBinds::ActionBinds(foundation::Allocator &allocator, const char *config_pa
                 }
 
                 Buffer buf(ta);
-                array::resize(buf, value_len);
+                array::resize(buf, (uint32_t)value_len);
                 array::push_back(buf, '\0');
                 memcpy(array::begin(buf), value, value_len);
 
@@ -474,7 +474,7 @@ const char *bind_descriptor(const ActionBindsBind bind) {
     }
 }
 
-const ActionBindsBind bind_for_keycode(const int16_t keycode) {
+ActionBindsBind bind_for_keycode(const int16_t keycode) {
     switch (keycode) {
     case GLFW_KEY_SPACE:
         return ActionBindsBind::KEY_SPACE;

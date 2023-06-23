@@ -208,6 +208,6 @@ struct ActionBinds {
 const char *bind_descriptor(const ActionBindsBind bind);
 
 /// Returns the corresponding bind for a keycode. Or NOT_FOUND if not found.
-const ActionBindsBind bind_for_keycode(const int16_t keycode);
+ActionBindsBind bind_for_keycode(const int16_t keycode);
 
 } // namespace engine

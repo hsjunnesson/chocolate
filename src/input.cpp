@@ -110,8 +110,6 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
         return;
     }
 
-    Input &input = *engine->input;
-
     ScrollState scroll_state;
     scroll_state.x_offset = xoffset;
     scroll_state.y_offset = yoffset;

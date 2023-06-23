@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.21)
 project(chocolate VERSION 1.0.0)
 
 include(GNUInstallDirs)
@@ -12,6 +12,7 @@ find_package(glfw3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(cJSON CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
+find_package(Backward CONFIG REQUIRED)
 
 if (SUPERLUMINAL)
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "c:/Program Files/Superluminal/Performance/API")
@@ -22,16 +23,6 @@ endif()
 # Fetch dependencies from Github
 
 include(FetchContent)
-
-FetchContent_Declare(
-    backward
-    GIT_REPOSITORY https://github.com/bombela/backward-cpp.git
-)
-
-if (NOT backward_POPULATED)
-    FetchContent_MakeAvailable(backward)
-endif()
-
 
 FetchContent_Declare(
     BitSquidFoundation
@@ -99,7 +90,6 @@ set_target_properties(
 # Includes
 target_include_directories(${LIB_NAME} PUBLIC ${PROJECT_SOURCE_DIR})
 target_include_directories(${LIB_NAME} SYSTEM PUBLIC ${bitsquidfoundation_SOURCE_DIR})
-target_include_directories(${LIB_NAME} SYSTEM PRIVATE ${backward_SOURCE_DIR})
 target_include_directories(${LIB_NAME} SYSTEM PRIVATE ${PROJECT_SOURCE_DIR}/glad/include)
 
 if (SUPERLUMINAL)
@@ -111,7 +101,7 @@ target_compile_definitions(${LIB_NAME} PRIVATE "GLFW_INCLUDE_NONE")
 
 # Linked libraries
 target_link_libraries(${LIB_NAME}
-    backward
+    Backward::Backward
     bitsquid-foundation
     glfw
     glm::glm
@@ -123,14 +113,16 @@ if (SUPERLUMINAL)
     target_link_libraries(${LIB_NAME} SuperluminalAPI)
 endif()
 
+
+# Compiler warnings & definitions
+
+include(cmake/CompilerWarnings.cmake)
+myproject_set_project_warnings(${PROJECT_NAME})
+
 if (MSVC)
     if (SUPERLUMINAL)
         target_compile_definitions(${PROJECT_NAME} PRIVATE SUPERLUMINAL=1)
     endif()
-endif()
-
-if (CMAKE_BUILD_TYPE MATCHES Debug)
-    target_compile_definitions(my_exe PRIVATE DEBUG=1)
 endif()
 
 

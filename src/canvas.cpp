@@ -252,6 +252,7 @@ void init_canvas(const Engine &engine, Canvas &canvas, const ini_t *config) {
 }
 
 void render_canvas(const Engine &engine, Canvas &canvas) {
+    (void)engine;
     assert(canvas.texture);
 
     glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "render canvas");
@@ -317,7 +318,7 @@ void canvas::print(Canvas &canvas, const char *str, int32_t x, int32_t y, Color4
     int32_t xx = x;
     int32_t yy = y;
 
-    for (int i = 0; i < strlen(str); ++i) {
+    for (int32_t i = 0; i < (int32_t)strlen(str); ++i) {
         char c = str[i];
 
         if (c == ' ') {

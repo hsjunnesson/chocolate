@@ -421,7 +421,6 @@ int run(Engine &engine) {
 
     float prev_frame_time = (float)glfwGetTime();
 
-    bool running = true;
     int exit_code = 0;
 
     float current_frame_time = prev_frame_time;

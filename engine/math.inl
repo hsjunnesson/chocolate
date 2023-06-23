@@ -159,4 +159,11 @@ T approach(T value, T target, T amount) {
     return value > target ? std::max(value - a, target) : std::min(value + a, target);
 }
 
+constexpr bool is_inside(const Rect &rect, const Vector2 point) {
+    return point.x >= rect.origin.x &&
+        point.x < (rect.origin.x + rect.size.x) &&
+        point.y >= rect.origin.y &&
+        point.y < (rect.origin.y + rect.size.y);
+}
+
 } // namespace math
