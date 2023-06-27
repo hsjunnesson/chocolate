@@ -350,25 +350,31 @@ void canvas::print(Canvas &canvas, const char *str, int32_t x, int32_t y, Color4
 }
 
 void canvas::circle(Canvas &canvas, int32_t x_center, int32_t y_center, int32_t r, Color4f col) {
-    // TODO: fix proper implementations of this
-    int32_t x = r, y = 0;
+    int32_t x = r;
+    int32_t y = 0;
     int32_t p = 1 - r;
 
-    while (x > y) {
-        pset(canvas, x_center + x, y_center + y, col);
-        pset(canvas, x_center - x, y_center + y, col);
-        pset(canvas, x_center + x, y_center - y, col);
-        pset(canvas, x_center - x, y_center - y, col);
-        pset(canvas, x_center + y, y_center + x, col);
-        pset(canvas, x_center - y, y_center + x, col);
-        pset(canvas, x_center + y, y_center - x, col);
-        pset(canvas, x_center - y, y_center - x, col);
+    while (x >= y) {
+        pset(canvas, (int32_t)(x_center + x), (int32_t)(y_center + y), col);
+        pset(canvas, (int32_t)(x_center - x), (int32_t)(y_center + y), col);
+        pset(canvas, (int32_t)(x_center + x), (int32_t)(y_center - y), col);
+        pset(canvas, (int32_t)(x_center - x), (int32_t)(y_center - y), col);
+        pset(canvas, (int32_t)(x_center + y), (int32_t)(y_center + x), col);
+        pset(canvas, (int32_t)(x_center - y), (int32_t)(y_center + x), col);
+        pset(canvas, (int32_t)(x_center + y), (int32_t)(y_center - x), col);
+        pset(canvas, (int32_t)(x_center - y), (int32_t)(y_center - x), col);
 
         ++y;
 
         if (p <= 0) {
             p = p + 2 * y + 1;
         } else {
+            if (p + 2 * (y - x + 1) < 0) {
+                pset(canvas, (int32_t)(x_center + x), (int32_t)(y_center + y - 1), col);
+                pset(canvas, (int32_t)(x_center - x), (int32_t)(y_center + y - 1), col);
+                pset(canvas, (int32_t)(x_center + x), (int32_t)(y_center - y + 1), col);
+                pset(canvas, (int32_t)(x_center - x), (int32_t)(y_center - y + 1), col);
+            }
             --x;
             p = p + 2 * y - 2 * x + 1;
         }
@@ -376,30 +382,27 @@ void canvas::circle(Canvas &canvas, int32_t x_center, int32_t y_center, int32_t 
 }
 
 void canvas::circle_fill(Canvas &canvas, int32_t x_center, int32_t y_center, int32_t r, Color4f col) {
-    // TODO: fix proper implementations of this
-    int32_t x = r, y = 0;
-
+    int32_t x = r;
+    int32_t y = 0;
     int32_t p = 1 - r;
-    while (x >= y) {
-        y++;
 
-        // Mid-point inside or on the perimeter
+    while (x >= y) {
+        line(canvas, x_center - x, y_center + y, x_center + x, y_center + y, col);
+        line(canvas, x_center - x, y_center - y, x_center + x, y_center - y, col);
+        line(canvas, x_center - y, y_center + x, x_center + y, y_center + x, col);
+        line(canvas, x_center - y, y_center - x, x_center + y, y_center - x, col);
+
+        ++y;
+
         if (p <= 0) {
             p = p + 2 * y + 1;
         } else {
-            // Mid-point outside the perimeter
-            x--;
+            if (p + 2 * (y - x + 1) < 0) {
+                line(canvas, x_center - x, y_center + y - 1, x_center + x, y_center + y - 1, col);
+                line(canvas, x_center - x, y_center - y + 1, x_center + x, y_center - y + 1, col);
+            }
+            --x;
             p = p + 2 * y - 2 * x + 1;
-        }
-
-        // Drawing horizontal lines for the calculated y and x values
-        line(canvas, x_center - x, y_center + y, x_center + x, y_center + y, col);
-        line(canvas, x_center - x, y_center - y, x_center + x, y_center - y, col);
-
-        // If x != y, additional lines should be drawn
-        if (x != y) {
-            line(canvas, x_center - y, y_center + x, x_center + y, y_center + x, col);
-            line(canvas, x_center - y, y_center - x, x_center + y, y_center - x, col);
         }
     }
 }
