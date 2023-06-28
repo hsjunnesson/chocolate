@@ -310,7 +310,7 @@ void canvas::clear(Canvas &canvas, Color4f col) {
     }
 }
 
-void canvas::print(Canvas &canvas, const char *str, int32_t x, int32_t y, Color4f col) {
+void canvas::print(Canvas &canvas, const char *str, int32_t x, int32_t y, Color4f col, bool invert, bool mask, Color4f mask_col) {
     if (array::empty(canvas.sprites_data)) {
         log_fatal("Attempting to canvas::print without sprites");
     }
@@ -343,7 +343,7 @@ void canvas::print(Canvas &canvas, const char *str, int32_t x, int32_t y, Color4
         }
 
         uint32_t sprite_index = hash::get(canvas.sprites_indices, key, (uint32_t)0);
-        sprite(canvas, sprite_index, xx, yy, col);
+        sprite(canvas, sprite_index, xx, yy, col, 1, 1, 1, 1, false, false, invert, mask, mask_col);
 
         xx += 8;
     }
