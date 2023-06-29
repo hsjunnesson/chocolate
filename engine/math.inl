@@ -166,4 +166,11 @@ constexpr bool is_inside(const Rect &rect, const Vector2 point) {
         point.y < (rect.origin.y + rect.size.y);
 }
 
+constexpr bool is_inside(const Rect &rect, const Vector2f point) {
+    return point.x >= rect.origin.x &&
+        point.x < (rect.origin.x + rect.size.x) &&
+        point.y >= rect.origin.y &&
+        point.y < (rect.origin.y + rect.size.y);
+}
+
 } // namespace math
