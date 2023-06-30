@@ -158,7 +158,10 @@ T approach(T value, T target, T amount) {
     T a = amount < 0 ? -amount : amount; // abs
     return value > target ? std::max(value - a, target) : std::min(value + a, target);
 }
-
+ 
+/**
+ * @brief Whether `point` is inside `rect`.
+ */
 constexpr bool is_inside(const Rect &rect, const Vector2 point) {
     return point.x >= rect.origin.x &&
         point.x < (rect.origin.x + rect.size.x) &&
@@ -166,11 +169,24 @@ constexpr bool is_inside(const Rect &rect, const Vector2 point) {
         point.y < (rect.origin.y + rect.size.y);
 }
 
+/**
+ * @brief Whether `point` is inside `rect`.
+ */
 constexpr bool is_inside(const Rect &rect, const Vector2f point) {
     return point.x >= rect.origin.x &&
         point.x < (rect.origin.x + rect.size.x) &&
         point.y >= rect.origin.y &&
         point.y < (rect.origin.y + rect.size.y);
+}
+
+/**
+ * @brief Whether `rect1` overlaps `rect2`.
+ */
+constexpr bool is_inside(const Rect &rect1, const Rect &rect2) {
+    return rect1.origin.x < rect2.origin.x + rect2.size.x &&
+           rect1.origin.x + rect1.size.x > rect2.origin.x &&
+           rect1.origin.y < rect2.origin.y + rect2.size.y &&
+           rect1.origin.y + rect1.size.y > rect2.origin.y;
 }
 
 } // namespace math
