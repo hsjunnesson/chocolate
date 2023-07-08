@@ -13,6 +13,7 @@ namespace engine {
 using namespace foundation;
 using namespace math;
 
+struct Engine;
 struct Window;
 
 enum class InputType {
@@ -33,6 +34,12 @@ enum class TriggerState {
     Pressed,
     Released,
     Repeated,
+};
+
+enum class CursorMode {
+    Normal, // Visible cursor
+    Hidden, // Hidden cursor while over the window
+//    Disabled, // Hidden and grabbed cursor, not yet supported.
 };
 
 struct KeyState {
@@ -77,9 +84,15 @@ struct Input {
 
     // Current mouse state.
     MouseState mouse_state;
+    
+    // Current cursor mode.
+    CursorMode cursor_mode;
 };
 
 // Processes all pending input events.
 void process_events(Input &input);
+
+// Sets cursor mode.
+void set_cursor_mode(const Engine &engine, Input &input, CursorMode cursor_mode);
 
 } // namespace engine

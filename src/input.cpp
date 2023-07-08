@@ -6,6 +6,11 @@
 #include <array.h>
 
 #include <GLFW/glfw3.h>
+
+#if defined(_WIN32)
+#include <Windows.h>
+#endif
+
 #pragma warning(pop)
 
 namespace engine {
@@ -124,11 +129,14 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
 Input::Input(Allocator &allocator, GLFWwindow *glfw_window)
 : allocator(allocator)
 , input_commands(nullptr)
-, mouse_state() {
+, mouse_state()
+, cursor_mode(CursorMode::Normal) {
     glfwSetKeyCallback(glfw_window, key_callback);
     glfwSetCursorPosCallback(glfw_window, cursor_callback);
     glfwSetMouseButtonCallback(glfw_window, mouse_button_callback);
     glfwSetScrollCallback(glfw_window, scroll_callback);
+    glfwSetInputMode(glfw_window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+    glfwSetInputMode(glfw_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     input_commands = MAKE_NEW(allocator, Array<InputCommand>, allocator);
 }
 
@@ -141,6 +149,51 @@ Input::~Input() {
 void process_events(Input &input) {
     array::clear(*input.input_commands);
     glfwPollEvents();
+}
+
+void set_cursor_mode(const Engine &engine, Input &input, CursorMode cursor_mode) {
+    (void)engine;
+    
+    if (cursor_mode == input.cursor_mode) {
+        return;
+    }
+    
+    input.cursor_mode = cursor_mode;
+
+#if defined(_WIN32)
+    CURSORINFO cursor_info;
+    cursor_info.cbSize = sizeof(CURSORINFO);
+    
+    if (!GetCursorInfo(&cursor_info)) {
+        DWORD last_error = GetLastError();
+        log_fatal("Could not get cursor info: 0x%" PRIx64 "", last_error);
+    }
+    
+    if (cursor_mode == CursorMode::Normal) {
+        ShowCursor(true);
+    } else if (cursor_mode == CursorMode::Hidden) {
+        ShowCursor(false);
+    }
+#else
+    log_fatal("Unsupported platform");
+#endif
+
+// This doesn't seem to work on GLFW
+//    int cm = 0;
+//    
+//    switch (cursor_mode) {
+//    case CursorMode::Normal:
+//        cm = GLFW_CURSOR_NORMAL;
+//        break;
+//    case CursorMode::Hidden:
+//        cm = GLFW_CURSOR_HIDDEN;
+//        break;
+//    case CursorMode::Disabled:
+//        cm = GLFW_CURSOR_DISABLED;
+//        break;
+//    }
+//    
+//    glfwSetInputMode(engine.glfw_window, GLFW_CURSOR, cm);
 }
 
 } // namespace engine
