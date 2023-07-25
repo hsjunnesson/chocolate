@@ -2,6 +2,10 @@
 
 #include "math.inl"
 
+#pragma warning(push, 0)
+#include <math.h>
+#pragma warning(pop)
+
 namespace engine {
 namespace color {
 using math::Color4f;
@@ -33,5 +37,10 @@ constexpr Color4f pink = {255.0f / 255, 119.0f / 255, 168.0f / 255, 1.0f};
 constexpr Color4f peach = {255.0f / 255, 204.0f / 255, 170.0f / 255, 1.0f};
 
 } // namespace pico8
+
+inline float luminance(const math::Color4f color) {
+    return 0.2126f * powf(color.r, 2.2f) + 0.7152f * powf(color.g, 2.2f) + 0.0722f * powf(color.b, 2.2f);
+}
+
 } // namespace color
 } // namespace engine
