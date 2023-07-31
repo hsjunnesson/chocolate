@@ -151,7 +151,9 @@ Canvas::~Canvas() {
     }
 }
 
-void init_canvas(const Engine &engine, Canvas &canvas, const ini_t *config) {
+void init_canvas(const Engine &engine, Canvas &canvas, const ini_t *config, Array<uint8_t> *sprites_data) {
+    assert(config != nullptr);
+
     glBindTexture(GL_TEXTURE_2D, canvas.texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -172,80 +174,102 @@ void init_canvas(const Engine &engine, Canvas &canvas, const ini_t *config) {
     GLint z_offset = glGetUniformLocation(canvas.shader->program, "z_offset");
     glUniform1f(z_offset, 1.0f);
 
-    if (config) {
-        const char *sprites_filename = engine::config::read_property(config, "canvas", "sprites_filename");
-        if (sprites_filename) {
-            if (!engine::config::has_property(config, "canvas", "sprite_size")) {
-                log_fatal("Config file missing [canvas] sprite_size]");
-            }
-
-            canvas.sprite_size = atoi(engine::config::read_property(config, "canvas", "sprite_size"));
-            int channels, sprites_width, sprites_height;
-            unsigned char *data = stbi_load(sprites_filename, &sprites_width, &sprites_height, &channels, 0);
-            if (!data) {
-                log_fatal("Couldn't load texture %s: %s", sprites_filename, stbi_failure_reason());
-            }
-
-            canvas.sprites_data_width = sprites_width;
-            array::resize(canvas.sprites_data, sprites_width * sprites_height * 4);
-
-            if (channels == 4) {
-                memcpy(array::begin(canvas.sprites_data), data, sprites_width * sprites_height * 4);
-            } else {
-                for (int x = 0; x < sprites_width; ++x) {
-                    for (int y = 0; y < sprites_height; ++y) {
-                        if (channels == 3) {
-                            array::push_back(canvas.sprites_data, data[(y * sprites_width + x) * 3 + 0]);
-                            array::push_back(canvas.sprites_data, data[(y * sprites_width + x) * 3 + 1]);
-                            array::push_back(canvas.sprites_data, data[(y * sprites_width + x) * 3 + 2]);
-                            array::push_back(canvas.sprites_data, (unsigned char)255);
-                        } else if (channels == 1) {
-                            array::push_back(canvas.sprites_data, data[y * sprites_width + x]);
-                            array::push_back(canvas.sprites_data, data[y * sprites_width + x]);
-                            array::push_back(canvas.sprites_data, data[y * sprites_width + x]);
-                            array::push_back(canvas.sprites_data, (unsigned char)255);
-                        }
-                    }
-                }
-            }
-
-            stbi_image_free(data);
+    {
+        if (!engine::config::has_property(config, "canvas", "sprite_size")) {
+            log_fatal("Config file missing [canvas] sprite_size]");
         }
 
-        // Read all key-values into canvas.sprites_indices
-        {
-            using namespace foundation;
+        canvas.sprite_size = atoi(engine::config::read_property(config, "canvas", "sprite_size"));
+    }
 
-            int canvas_section_index = ini_find_section(config, "canvas", 0);
-            if (canvas_section_index == INI_NOT_FOUND) {
-                log_fatal("Config file missing [canvas]");
+    if (sprites_data == nullptr) {
+        const char *sprites_filename = engine::config::read_property(config, "canvas", "sprites_filename");
+        if (!sprites_filename) {
+            log_fatal("Config file missing [canvas] sprites_filename");
+        }
+
+        int channels, sprites_width, sprites_height;
+        unsigned char *data = stbi_load(sprites_filename, &sprites_width, &sprites_height, &channels, 0);
+        if (!data) {
+            log_fatal("Couldn't load texture %s: %s", sprites_filename, stbi_failure_reason());
+        }
+
+        canvas.sprites_data_width = sprites_width;
+        array::resize(canvas.sprites_data, sprites_width * sprites_height * 4);
+
+        if (channels == 4) {
+            memcpy(array::begin(canvas.sprites_data), data, sprites_width * sprites_height * 4);
+        } else {
+            for (int x = 0; x < sprites_width; ++x) {
+                for (int y = 0; y < sprites_height; ++y) {
+                    if (channels == 3) {
+                        array::push_back(canvas.sprites_data, data[(y * sprites_width + x) * 3 + 0]);
+                        array::push_back(canvas.sprites_data, data[(y * sprites_width + x) * 3 + 1]);
+                        array::push_back(canvas.sprites_data, data[(y * sprites_width + x) * 3 + 2]);
+                        array::push_back(canvas.sprites_data, (unsigned char)255);
+                    } else if (channels == 1) {
+                        array::push_back(canvas.sprites_data, data[y * sprites_width + x]);
+                        array::push_back(canvas.sprites_data, data[y * sprites_width + x]);
+                        array::push_back(canvas.sprites_data, data[y * sprites_width + x]);
+                        array::push_back(canvas.sprites_data, (unsigned char)255);
+                    }
+                }
+            }
+        }
+
+        stbi_image_free(data);
+        log_info("Loaded canvas sprites (%d:%d) from %s", sprites_width, sprites_height, sprites_filename);
+    } else {
+        uint32_t sprites_data_size = array::size(*sprites_data);
+        uint32_t channels = 4;
+        if (sprites_data_size % channels != 0) {
+            log_fatal("Canvas sprites data invalid format.");
+        }
+
+        uint32_t side_length = static_cast<uint32_t>(sqrt(sprites_data_size));
+        bool power_of_two = (side_length != 0) && ((side_length & (side_length - 1)) == 0);
+        if (!power_of_two) {
+            log_fatal("Canvas sprites data not power of two");
+        }
+
+        canvas.sprites_data = *sprites_data;
+        canvas.sprites_data_width = static_cast<int32_t>(sqrt(sprites_data_size / channels));
+        log_info("Loaded canvas sprites from memory");
+    }
+
+    // Read all key-values into canvas.sprites_indices
+    {
+        using namespace foundation;
+
+        int canvas_section_index = ini_find_section(config, "canvas", 0);
+        if (canvas_section_index == INI_NOT_FOUND) {
+            log_fatal("Config file missing [canvas]");
+        }
+
+        for (int i = 0; i < ini_property_count(config, canvas_section_index); ++i) {
+            const char *name = ini_property_name(config, canvas_section_index, i);
+            const char *value = ini_property_value(config, canvas_section_index, i);
+
+            size_t name_len = strlen(name);
+
+            // Trim off trailing space when you do "NAME = VALUE"
+            if (name[name_len - 1] == ' ') {
+                --name_len;
             }
 
-            for (int i = 0; i < ini_property_count(config, canvas_section_index); ++i) {
-                const char *name = ini_property_name(config, canvas_section_index, i);
-                const char *value = ini_property_value(config, canvas_section_index, i);
+            uint64_t name_key = murmur_hash_64(name, (uint32_t)name_len, 0);
 
-                size_t name_len = strlen(name);
-
-                // Trim off trailing space when you do "NAME = VALUE"
-                if (name[name_len - 1] == ' ') {
-                    --name_len;
-                }
-
-                uint64_t name_key = murmur_hash_64(name, (uint32_t)name_len, 0);
-
-                try {
-                    long val = std::stol(value);
-                    if (val > std::numeric_limits<int32_t>::max() || val < std::numeric_limits<int32_t>::min()) {
-                        log_error("Value out of range [canvas] %s", name);
-                        continue;
-                    }
-
-                    uint32_t num = static_cast<uint32_t>(val);
-                    hash::set(canvas.sprites_indices, name_key, num);
-                } catch (...) {
+            try {
+                long val = std::stol(value);
+                if (val > std::numeric_limits<int32_t>::max() || val < std::numeric_limits<int32_t>::min()) {
+                    log_error("Value out of range [canvas] %s", name);
                     continue;
                 }
+
+                uint32_t num = static_cast<uint32_t>(val);
+                hash::set(canvas.sprites_indices, name_key, num);
+            } catch (...) {
+                continue;
             }
         }
     }
@@ -524,7 +548,7 @@ void canvas::sprite(Canvas &canvas, uint32_t n, int32_t x, int32_t y, Color4f co
                     continue;
                 }
             }
-            
+
             canvas.data[dst + 0] = red;
             canvas.data[dst + 1] = green;
             canvas.data[dst + 2] = blue;

@@ -39,7 +39,7 @@ enum class TriggerState {
 enum class CursorMode {
     Normal, // Visible cursor
     Hidden, // Hidden cursor while over the window
-//    Disabled, // Hidden and grabbed cursor, not yet supported.
+    //    Disabled, // Hidden and grabbed cursor, not yet supported.
 };
 
 struct KeyState {
@@ -84,7 +84,7 @@ struct Input {
 
     // Current mouse state.
     MouseState mouse_state;
-    
+
     // Current cursor mode.
     CursorMode cursor_mode;
 };

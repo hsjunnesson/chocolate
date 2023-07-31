@@ -53,7 +53,14 @@ struct Canvas {
     int32_t sprite_size;
 };
 
-void init_canvas(const Engine &engine, Canvas &canvas, const ini_t *config = nullptr);
+/** @brief Initializes the canvas.
+ * @param engine The `Engine` object.
+ * @param canvas The `Canvas` to initialize.
+ * @param config The `ini_t` to read config values from.
+ * @param sprites_data An optional buffer of pixels to read from memory instead of reading from [canvas] sprites_filename ini value.
+ * The buffer is assumed to be 32-bit RBGA.
+ */
+void init_canvas(const Engine &engine, Canvas &canvas, const ini_t *config, Array<uint8_t> *sprites_data = nullptr);
 void render_canvas(const Engine &engine, Canvas &canvas);
 
 namespace canvas {
@@ -61,11 +68,11 @@ namespace canvas {
 void pset(Canvas &canvas, int32_t x, int32_t y, Color4f col);
 void clear(Canvas &canvas, Color4f col = engine::color::black);
 void print(Canvas &canvas, const char *str, int32_t x, int32_t y, Color4f col = engine::color::white, bool invert = false, bool mask = true, Color4f mask_col = engine::color::black);
-void circle(Canvas &canvas, int32_t x_center, int32_t y_center, int32_t r, Color4f col);
-void circle_fill(Canvas &canvas, int32_t x_center, int32_t y_center, int32_t r, Color4f col);
-void line(Canvas &canvas, int32_t x1, int32_t y1, int32_t x2, int32_t y2, Color4f col);
-void rectangle(Canvas &canvas, int32_t x1, int32_t y1, int32_t x2, int32_t y2, Color4f col);
-void rectangle_fill(Canvas &canvas, int32_t x1, int32_t y1, int32_t x2, int32_t y2, Color4f col);
+void circle(Canvas &canvas, int32_t x_center, int32_t y_center, int32_t r, Color4f col = engine::color::white);
+void circle_fill(Canvas &canvas, int32_t x_center, int32_t y_center, int32_t r, Color4f col = engine::color::white);
+void line(Canvas &canvas, int32_t x1, int32_t y1, int32_t x2, int32_t y2, Color4f col = engine::color::white);
+void rectangle(Canvas &canvas, int32_t x1, int32_t y1, int32_t x2, int32_t y2, Color4f col = engine::color::white);
+void rectangle_fill(Canvas &canvas, int32_t x1, int32_t y1, int32_t x2, int32_t y2, Color4f col = engine::color::white);
 
 // Draw sprite at position `x`, `y`. `w` and `h` determine how many sprites wide and tall to blit.
 void sprite(Canvas &canvas, uint32_t n, int32_t x, int32_t y, Color4f col = engine::color::white, uint8_t w = 1, uint8_t h = 1, uint8_t scale_w = 1, uint8_t scale_h = 1, bool flip_x = false, bool flip_y = false, bool invert = false, bool mask = true, Color4f mask_col = engine::color::black);

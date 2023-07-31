@@ -153,22 +153,22 @@ void process_events(Input &input) {
 
 void set_cursor_mode(const Engine &engine, Input &input, CursorMode cursor_mode) {
     (void)engine;
-    
+
     if (cursor_mode == input.cursor_mode) {
         return;
     }
-    
+
     input.cursor_mode = cursor_mode;
 
 #if defined(_WIN32)
     CURSORINFO cursor_info;
     cursor_info.cbSize = sizeof(CURSORINFO);
-    
+
     if (!GetCursorInfo(&cursor_info)) {
         DWORD last_error = GetLastError();
         log_fatal("Could not get cursor info: 0x%" PRIx64 "", last_error);
     }
-    
+
     if (cursor_mode == CursorMode::Normal) {
         ShowCursor(true);
     } else if (cursor_mode == CursorMode::Hidden) {
@@ -178,22 +178,22 @@ void set_cursor_mode(const Engine &engine, Input &input, CursorMode cursor_mode)
     log_fatal("Unsupported platform");
 #endif
 
-// This doesn't seem to work on GLFW
-//    int cm = 0;
-//    
-//    switch (cursor_mode) {
-//    case CursorMode::Normal:
-//        cm = GLFW_CURSOR_NORMAL;
-//        break;
-//    case CursorMode::Hidden:
-//        cm = GLFW_CURSOR_HIDDEN;
-//        break;
-//    case CursorMode::Disabled:
-//        cm = GLFW_CURSOR_DISABLED;
-//        break;
-//    }
-//    
-//    glfwSetInputMode(engine.glfw_window, GLFW_CURSOR, cm);
+    // This doesn't seem to work on GLFW
+    //    int cm = 0;
+    //
+    //    switch (cursor_mode) {
+    //    case CursorMode::Normal:
+    //        cm = GLFW_CURSOR_NORMAL;
+    //        break;
+    //    case CursorMode::Hidden:
+    //        cm = GLFW_CURSOR_HIDDEN;
+    //        break;
+    //    case CursorMode::Disabled:
+    //        cm = GLFW_CURSOR_DISABLED;
+    //        break;
+    //    }
+    //
+    //    glfwSetInputMode(engine.glfw_window, GLFW_CURSOR, cm);
 }
 
 } // namespace engine

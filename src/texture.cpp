@@ -46,9 +46,9 @@ void __free(void *ptr) {
 
 // TODO: fix memory management
 
-//#define STBI_MALLOC(size) __malloc(size)
-//#define STBI_REALLOC(ptr, new_size) __realloc(ptr, new_size)
-//#define STBI_FREE(ptr) __free(ptr)
+// #define STBI_MALLOC(size) __malloc(size)
+// #define STBI_REALLOC(ptr, new_size) __realloc(ptr, new_size)
+// #define STBI_FREE(ptr) __free(ptr)
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "engine/stb_image.h"
