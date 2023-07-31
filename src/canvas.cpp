@@ -165,7 +165,7 @@ void init_canvas(const Engine &engine, Canvas &canvas, const ini_t *config, Arra
     int32_t size = canvas.width * canvas.height * 4;
     array::resize(canvas.data, size);
 
-    canvas::clear(canvas);
+    canvas::clear(canvas, engine::color::black);
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, canvas.width, canvas.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, array::begin(canvas.data));
     glObjectLabel(GL_TEXTURE, canvas.texture, -1, "Canvas Texture");
