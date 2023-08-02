@@ -3,7 +3,9 @@
 #pragma warning(push, 0)
 #include <algorithm>
 #include <assert.h>
+#include <cmath>
 #include <inttypes.h>
+#include <limits>
 #pragma warning(pop)
 
 namespace math {
@@ -36,11 +38,13 @@ struct Color4f {
     float b = 0;
     float a = 0;
 
-    // constexpr Color4f(float r = 0.0f, float g = 0.0f, float b = 0.0f, float a = 0.0f)
-    // : r(r)
-    // , g(g)
-    // , b(b)
-    // , a(a) {}
+    bool operator==(const Color4f &other) const {
+        float epsilon = std::numeric_limits<float>::epsilon();
+        return std::abs(r - other.r) <= epsilon &&
+               std::abs(g - other.g) <= epsilon &&
+               std::abs(b - other.b) <= epsilon &&
+               std::abs(a - other.a) <= epsilon;
+    }
 };
 
 struct Matrix4f {
