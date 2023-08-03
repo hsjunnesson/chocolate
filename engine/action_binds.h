@@ -10,6 +10,8 @@ typedef foundation::Array<char> Buffer;
 
 namespace engine {
 
+struct InputCommand;
+
 // The enumeration of legal action binds binds.
 enum class ActionBindsBind {
     FIRST, /* Special enum, don't use. */
@@ -193,21 +195,20 @@ enum class ActionBindsBind {
 struct ActionBinds {
     ActionBinds(foundation::Allocator &allocator, const char *config_path);
 
-    /// Hash of action strings to binds. This is a multi hash where each action can have multiple binds.
-    // The keys are murmur hashed action strings.
-    // e.g.: murmur_hash(QUIT): KEY_ESCAPE,KEY_Q
-    foundation::Hash<ActionBindsBind> action_binds;
-
     /// Hash of binds to actions.
     // The keys are ActionBindsBind enums, values are hashed action strings.
-    // e.g.: KEY_Q: murmur_hash(QUIT)
+    // e.g.: murmur_hash(KEY_Q): murmur_hash(QUIT)
     foundation::Hash<uint64_t> bind_actions;
 };
 
 /// Returns the string descriptor corresponding to the Bind. Nullptr on invalid bind.
 const char *bind_descriptor(const ActionBindsBind bind);
 
-/// Returns the corresponding bind for a keycode. Or NOT_FOUND if not found.
+/// Returns the corresponding `ActionBindsBind` for a keycode. Or NOT_FOUND if not found.
 ActionBindsBind bind_for_keycode(const int16_t keycode);
+
+/// Returns the key into the bind_actions hash which correspond to the input_command.
+/// Returns 0 if not found.
+uint64_t action_key_for_input_command(const engine::InputCommand &input_command);
 
 } // namespace engine

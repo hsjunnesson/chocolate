@@ -27,9 +27,38 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
         return;
     }
 
+    Input &input = *engine->input;
+
+    if (key == GLFW_KEY_LEFT_SHIFT || key == GLFW_KEY_RIGHT_SHIFT) {
+        if (action == GLFW_PRESS) {
+            input.shift_state = true;
+        } else if (action == GLFW_RELEASE) {
+            input.shift_state = false;
+        }
+    }
+
+    if (key == GLFW_KEY_LEFT_ALT || key == GLFW_KEY_RIGHT_ALT) {
+        if (action == GLFW_PRESS) {
+            input.alt_state = true;
+        } else if (action == GLFW_RELEASE) {
+            input.alt_state = false;
+        }
+    }
+
+    if (key == GLFW_KEY_LEFT_CONTROL || key == GLFW_KEY_RIGHT_CONTROL) {
+        if (action == GLFW_PRESS) {
+            input.ctrl_state = true;
+        } else if (action == GLFW_RELEASE) {
+            input.ctrl_state = false;
+        }
+    }
+
     InputCommand input_command;
     input_command.input_type = InputType::Key;
-    input_command.key_state.keycode = key;
+    input_command.key_state.keycode = static_cast<int16_t>(key);
+    input_command.key_state.shift_state = input.shift_state;
+    input_command.key_state.alt_state = input.alt_state;
+    input_command.key_state.ctrl_state = input.ctrl_state;
 
     if (action == GLFW_PRESS) {
         input_command.key_state.trigger_state = TriggerState::Pressed;
@@ -39,7 +68,7 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
         input_command.key_state.trigger_state = TriggerState::Repeated;
     }
 
-    array::push_back(*engine->input->input_commands, input_command);
+    array::push_back(*input.input_commands, input_command);
 }
 
 void cursor_callback(GLFWwindow *window, double x, double y) {
@@ -130,7 +159,10 @@ Input::Input(Allocator &allocator, GLFWwindow *glfw_window)
 : allocator(allocator)
 , input_commands(nullptr)
 , mouse_state()
-, cursor_mode(CursorMode::Normal) {
+, cursor_mode(CursorMode::Normal)
+, shift_state(false)
+, alt_state(false)
+, ctrl_state(false) {
     glfwSetKeyCallback(glfw_window, key_callback);
     glfwSetCursorPosCallback(glfw_window, cursor_callback);
     glfwSetMouseButtonCallback(glfw_window, mouse_button_callback);

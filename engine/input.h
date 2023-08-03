@@ -45,6 +45,9 @@ enum class CursorMode {
 struct KeyState {
     int16_t keycode = -1;
     TriggerState trigger_state = TriggerState::None;
+    bool shift_state;
+    bool alt_state;
+    bool ctrl_state;
 };
 
 struct MouseState {
@@ -87,6 +90,11 @@ struct Input {
 
     // Current cursor mode.
     CursorMode cursor_mode;
+    
+    // Current keyboard states
+    bool shift_state;
+    bool alt_state;
+    bool ctrl_state;
 };
 
 // Processes all pending input events.

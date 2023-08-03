@@ -3,6 +3,7 @@
 #include "engine/file.h"
 #include "engine/ini.h"
 #include "engine/log.h"
+#include "engine/input.h"
 
 #pragma warning(push, 0)
 #include <GLFW/glfw3.h>
@@ -15,6 +16,7 @@
 
 #define __STDC_WANT_LIB_EXT1__ 1
 #include <string.h>
+#include <cstring>
 #pragma warning(pop)
 
 namespace engine {
@@ -25,8 +27,7 @@ ActionBindsBind bind_from_descriptor(const char *);
 const char *bind_descriptor(const ActionBindsBind);
 
 ActionBinds::ActionBinds(foundation::Allocator &allocator, const char *config_path)
-: action_binds(allocator)
-, bind_actions(allocator) {
+: bind_actions(allocator) {
     TempAllocator1024 ta;
 
     string_stream::Buffer buffer(ta);
@@ -82,19 +83,68 @@ ActionBinds::ActionBinds(foundation::Allocator &allocator, const char *config_pa
 #endif
 
                 while (str) {
-                    ActionBindsBind bind = bind_from_descriptor(str);
-                    if (bind == ActionBindsBind::NOT_FOUND) {
-                        log_fatal("Invalid [actionbinds] %s = %s", name, str);
-                    } else {
-                        multi_hash::insert(action_binds, action_key, bind);
+                    bool shift_state = false;
+                    bool alt_state = false;
+                    bool ctrl_state = false;
+                    
+                    uint64_t bind_key = 0;
 
-                        uint64_t bind_key = static_cast<uint64_t>(bind);
-
-                        if (hash::has(bind_actions, bind_key)) {
-                            log_fatal("invalid [actionbinds] defining multiple of bind %s", str);
+                    // Check for states, like SHIFT+KEY_ESCAPE
+                    {
+                        char *plus = strchr(str, '+');
+                        if (plus) {
+                            *plus = '\0'; // Null-terminate the first part
+                            char *first_part = str;
+                            char *second_part = plus + 1;
+                            
+                            if (strcmp(first_part, "SHIFT") == 0) {
+                                shift_state = true;
+                            } else if (strcmp(first_part, "ALT") == 0) {
+                                alt_state = true;
+                            } else if (strcmp(first_part, "CTRL") == 0) {
+                                ctrl_state = true;
+                            } else {
+                                log_fatal("Invalid [actionbinds] %s = %s+%s", name, first_part, second_part);
+                            }
+                            
+                            ActionBindsBind bind = bind_from_descriptor(second_part);
+                            if (bind == ActionBindsBind::NOT_FOUND) {
+                                log_fatal("Invalid [actionbinds] %s = %s+%s", name, first_part, second_part);
+                            }
+                            
+                            Buffer ss(ta);
+                            
+                            if (shift_state) {
+                                ss << "SHIFT+";
+                            }
+                            
+                            if (alt_state) {
+                                ss << "ALT+";
+                            }
+                            
+                            if (ctrl_state) {
+                                ss << "CTRL+";
+                            }
+                            
+                            ss << second_part;
+                            
+                            size_t len = strlen(c_str(ss));
+                            bind_key = murmur_hash_64(c_str(ss), (uint32_t)len, 0);
                         } else {
-                            hash::set(bind_actions, bind_key, action_key);
+                            ActionBindsBind bind = bind_from_descriptor(str);
+                            if (bind == ActionBindsBind::NOT_FOUND) {
+                                log_fatal("Invalid [actionbinds] %s = %s", name, str);
+                            }
+
+                            size_t len = strlen(str);
+                            bind_key = murmur_hash_64(str, (uint32_t)len, 0);
                         }
+                    }
+                    
+                    if (hash::has(bind_actions, bind_key)) {
+                        log_fatal("invalid [actionbinds] defining multiple of bind %s", str);
+                    } else {
+                        hash::set(bind_actions, bind_key, action_key);
                     }
 
 #ifdef __APPLE__
@@ -713,6 +763,47 @@ ActionBindsBind bind_for_keycode(const int16_t keycode) {
     }
 
     return ActionBindsBind::NOT_FOUND;
+}
+
+uint64_t action_key_for_input_command(const engine::InputCommand &input_command) {
+    using namespace foundation;
+    using namespace foundation::string_stream;
+    
+    if (input_command.input_type != InputType::Key) {
+        return 0;
+    }
+
+    ActionBindsBind bind = bind_for_keycode(input_command.key_state.keycode);
+    if (bind == ActionBindsBind::NOT_FOUND) {
+        return 0;
+    }
+
+    const char *descriptor = bind_descriptor(bind);
+    if (descriptor == nullptr) {
+        return 0;
+    }
+
+    TempAllocator256 ta;
+    Buffer ss(ta);
+    
+    if (input_command.key_state.shift_state) {
+        ss << "SHIFT+";
+    }
+    
+    if (input_command.key_state.alt_state) {
+        ss << "ALT+";
+    }
+    
+    if (input_command.key_state.ctrl_state) {
+        ss << "CTRL+";
+    }
+    
+    ss << descriptor;
+    
+    size_t len = strlen(c_str(ss));
+    uint64_t key = murmur_hash_64(c_str(ss), (uint32_t)len, 0);
+
+    return key;
 }
 
 } // namespace engine
