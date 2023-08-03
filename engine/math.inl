@@ -39,7 +39,7 @@ struct Color4f {
     float a = 0;
 
     bool operator==(const Color4f &other) const {
-        float epsilon = std::numeric_limits<float>::epsilon();
+        constexpr float epsilon = std::numeric_limits<float>::epsilon();
         return std::abs(r - other.r) <= epsilon &&
                std::abs(g - other.g) <= epsilon &&
                std::abs(b - other.b) <= epsilon &&
