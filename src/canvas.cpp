@@ -346,12 +346,12 @@ void canvas::print(Canvas &canvas, const char *str, int32_t x, int32_t y, Color4
         char c = str[i];
 
         if (c == ' ') {
-            xx += 8;
+            xx += canvas.sprite_size;
             continue;
         }
 
         if (c == '\n') {
-            yy += 8;
+            yy += canvas.sprite_size;
             xx = x;
             continue;
         }
@@ -369,7 +369,7 @@ void canvas::print(Canvas &canvas, const char *str, int32_t x, int32_t y, Color4
         uint32_t sprite_index = hash::get(canvas.sprites_indices, key, (uint32_t)0);
         sprite(canvas, sprite_index, xx, yy, col, 1, 1, 1, 1, false, false, invert, mask, mask_col);
 
-        xx += 8;
+        xx += canvas.sprite_size;
     }
 }
 
