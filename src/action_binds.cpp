@@ -2,8 +2,8 @@
 #include "engine/config.h"
 #include "engine/file.h"
 #include "engine/ini.h"
-#include "engine/log.h"
 #include "engine/input.h"
+#include "engine/log.h"
 
 #pragma warning(push, 0)
 #include <GLFW/glfw3.h>
@@ -15,8 +15,8 @@
 #include <temp_allocator.h>
 
 #define __STDC_WANT_LIB_EXT1__ 1
-#include <string.h>
 #include <cstring>
+#include <string.h>
 #pragma warning(pop)
 
 namespace engine {
@@ -86,7 +86,7 @@ ActionBinds::ActionBinds(foundation::Allocator &allocator, const char *config_pa
                     bool shift_state = false;
                     bool alt_state = false;
                     bool ctrl_state = false;
-                    
+
                     uint64_t bind_key = 0;
 
                     // Check for states, like SHIFT+KEY_ESCAPE
@@ -96,7 +96,7 @@ ActionBinds::ActionBinds(foundation::Allocator &allocator, const char *config_pa
                             *plus = '\0'; // Null-terminate the first part
                             char *first_part = str;
                             char *second_part = plus + 1;
-                            
+
                             if (strcmp(first_part, "SHIFT") == 0) {
                                 shift_state = true;
                             } else if (strcmp(first_part, "ALT") == 0) {
@@ -106,28 +106,28 @@ ActionBinds::ActionBinds(foundation::Allocator &allocator, const char *config_pa
                             } else {
                                 log_fatal("Invalid [actionbinds] %s = %s+%s", name, first_part, second_part);
                             }
-                            
+
                             ActionBindsBind bind = bind_from_descriptor(second_part);
                             if (bind == ActionBindsBind::NOT_FOUND) {
                                 log_fatal("Invalid [actionbinds] %s = %s+%s", name, first_part, second_part);
                             }
-                            
+
                             Buffer ss(ta);
-                            
+
                             if (shift_state) {
                                 ss << "SHIFT+";
                             }
-                            
+
                             if (alt_state) {
                                 ss << "ALT+";
                             }
-                            
+
                             if (ctrl_state) {
                                 ss << "CTRL+";
                             }
-                            
+
                             ss << second_part;
-                            
+
                             size_t len = strlen(c_str(ss));
                             bind_key = murmur_hash_64(c_str(ss), (uint32_t)len, 0);
                         } else {
@@ -140,7 +140,7 @@ ActionBinds::ActionBinds(foundation::Allocator &allocator, const char *config_pa
                             bind_key = murmur_hash_64(str, (uint32_t)len, 0);
                         }
                     }
-                    
+
                     if (hash::has(bind_actions, bind_key)) {
                         log_fatal("invalid [actionbinds] defining multiple of bind %s", str);
                     } else {
@@ -768,7 +768,7 @@ ActionBindsBind bind_for_keycode(const int16_t keycode) {
 uint64_t action_key_for_input_command(const engine::InputCommand &input_command) {
     using namespace foundation;
     using namespace foundation::string_stream;
-    
+
     if (input_command.input_type != InputType::Key) {
         return 0;
     }
@@ -785,21 +785,21 @@ uint64_t action_key_for_input_command(const engine::InputCommand &input_command)
 
     TempAllocator256 ta;
     Buffer ss(ta);
-    
+
     if (input_command.key_state.shift_state) {
         ss << "SHIFT+";
     }
-    
+
     if (input_command.key_state.alt_state) {
         ss << "ALT+";
     }
-    
+
     if (input_command.key_state.ctrl_state) {
         ss << "CTRL+";
     }
-    
+
     ss << descriptor;
-    
+
     size_t len = strlen(c_str(ss));
     uint64_t key = murmur_hash_64(c_str(ss), (uint32_t)len, 0);
 

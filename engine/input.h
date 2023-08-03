@@ -90,7 +90,7 @@ struct Input {
 
     // Current cursor mode.
     CursorMode cursor_mode;
-    
+
     // Current keyboard states
     bool shift_state;
     bool alt_state;
