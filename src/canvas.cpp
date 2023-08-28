@@ -8,7 +8,6 @@
 #include "engine/shader.h"
 #include "engine/stb_image.h"
 
-#pragma warning(push, 0)
 #include <GLFW/glfw3.h>
 #include <array.h>
 #include <cassert>
@@ -19,9 +18,7 @@
 #include <murmur_hash.h>
 #include <string>
 #include <string_stream.h>
-
 #include <glm/glm.hpp>
-#pragma warning(pop)
 
 using engine::Canvas;
 using engine::Engine;
@@ -48,7 +45,7 @@ const char *fragment_source = R"(
 precision highp float;
 
 uniform sampler2D texture0;
-in vec2 uv;
+smooth in vec2 uv;
 
 out vec4 out_color;
 

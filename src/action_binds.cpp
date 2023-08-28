@@ -5,7 +5,6 @@
 #include "engine/input.h"
 #include "engine/log.h"
 
-#pragma warning(push, 0)
 #include <GLFW/glfw3.h>
 #include <array.h>
 #include <hash.h>
@@ -17,7 +16,6 @@
 #define __STDC_WANT_LIB_EXT1__ 1
 #include <cstring>
 #include <string.h>
-#pragma warning(pop)
 
 namespace engine {
 using namespace foundation;
@@ -76,10 +74,10 @@ ActionBinds::ActionBinds(foundation::Allocator &allocator, const char *config_pa
                 char *str = array::begin(buf);
                 char *context = nullptr;
 
-#ifdef __APPLE__
-                str = strtok_r(str, ",", &context);
-#else
+#if defined(_WIN32)
                 str = strtok_s(str, ",", &context);
+#else
+                str = strtok_r(str, ",", &context);
 #endif
 
                 while (str) {
@@ -147,10 +145,10 @@ ActionBinds::ActionBinds(foundation::Allocator &allocator, const char *config_pa
                         hash::set(bind_actions, bind_key, action_key);
                     }
 
-#ifdef __APPLE__
-                    str = strtok_r(NULL, ",", &context);
-#else
+#if defined(_WIN32)
                     str = strtok_s(NULL, ",", &context);
+#else
+                    str = strtok_r(NULL, ",", &context);
 #endif
                 }
             }

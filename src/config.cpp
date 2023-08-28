@@ -6,7 +6,6 @@
 void *__config_malloc(size_t size);
 void __config_free(void *ptr);
 
-#pragma warning(push, 0)
 #define INI_IMPLEMENTATION
 #define INI_MALLOC(ctx, size) (__config_malloc(size))
 #define INI_FREE(ctx, ptr) (__config_free(ptr))
@@ -14,7 +13,6 @@ void __config_free(void *ptr);
 
 #include <assert.h>
 #include <memory.h>
-#pragma warning(pop)
 
 void *__config_malloc(size_t size) {
     foundation::Allocator &allocator = foundation::memory_globals::default_allocator();

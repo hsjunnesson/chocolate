@@ -1,12 +1,10 @@
 #include "engine/log.h"
 
-#pragma warning(push, 0)
 #include <iomanip>
 #include <sstream>
 #include <stdarg.h>
 #include <stdio.h>
 #include <time.h>
-
 #include <backward.hpp>
 #include <memory.h>
 #include <string_stream.h>
@@ -15,7 +13,6 @@
 #if defined(WIN32)
 #include <windows.h>
 #endif
-#pragma warning(pop)
 
 using namespace foundation;
 using namespace foundation::string_stream;
@@ -46,17 +43,17 @@ void internal_log(LoggingSeverity severity, const char *format, ...) {
 
     ss << severity_prefix;
 
-#ifdef __APPLE__
+#if defined(__WIN32)
+    va_list args;
+    va_start(args, format);
+    ss = string_stream::vprintf(ss, format, args);
+    va_end(args);
+#elif defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
     char buffer[1024];
     va_list args;
     va_start(args, format);
     vsnprintf(buffer, 1024, format, args);
     ss << buffer;
-    va_end(args);
-#else
-    va_list args;
-    va_start(args, format);
-    ss = string_stream::vprintf(ss, format, args);
     va_end(args);
 #endif
 

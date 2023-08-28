@@ -1,7 +1,6 @@
 #include "engine/file.h"
 #include "engine/log.h"
 
-#pragma warning(push, 0)
 #include <array.h>
 #include <memory.h>
 #include <string_stream.h>
@@ -15,7 +14,6 @@
 #include <sys/stat.h>
 #endif
 // clang-format on
-#pragma warning(pop)
 
 namespace engine {
 namespace file {
@@ -26,6 +24,9 @@ bool exist(const char *filename) {
 #if defined(_WIN32)
     DWORD dwAttrib = GetFileAttributes(filename);
     return (dwAttrib != INVALID_FILE_ATTRIBUTES && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+#elif defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
+    struct stat buf;
+    return (stat(filename, &buf) == 0);
 #else
     log_fatal("Unsupported platform");
     return false;

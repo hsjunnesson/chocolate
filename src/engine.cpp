@@ -6,8 +6,6 @@
 #include "engine/math.inl"
 #include "engine/shader.h"
 #include "engine/texture.h"
-
-#pragma warning(push, 0)
 #include "engine/ini.h"
 
 #include <GLFW/glfw3.h>
@@ -29,8 +27,6 @@
 #include <cstdio>
 #endif
 
-#pragma warning(pop)
-
 namespace {
 
 using namespace foundation;
@@ -45,6 +41,11 @@ void glfw_error_callback(int error, const char *description) {
 void APIENTRY gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const char *message, const void *user_param) {
     (void)length;
     (void)user_param;
+
+    // Ignore notification-level messages
+    if (severity == GL_DEBUG_SEVERITY_NOTIFICATION) {
+        return;
+    }
 
     // ignore non-significant error/warning codes
     if (id == 131169 || id == 131185 || id == 131218 || id == 131204) {
@@ -323,13 +324,12 @@ Engine::Engine(Allocator &allocator, const char *config_path)
         }
 
 #if defined(_DEBUG) && defined(WIN32)
-#if defined(__APPLE__)
+#elif defined(__APPLE__)
 #else
         glEnable(GL_DEBUG_OUTPUT);
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
         glDebugMessageCallback(gl_debug_callback, nullptr);
         glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
-#endif
 #endif
 
         int swap_interval = 0;

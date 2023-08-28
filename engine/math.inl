@@ -1,12 +1,11 @@
 #pragma once
 
-#pragma warning(push, 0)
+#include <cstring>
 #include <algorithm>
 #include <assert.h>
 #include <cmath>
 #include <inttypes.h>
 #include <limits>
-#pragma warning(pop)
 
 namespace math {
 
