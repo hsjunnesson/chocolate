@@ -1,11 +1,11 @@
 #include "engine/texture.h"
 #include "engine/log.h"
 
-#include <memory.h>
 #include <GLFW/glfw3.h>
-#include <glad/glad.h>
 #include <algorithm>
 #include <cstring>
+#include <glad/glad.h>
+#include <memory.h>
 
 using namespace foundation;
 

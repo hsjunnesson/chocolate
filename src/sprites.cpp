@@ -5,16 +5,16 @@
 #include "engine/shader.h"
 #include "engine/texture.h"
 
-#include <array.h>
-#include <hash.h>
-#include <memory.h>
-#include <temp_allocator.h>
-#include <mutex>
 #include <GLFW/glfw3.h>
+#include <array.h>
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <hash.h>
+#include <memory.h>
+#include <mutex>
+#include <temp_allocator.h>
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/euler_angles.hpp>

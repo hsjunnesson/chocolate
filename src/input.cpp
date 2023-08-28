@@ -2,8 +2,8 @@
 #include "engine/engine.h"
 #include "engine/log.h"
 
-#include <array.h>
 #include <GLFW/glfw3.h>
+#include <array.h>
 #if defined(_WIN32)
 #include <Windows.h>
 #endif
@@ -215,7 +215,6 @@ void set_cursor_mode(const Engine &engine, Input &input, CursorMode cursor_mode)
 
     glfwSetInputMode(engine.glfw_window, GLFW_CURSOR, cm);
 #endif
-
 }
 
 } // namespace engine

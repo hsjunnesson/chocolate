@@ -12,13 +12,13 @@
 #include <array.h>
 #include <cassert>
 #include <glad/glad.h>
+#include <glm/glm.hpp>
 #include <hash.h>
 #include <limits>
 #include <memory.h>
 #include <murmur_hash.h>
 #include <string>
 #include <string_stream.h>
-#include <glm/glm.hpp>
 
 using engine::Canvas;
 using engine::Engine;

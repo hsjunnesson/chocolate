@@ -4,11 +4,11 @@
 
 #include <GLFW/glfw3.h>
 #include <array.h>
+#include <fstream>
 #include <glad/glad.h>
 #include <memory.h>
 #include <string_stream.h>
 #include <temp_allocator.h>
-#include <fstream>
 
 namespace engine {
 

@@ -1,14 +1,14 @@
 #include "engine/log.h"
 
+#include <backward.hpp>
 #include <iomanip>
+#include <memory.h>
 #include <sstream>
 #include <stdarg.h>
 #include <stdio.h>
-#include <time.h>
-#include <backward.hpp>
-#include <memory.h>
 #include <string_stream.h>
 #include <temp_allocator.h>
+#include <time.h>
 
 #if defined(WIN32)
 #include <windows.h>

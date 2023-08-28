@@ -1,12 +1,12 @@
 #include "engine/engine.h"
 #include "engine/config.h"
 #include "engine/file.h"
+#include "engine/ini.h"
 #include "engine/input.h"
 #include "engine/log.h"
 #include "engine/math.inl"
 #include "engine/shader.h"
 #include "engine/texture.h"
-#include "engine/ini.h"
 
 #include <GLFW/glfw3.h>
 #include <cassert>
