@@ -1,20 +1,17 @@
 #include "engine/texture.h"
 #include "engine/log.h"
 
-#pragma warning(push, 0)
 #include <memory.h>
-
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
-
 #include <algorithm>
 #include <cstring>
-#pragma warning(pop)
 
 using namespace foundation;
 
 namespace {
 
+/*
 void *__malloc(size_t size) {
     Allocator &allocator = memory_globals::default_allocator();
     return allocator.allocate(size);
@@ -41,6 +38,7 @@ void __free(void *ptr) {
         allocator.deallocate(ptr);
     }
 }
+*/
 
 } // namespace
 

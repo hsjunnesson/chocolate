@@ -4,21 +4,17 @@
 #include "engine/math.inl"
 #include "engine/texture.h"
 
-#pragma warning(push, 0)
 #include <collection_types.h>
 #include <hash.h>
 #include <memory.h>
 #include <murmur_hash.h>
 #include <string_stream.h>
 #include <temp_allocator.h>
-
 #include <cjson/cJSON.h>
-
 #include <cassert>
 
 #define __STDC_WANT_LIB_EXT1__ 1
 #include <string.h>
-#pragma warning(pop)
 
 namespace engine {
 using namespace foundation;

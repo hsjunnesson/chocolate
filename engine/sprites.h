@@ -2,14 +2,12 @@
 
 #include "math.inl"
 
-#pragma warning(push, 0)
 #include <collection_types.h>
 #include <inttypes.h>
-#pragma warning(pop)
-
 #ifdef __APPLE__
 #include <mutex>
 #else
+
 namespace std {
 class mutex;
 } // namespace std

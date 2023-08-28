@@ -2,11 +2,9 @@
 
 #include "math.inl"
 
-#pragma warning(push, 0)
 #include <collection_types.h>
 #include <engine/color.inl>
 #include <memory_types.h>
-#pragma warning(pop)
 
 typedef struct ini_t ini_t;
 

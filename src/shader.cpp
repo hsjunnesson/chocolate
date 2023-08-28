@@ -2,16 +2,13 @@
 #include "engine/file.h"
 #include "engine/log.h"
 
-#pragma warning(push, 0)
 #include <GLFW/glfw3.h>
 #include <array.h>
 #include <glad/glad.h>
 #include <memory.h>
 #include <string_stream.h>
 #include <temp_allocator.h>
-
 #include <fstream>
-#pragma warning(pop)
 
 namespace engine {
 
@@ -91,6 +88,20 @@ Shader::Shader(const char *geometry_source, const char *vertex_source, const cha
     }
 
     glLinkProgram(program);
+    GLint is_linked = 0;
+    glGetProgramiv(program, GL_LINK_STATUS, &is_linked);
+    if (is_linked == GL_FALSE) {
+        Buffer error_buffer(ta);
+
+        int log_length;
+        glGetProgramiv(program, GL_INFO_LOG_LENGTH, &log_length);
+        if (log_length > 0) {
+            resize(error_buffer, log_length);
+            glGetProgramInfoLog(program, log_length, nullptr, begin(error_buffer));
+        }
+
+        log_fatal("Error linking shader: %s", c_str(error_buffer));
+    }
 
     if (name) {
         Buffer name_buffer(ta);

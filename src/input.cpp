@@ -2,16 +2,11 @@
 #include "engine/engine.h"
 #include "engine/log.h"
 
-#pragma warning(push, 0)
 #include <array.h>
-
 #include <GLFW/glfw3.h>
-
 #if defined(_WIN32)
 #include <Windows.h>
 #endif
-
-#pragma warning(pop)
 
 namespace engine {
 
@@ -207,25 +202,20 @@ void set_cursor_mode(const Engine &engine, Input &input, CursorMode cursor_mode)
         ShowCursor(false);
     }
 #else
-    log_fatal("Unsupported platform");
+    int cm = 0;
+
+    switch (cursor_mode) {
+    case CursorMode::Normal:
+        cm = GLFW_CURSOR_NORMAL;
+        break;
+    case CursorMode::Hidden:
+        cm = GLFW_CURSOR_HIDDEN;
+        break;
+    }
+
+    glfwSetInputMode(engine.glfw_window, GLFW_CURSOR, cm);
 #endif
 
-    // This doesn't seem to work on GLFW
-    //    int cm = 0;
-    //
-    //    switch (cursor_mode) {
-    //    case CursorMode::Normal:
-    //        cm = GLFW_CURSOR_NORMAL;
-    //        break;
-    //    case CursorMode::Hidden:
-    //        cm = GLFW_CURSOR_HIDDEN;
-    //        break;
-    //    case CursorMode::Disabled:
-    //        cm = GLFW_CURSOR_DISABLED;
-    //        break;
-    //    }
-    //
-    //    glfwSetInputMode(engine.glfw_window, GLFW_CURSOR, cm);
 }
 
 } // namespace engine

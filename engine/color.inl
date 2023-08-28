@@ -2,9 +2,7 @@
 
 #include "math.inl"
 
-#pragma warning(push, 0)
 #include <math.h>
-#pragma warning(pop)
 
 namespace engine {
 namespace color {

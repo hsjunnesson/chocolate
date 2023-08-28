@@ -5,23 +5,19 @@
 #include "engine/shader.h"
 #include "engine/texture.h"
 
-#pragma warning(push, 0)
 #include <array.h>
 #include <hash.h>
 #include <memory.h>
 #include <temp_allocator.h>
-
 #include <mutex>
-
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/euler_angles.hpp>
-#pragma warning(pop)
 
 namespace {
 const uint64_t max_sprites = 1000000;
@@ -425,8 +421,6 @@ void commit_sprites(Sprites &sprites) {
 
     TempAllocator1024 ta;
     Array<Matrix4f> transform_updates(ta);
-
-    const static glm::vec3 rotation_vec = glm::vec3(0.0f, 0.0f, -1.0f);
 
     int i = 0;
     for (engine::Sprite *sprite = array::begin(*sprites.sprites); sprite != array::end(*sprites.sprites); ++sprite) {
