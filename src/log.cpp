@@ -43,7 +43,7 @@ void internal_log(LoggingSeverity severity, const char *format, ...) {
 
     ss << severity_prefix;
 
-#if defined(__WIN32)
+#if defined(_WIN32)
     va_list args;
     va_start(args, format);
     ss = string_stream::vprintf(ss, format, args);
