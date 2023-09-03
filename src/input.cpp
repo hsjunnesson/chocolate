@@ -102,7 +102,9 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
 
     MouseState mouse_state = input.mouse_state;
     mouse_state.mouse_action = MouseAction::MouseTrigger;
-
+    mouse_state.mouse_left_state = TriggerState::None;
+    mouse_state.mouse_right_state = TriggerState::None;
+    
     if (button == GLFW_MOUSE_BUTTON_LEFT) {
         if (action == GLFW_RELEASE) {
             mouse_state.mouse_left_state = TriggerState::Released;
