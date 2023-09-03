@@ -97,7 +97,8 @@ Canvas::Canvas(Allocator &allocator)
 , sprites_data(allocator)
 , sprites_data_width(0)
 , sprites_indices(allocator)
-, sprite_size(0) {
+, sprite_size(0)
+, clip_mask({{0, 0}, {-1, -1}}) {
     shader = MAKE_NEW(allocator, Shader, nullptr, vertex_source, fragment_source, "Canvas");
 
     glGenVertexArrays(1, &vao);
@@ -300,8 +301,37 @@ void render_canvas(const Engine &engine, Canvas &canvas) {
     glPopDebugGroup();
 }
 
+void canvas::clip(Canvas &canvas) {
+    canvas.clip_mask.origin = {0, 0};
+    canvas.clip_mask.size = {-1, -1};
+}
+
+void canvas::clip(Canvas &canvas, int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
+    assert(x2 >= x1);
+    assert(y2 >= y1);
+
+    canvas.clip_mask.origin = {x1, y1};
+    canvas.clip_mask.size = {x2 - x1, y2 - y1};
+}
+
+// Returns true if coordinate lays inside the clip mask.
+bool is_clipped(Canvas &canvas, int32_t x, int32_t y) {
+    if (canvas.clip_mask.size.x == -1) {
+        return true;
+    }
+
+    return x >= canvas.clip_mask.origin.x &&
+           x < (canvas.clip_mask.origin.x + canvas.clip_mask.size.x) &&
+           y >= canvas.clip_mask.origin.y &&
+           y < (canvas.clip_mask.origin.y + canvas.clip_mask.size.y);
+}
+
 void canvas::pset(Canvas &canvas, int32_t x, int32_t y, Color4f col) {
     if (x < 0 || y < 0 || x >= canvas.width || y >= canvas.height) {
+        return;
+    }
+
+    if (!is_clipped(canvas, x, y)) {
         return;
     }
 
@@ -521,6 +551,10 @@ void canvas::sprite(Canvas &canvas, uint32_t n, int32_t x, int32_t y, Color4f co
     for (int32_t jj = 0; jj < sprite_height * scale_h; ++jj) {
         for (int32_t ii = 0; ii < sprite_width * scale_w; ++ii) {
             if (x + ii < 0 || x + ii >= canvas.width || y + jj < 0 || y + jj >= canvas.height) {
+                continue;
+            }
+
+            if (!is_clipped(canvas, x + ii, y + jj)) {
                 continue;
             }
 

@@ -49,6 +49,9 @@ struct Canvas {
 
     // The square pixel size of a sprite in the sprites tilemap.
     int32_t sprite_size;
+
+    // The rect that is the clip mask.
+    math::Rect clip_mask;
 };
 
 /** @brief Initializes the canvas.
@@ -62,6 +65,12 @@ void init_canvas(const Engine &engine, Canvas &canvas, const ini_t *config, Arra
 void render_canvas(const Engine &engine, Canvas &canvas);
 
 namespace canvas {
+
+// Clear the clipping mask.
+void clip(Canvas &canvas);
+
+// Sets the clipping mask. Pixels will only be drawn painted inside this rectangle.
+void clip(Canvas &canvas, int32_t x1, int32_t y1, int32_t x2, int32_t y2);
 
 void pset(Canvas &canvas, int32_t x, int32_t y, Color4f col);
 void clear(Canvas &canvas, Color4f col);
