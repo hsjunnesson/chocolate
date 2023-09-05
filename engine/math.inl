@@ -44,6 +44,10 @@ struct Color4f {
                std::abs(b - other.b) <= epsilon &&
                std::abs(a - other.a) <= epsilon;
     }
+
+    bool operator!=(const Color4f &other) const {
+        return !(*this == other);
+    }
 };
 
 struct Matrix4f {
