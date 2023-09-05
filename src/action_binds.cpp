@@ -85,59 +85,51 @@ ActionBinds::ActionBinds(foundation::Allocator &allocator, const char *config_pa
                     bool alt_state = false;
                     bool ctrl_state = false;
 
-                    uint64_t bind_key = 0;
+                    char *key_part = nullptr;
+                    char *context_mod = nullptr;
+#if defined(_WIN32)
+                    char *mod = strtok_s(str, "+", &context_mod);
+#else
+                    char *mod = strtok_r(str, "+", &context_mod);
+#endif
 
-                    // Check for states, like SHIFT+KEY_ESCAPE
-                    {
-                        char *plus = strchr(str, '+');
-                        if (plus) {
-                            *plus = '\0'; // Null-terminate the first part
-                            char *first_part = str;
-                            char *second_part = plus + 1;
-
-                            if (strcmp(first_part, "SHIFT") == 0) {
-                                shift_state = true;
-                            } else if (strcmp(first_part, "ALT") == 0) {
-                                alt_state = true;
-                            } else if (strcmp(first_part, "CTRL") == 0) {
-                                ctrl_state = true;
-                            } else {
-                                log_fatal("Invalid [actionbinds] %s = %s+%s", name, first_part, second_part);
-                            }
-
-                            ActionBindsBind bind = bind_from_descriptor(second_part);
-                            if (bind == ActionBindsBind::NOT_FOUND) {
-                                log_fatal("Invalid [actionbinds] %s = %s+%s", name, first_part, second_part);
-                            }
-
-                            Buffer ss(ta);
-
-                            if (shift_state) {
-                                ss << "SHIFT+";
-                            }
-
-                            if (alt_state) {
-                                ss << "ALT+";
-                            }
-
-                            if (ctrl_state) {
-                                ss << "CTRL+";
-                            }
-
-                            ss << second_part;
-
-                            size_t len = strlen(c_str(ss));
-                            bind_key = murmur_hash_64(c_str(ss), (uint32_t)len, 0);
+                    while (mod) {
+                        if (strcmp(mod, "SHIFT") == 0) {
+                            shift_state = true;
+                        } else if (strcmp(mod, "ALT") == 0) {
+                            alt_state = true;
+                        } else if (strcmp(mod, "CTRL") == 0) {
+                            ctrl_state = true;
                         } else {
-                            ActionBindsBind bind = bind_from_descriptor(str);
-                            if (bind == ActionBindsBind::NOT_FOUND) {
-                                log_fatal("Invalid [actionbinds] %s = %s", name, str);
-                            }
-
-                            size_t len = strlen(str);
-                            bind_key = murmur_hash_64(str, (uint32_t)len, 0);
+                            // The remaining part should be the key
+                            key_part = mod;
                         }
+#if defined(_WIN32)
+                        mod = strtok_s(NULL, "+", &context_mod);
+#else
+                        mod = strtok_r(NULL, "+", &context_mod);
+#endif
                     }
+
+                    if (!key_part) {
+                        log_fatal("Invalid [actionbinds] %s", str);
+                        return;
+                    }
+
+                    ActionBindsBind bind = bind_from_descriptor(key_part);
+                    if (bind == ActionBindsBind::NOT_FOUND) {
+                        log_fatal("Invalid [actionbinds] %s", str);
+                        return;
+                    }
+
+                    Buffer ss(ta);
+                    if (shift_state) ss << "SHIFT+";
+                    if (alt_state) ss << "ALT+";
+                    if (ctrl_state) ss << "CTRL+";
+                    ss << key_part;
+
+                    size_t len = strlen(c_str(ss));
+                    uint64_t bind_key = murmur_hash_64(c_str(ss), (uint32_t)len, 0);
 
                     if (hash::has(bind_actions, bind_key)) {
                         log_fatal("invalid [actionbinds] defining multiple of bind %s", str);
