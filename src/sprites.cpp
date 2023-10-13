@@ -492,6 +492,8 @@ void render_sprites(const Engine &engine, const Sprites &sprites) {
         return;
     }
 
+    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "render sprites");
+
     const float render_scale = engine.camera_zoom * engine.render_scale;
 
     const glm::mat4 projection = glm::ortho(0.0f, (float)engine.window_rect.size.x, 0.0f, (float)engine.window_rect.size.y, 0.1f, 100.0f);
@@ -516,12 +518,15 @@ void render_sprites(const Engine &engine, const Sprites &sprites) {
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDisable(GL_DEPTH_TEST);
 
     glDrawElements(GL_TRIANGLES, 6 * (GLsizei)quads, GL_UNSIGNED_INT, (void *)0);
 
+	glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
 
     glBindVertexArray(0);
+    glPopDebugGroup();
 }
 
 } // namespace engine
