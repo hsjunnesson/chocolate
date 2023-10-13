@@ -1,6 +1,7 @@
 #pragma once
 
 #include "math.inl"
+#include "color.inl"
 
 #include <collection_types.h>
 #include <inttypes.h>
@@ -76,7 +77,7 @@ struct Sprites {
 void init_sprites(Sprites &sprites, const char *atlas_filename);
 
 // Adds a sprite and returns a copy of the sprite.
-const Sprite add_sprite(Sprites &sprites, const char *sprite_name);
+const Sprite add_sprite(Sprites &sprites, const char *sprite_name, Color4f color = engine::color::white);
 
 // Remove sprite based on its id.
 void remove_sprite(Sprites &sprites, const uint64_t id);

@@ -221,7 +221,7 @@ void init_sprites(Sprites &sprites, const char *atlas_filename) {
     sprites.atlas = MAKE_NEW(sprites.allocator, Atlas, sprites.allocator, atlas_filename);
 }
 
-const Sprite add_sprite(Sprites &sprites, const char *sprite_name) {
+const Sprite add_sprite(Sprites &sprites, const char *sprite_name, Color4f color) {
     std::scoped_lock lock(*sprites.sprites_mutex);
 
     if (array::size(*sprites.sprites) > max_sprites) {
@@ -237,6 +237,7 @@ const Sprite add_sprite(Sprites &sprites, const char *sprite_name) {
     sprite.id = ++sprites.sprite_id_counter;
     sprite.atlas_rect = rect;
     sprite.transform = Matrix4f::identity();
+	sprite.color = color;
     sprite.dirty = true;
 
     array::push_back(*sprites.sprites, sprite);
