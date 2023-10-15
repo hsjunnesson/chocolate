@@ -123,9 +123,18 @@ ActionBinds::ActionBinds(foundation::Allocator &allocator, const char *config_pa
                     }
 
                     Buffer ss(ta);
-                    if (shift_state) ss << "SHIFT+";
-                    if (alt_state) ss << "ALT+";
-                    if (ctrl_state) ss << "CTRL+";
+                    if (shift_state) {
+                        ss << "SHIFT+";
+                    }
+
+                    if (alt_state) {
+                        ss << "ALT+";
+                    }
+
+                    if (ctrl_state) {
+                        ss << "CTRL+";
+                    }
+                    
                     ss << key_part;
 
                     size_t len = strlen(c_str(ss));

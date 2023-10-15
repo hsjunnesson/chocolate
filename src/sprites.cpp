@@ -237,7 +237,7 @@ const Sprite add_sprite(Sprites &sprites, const char *sprite_name, Color4f color
     sprite.id = ++sprites.sprite_id_counter;
     sprite.atlas_rect = rect;
     sprite.transform = Matrix4f::identity();
-	sprite.color = color;
+    sprite.color = color;
     sprite.dirty = true;
 
     array::push_back(*sprites.sprites, sprite);
@@ -523,7 +523,7 @@ void render_sprites(const Engine &engine, const Sprites &sprites) {
 
     glDrawElements(GL_TRIANGLES, 6 * (GLsizei)quads, GL_UNSIGNED_INT, (void *)0);
 
-	glEnable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
 
     glBindVertexArray(0);

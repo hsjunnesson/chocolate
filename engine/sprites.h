@@ -1,7 +1,7 @@
 #pragma once
 
-#include "math.inl"
 #include "color.inl"
+#include "math.inl"
 
 #include <collection_types.h>
 #include <inttypes.h>
