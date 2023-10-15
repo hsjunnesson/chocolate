@@ -40,6 +40,7 @@ struct Engine {
 
     GLFWwindow *glfw_window;
     Rect window_rect;
+    bool window_resizable;
     bool window_resized;
     float target_aspect_ratio;
 
