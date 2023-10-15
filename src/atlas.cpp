@@ -27,7 +27,7 @@ Atlas::Atlas(foundation::Allocator &allocator, const char *atlas_filename)
 , frames(nullptr)
 , texture(nullptr) {
     sprite_names = MAKE_NEW(allocator, Array<Buffer *>, allocator);
-    frames = MAKE_NEW(allocator, Hash<Rect>, allocator);
+    frames = MAKE_NEW(allocator, Hash<AtlasFrame>, allocator);
 
     string_stream::Buffer data(allocator);
 
@@ -101,18 +101,40 @@ Atlas::Atlas(foundation::Allocator &allocator, const char *atlas_filename)
                 log_fatal("Could not parse atlas %s: frame missing \"h\": ...", atlas_filename);
             }
 
+            Vector2f pv = {0.5f, 0.5f};
+
+            cJSON *pivot = cJSON_GetObjectItemCaseSensitive(frame, "pivot");
+            if (pivot && cJSON_IsObject(pivot)) {
+                cJSON *pvx = cJSON_GetObjectItemCaseSensitive(pivot, "x");
+                if (!pvx || !cJSON_IsNumber(pvx)) {
+                    log_fatal("Could not parse atlas %s: frame pivot missing \"x\": ...", atlas_filename);
+                }
+
+                cJSON *pvy = cJSON_GetObjectItemCaseSensitive(pivot, "y");
+                if (!pvy || !cJSON_IsNumber(pvy)) {
+                    log_fatal("Could not parse atlas %s: frame pivot missing \"y\": ...", atlas_filename);
+                }
+
+                pv.x = (float)pvx->valuedouble;
+                pv.y = (float)pvy->valuedouble;
+            }
+
             Rect r;
             r.origin.x = x->valueint;
             r.origin.y = y->valueint;
             r.size.x = w->valueint;
             r.size.y = h->valueint;
 
+            AtlasFrame fr;
+            fr.pivot = pv;
+            fr.rect = r;
+
             Buffer *sprite_name = MAKE_NEW(allocator, Buffer, allocator);
             *sprite_name << filename->valuestring;
             array::push_back(*sprite_names, sprite_name);
 
             uint64_t key = murmur_hash_64(c_str(*sprite_name), array::size(*sprite_name), 0);
-            hash::set(*this->frames, key, r);
+            hash::set(*this->frames, key, fr);
         }
     }
 }
@@ -128,7 +150,7 @@ Atlas::~Atlas() {
     MAKE_DELETE(allocator, Texture, texture);
 }
 
-const Rect *atlas_rect(const Atlas &atlas, const char *sprite_name) {
+const AtlasFrame *atlas_frame(const Atlas &atlas, const char *sprite_name) {
     if (!sprite_name) {
         return nullptr;
     }
@@ -141,6 +163,15 @@ const Rect *atlas_rect(const Atlas &atlas, const char *sprite_name) {
     }
 
     return nullptr;
+}
+
+const Rect *atlas_rect(const Atlas &atlas, const char *sprite_name) {
+    const AtlasFrame *frame = atlas_frame(atlas, sprite_name);
+    if (!frame) {
+        return nullptr;
+    }
+
+    return &frame->rect;
 }
 
 } // namespace engine
