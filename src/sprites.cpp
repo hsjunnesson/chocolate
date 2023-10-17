@@ -228,14 +228,14 @@ const Sprite add_sprite(Sprites &sprites, const char *sprite_name, Color4f color
         log_fatal("Sprites already at max size");
     }
 
-    const Rect *rect = atlas_rect(*sprites.atlas, sprite_name);
-    if (!rect) {
+    const AtlasFrame *frame = atlas_frame(*sprites.atlas, sprite_name);
+    if (!frame) {
         log_fatal("Sprites atlas doesn't contain %s", sprite_name);
     }
 
     Sprite sprite;
     sprite.id = ++sprites.sprite_id_counter;
-    sprite.atlas_rect = rect;
+    sprite.atlas_frame = frame;
     sprite.transform = Matrix4f::identity();
     sprite.color = color;
     sprite.dirty = true;
@@ -458,10 +458,10 @@ void commit_sprites(Sprites &sprites) {
                 const int atlas_width = sprites.atlas->texture->width;
                 const int atlas_height = sprites.atlas->texture->height;
 
-                float texcoord_x = (float)sprite->atlas_rect->origin.x / atlas_width;
-                float texcoord_y = (float)(sprite->atlas_rect->origin.y + sprite->atlas_rect->size.y) / atlas_height;
-                float texcoord_w = (float)sprite->atlas_rect->size.x / atlas_width;
-                float texcoord_h = (float)sprite->atlas_rect->size.y / atlas_height;
+                float texcoord_x = (float)sprite->atlas_frame->rect.origin.x / atlas_width;
+                float texcoord_y = (float)(sprite->atlas_frame->rect.origin.y + sprite->atlas_frame->rect.size.y) / atlas_height;
+                float texcoord_w = (float)sprite->atlas_frame->rect.size.x / atlas_width;
+                float texcoord_h = (float)sprite->atlas_frame->rect.size.y / atlas_height;
 
                 sprites.vertex_data[i * 4 + 0].texture_coords = {texcoord_x, texcoord_y};
                 sprites.vertex_data[i * 4 + 1].texture_coords = {texcoord_x + texcoord_w, texcoord_y - texcoord_h};

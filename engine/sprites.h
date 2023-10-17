@@ -20,11 +20,12 @@ using namespace math;
 
 struct Engine;
 struct Atlas;
+struct AtlasFrame;
 struct Shader;
 
 struct Sprite {
     uint64_t id;
-    const Rect *atlas_rect = nullptr;
+    const AtlasFrame *atlas_frame = nullptr;
     Matrix4f transform = Matrix4f::identity();
     Color4f color = {1.0f, 1.0f, 1.0f, 1.0f};
     bool dirty = false;
