@@ -14,17 +14,9 @@ find_package(cJSON CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
 find_package(Backward CONFIG REQUIRED)
 
-
-if (TRACY)
-    FetchContent_Declare (
-        tracy
-        GIT_REPOSITORY https://github.com/wolfpld/tracy.git
-        GIT_TAG        37aff70dfa50cf6307b3fee6074d627dc2929143     # Release 0.10.0
-        GIT_SHALLOW TRUE
-        GIT_PROGRESS TRUE
-    )
-
-    FetchContent_MakeAvailable(tracy)
+if (SUPERLUMINAL)
+    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "c:/Program Files/Superluminal/Performance/API")
+    find_package(SuperluminalAPI REQUIRED)
 endif()
 
 
@@ -100,9 +92,8 @@ target_include_directories(${LIB_NAME} PUBLIC ${PROJECT_SOURCE_DIR})
 target_include_directories(${LIB_NAME} SYSTEM PUBLIC ${bitsquidfoundation_SOURCE_DIR})
 target_include_directories(${LIB_NAME} SYSTEM PRIVATE ${PROJECT_SOURCE_DIR}/glad/include)
 
-if (TRACY)
-    include_directories(SYSTEM PUBLIC ${tracy_SOURCE_DIR}/public)
-    target_link_libraries(${LIB_NAME} TracyClient)
+if (SUPERLUMINAL)
+    target_include_directories(${LIB_NAME} SYSTEM PRIVATE ${SuperluminalAPI_INCLUDE_DIRS})
 endif()
 
 target_compile_definitions(${LIB_NAME} PRIVATE "GLFW_INCLUDE_NONE")
@@ -118,11 +109,21 @@ target_link_libraries(${LIB_NAME}
     imgui::imgui
 )
 
+if (SUPERLUMINAL)
+    target_link_libraries(${LIB_NAME} SuperluminalAPI)
+endif()
+
 
 # Compiler warnings & definitions
 
 include(cmake/CompilerWarnings.cmake)
 myproject_set_project_warnings(${PROJECT_NAME})
+
+if (MSVC)
+    if (SUPERLUMINAL)
+        target_compile_definitions(${PROJECT_NAME} PRIVATE SUPERLUMINAL=1)
+    endif()
+endif()
 
 
 # Enable tests

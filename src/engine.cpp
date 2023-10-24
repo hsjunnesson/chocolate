@@ -22,8 +22,9 @@
 #include <string_stream.h>
 #include <temp_allocator.h>
 
-#if defined(TRACY_ENABLE)
-#include <tracy/Tracy.hpp>
+#if defined(SUPERLUMINAL)
+#include <Superluminal/PerformanceAPI.h>
+#include <cstdio>
 #endif
 
 namespace {
@@ -391,8 +392,6 @@ Engine::~Engine() {
 }
 
 void render(Engine &engine) {
-    ZoneScoped;
-
     wait_buffer();
 
     glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "render engine");
@@ -441,6 +440,12 @@ int run(Engine &engine) {
     float delta_time = current_frame_time - prev_frame_time;
 
     while (true) {
+#if defined(SUPERLUMINAL)
+        char superluminal_event_data[256];
+        snprintf(superluminal_event_data, 256, "Frame %" PRIu64 "", engine.frames);
+        PerformanceAPI_BeginEvent("frame", superluminal_event_data, PERFORMANCEAPI_DEFAULT_COLOR);
+#endif
+
         // Process queued events
         if (engine.engine_callbacks && engine.engine_callbacks->on_input) {
             for (uint32_t i = 0; i < array::size(*engine.input->input_commands); ++i) {
@@ -491,9 +496,8 @@ int run(Engine &engine) {
         }
 
         ++engine.frames;
-
-#if defined(TRACY_ENABLE)
-        FrameMark;
+#if defined(SUPERLUMINAL)
+        PerformanceAPI_EndEvent();
 #endif
     }
 
