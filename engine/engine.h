@@ -1,5 +1,11 @@
 #pragma once
 
+#if defined(TRACY_ENABLE)
+    #include <tracy/Tracy.hpp>
+#else
+    #define ZoneScoped void(0)
+#endif
+
 #include "math.inl"
 
 #include <inttypes.h>
