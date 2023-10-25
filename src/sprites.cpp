@@ -16,10 +16,6 @@
 #include <mutex>
 #include <temp_allocator.h>
 
-#if defined(SUPERLUMINAL)
-#include <Superluminal/PerformanceAPI.h>
-#endif
-
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/euler_angles.hpp>
 

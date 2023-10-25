@@ -22,11 +22,6 @@
 #include <string_stream.h>
 #include <temp_allocator.h>
 
-#if defined(SUPERLUMINAL)
-#include <Superluminal/PerformanceAPI.h>
-#include <cstdio>
-#endif
-
 namespace {
 
 using namespace foundation;
@@ -440,12 +435,6 @@ int run(Engine &engine) {
     float delta_time = current_frame_time - prev_frame_time;
 
     while (true) {
-#if defined(SUPERLUMINAL)
-        char superluminal_event_data[256];
-        snprintf(superluminal_event_data, 256, "Frame %" PRIu64 "", engine.frames);
-        PerformanceAPI_BeginEvent("frame", superluminal_event_data, PERFORMANCEAPI_DEFAULT_COLOR);
-#endif
-
         // Process queued events
         if (engine.engine_callbacks && engine.engine_callbacks->on_input) {
             for (uint32_t i = 0; i < array::size(*engine.input->input_commands); ++i) {
@@ -496,9 +485,6 @@ int run(Engine &engine) {
         }
 
         ++engine.frames;
-#if defined(SUPERLUMINAL)
-        PerformanceAPI_EndEvent();
-#endif
     }
 
     return exit_code;
