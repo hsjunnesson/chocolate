@@ -65,6 +65,7 @@ set(HEADERS_Chocolate
     "engine/shader.h"
     "engine/sprites.h"
     "engine/stb_image.h"
+    "engine/stb_image_write.h"
     "engine/texture.h"
 )
 

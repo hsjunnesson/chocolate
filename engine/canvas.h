@@ -62,7 +62,26 @@ struct Canvas {
  * The buffer is assumed to be 32-bit RBGA.
  */
 void init_canvas(const Engine &engine, Canvas &canvas, const ini_t *config, Array<uint8_t> *sprites_data = nullptr);
+
+/** Renders the canvas
+ * @param engine The `Engine` object.
+ * @param canvas The `Canvas` to render.
+ */
 void render_canvas(const Engine &engine, Canvas &canvas);
+
+/** Writes the canvas to a PNG.
+ * @param canvas The `Canvas` to save.
+ * @param filename The filename to save to.
+ * This operation honors the clipping mask. Setting a clipping mask saves only that part of the canvas.
+ */
+void write_png(const Canvas &canvas, const char *filename);
+
+/** Prints the canvas through the OS to a printer.
+ * @param canvas The `Canvas` to print.
+ * @param printer The name of the printer.
+ * This operation honors the clipping mask. Setting a clipping mask prints only that part of the canvas.
+ */
+void print(const Canvas &canvas, const char *printer);
 
 namespace canvas {
 
