@@ -399,17 +399,17 @@ ActionBinds::ActionBinds(foundation::Allocator &allocator, const char *config_pa
 
                     if (shift_state) {
                         ss << "SHIFT+";
-                        human_readable << "Shift + ";
+                        human_readable << "Shift+";
                     }
                     
                     if (alt_state) {
                         ss << "ALT+";
-                        human_readable << "Alt + ";
+                        human_readable << "Alt+";
                     }
                     
                     if (ctrl_state) {
                         ss << "CTRL+";
-                        human_readable << "Ctrl + ";
+                        human_readable << "Ctrl+";
                     }
                     
                     ss << key_part;
