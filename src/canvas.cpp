@@ -367,7 +367,7 @@ void print(const Canvas &canvas, const char *printer) {
 
 #if defined(_WIN32)
     // Initialize a document
-    DOCINFOW di = { sizeof(DOCINFOW), L"My Document", NULL };
+    DOCINFOW di = {sizeof(DOCINFOW), L"My Document", NULL};
 
     int printer_length = MultiByteToWideChar(CP_ACP, 0, printer, -1, NULL, 0);
     wchar_t *wide_printer = (wchar_t *)canvas.allocator.allocate(sizeof(wchar_t) * printer_length);
@@ -418,8 +418,7 @@ void print(const Canvas &canvas, const char *printer) {
         pixel_data,
         &bmi,
         DIB_RGB_COLORS,
-        SRCCOPY
-    );
+        SRCCOPY);
 
     // Finish the print job
     if (EndPage(printerDC) <= 0) {

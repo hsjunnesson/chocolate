@@ -11,7 +11,6 @@
 #include <memory.h>
 #include <murmur_hash.h>
 #include <string_stream.h>
-#include <memory.h>
 #include <temp_allocator.h>
 
 #define __STDC_WANT_LIB_EXT1__ 1
@@ -393,7 +392,6 @@ ActionBinds::ActionBinds(foundation::Allocator &allocator, const char *config_pa
                         return;
                     }
 
-
                     Buffer ss(ta);
                     Buffer human_readable(ta);
 
@@ -401,20 +399,20 @@ ActionBinds::ActionBinds(foundation::Allocator &allocator, const char *config_pa
                         ss << "SHIFT+";
                         human_readable << "Shift+";
                     }
-                    
+
                     if (alt_state) {
                         ss << "ALT+";
                         human_readable << "Alt+";
                     }
-                    
+
                     if (ctrl_state) {
                         ss << "CTRL+";
                         human_readable << "Ctrl+";
                     }
-                    
+
                     ss << key_part;
                     human_readable << human_readable_bind(bind);
-                    
+
                     size_t len = strlen(c_str(ss));
                     uint64_t bind_key = murmur_hash_64(c_str(ss), (uint32_t)len, 0);
 

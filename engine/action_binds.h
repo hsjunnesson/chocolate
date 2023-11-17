@@ -189,19 +189,19 @@ enum class ActionBindsBind {
 struct ActionBinds {
     ActionBinds(foundation::Allocator &allocator, const char *config_path);
     ~ActionBinds();
-    
+
     foundation::Allocator &allocator;
-    
+
     /// Hash of binds to actions.
     // The keys are ActionBindsBind enums, values are hashed action strings.
     // e.g.: murmur_hash(KEY_Q): murmur_hash(QUIT)
     foundation::Hash<uint64_t> bind_actions;
-    
+
     /// Hash of actions to human readable strings of binds.
     // The keys are your action binds, values are strings describing the bind.
     // Note that some actions don't have a corresponding human readable string.
     // e.g.: murmur_hash(QUIT): "Escape";
-    foundation::Hash<const char *>human_readable_action_binds;
+    foundation::Hash<const char *> human_readable_action_binds;
 };
 
 /// Returns the string descriptor corresponding to the Bind. Nullptr on invalid bind.
