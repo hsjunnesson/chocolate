@@ -11,6 +11,7 @@
 #include <memory.h>
 #include <murmur_hash.h>
 #include <string_stream.h>
+#include <memory.h>
 #include <temp_allocator.h>
 
 #define __STDC_WANT_LIB_EXT1__ 1
@@ -24,8 +25,278 @@ using namespace foundation::string_stream;
 ActionBindsBind bind_from_descriptor(const char *);
 const char *bind_descriptor(const ActionBindsBind);
 
+const char *human_readable_bind(const ActionBindsBind bind) {
+    switch (bind) {
+    case ActionBindsBind::KEY_APOSTROPHE:
+        return "\'";
+        break;
+    case ActionBindsBind::KEY_COMMA:
+        return ",";
+        break;
+    case ActionBindsBind::KEY_MINUS:
+        return "-";
+        break;
+    case ActionBindsBind::KEY_PERIOD:
+        return ".";
+        break;
+    case ActionBindsBind::KEY_SLASH:
+        return "/";
+        break;
+    case ActionBindsBind::KEY_0:
+        return "0";
+        break;
+    case ActionBindsBind::KEY_1:
+        return "1";
+        break;
+    case ActionBindsBind::KEY_2:
+        return "2";
+        break;
+    case ActionBindsBind::KEY_3:
+        return "3";
+        break;
+    case ActionBindsBind::KEY_4:
+        return "4";
+        break;
+    case ActionBindsBind::KEY_5:
+        return "5";
+        break;
+    case ActionBindsBind::KEY_6:
+        return "6";
+        break;
+    case ActionBindsBind::KEY_7:
+        return "7";
+        break;
+    case ActionBindsBind::KEY_8:
+        return "8";
+        break;
+    case ActionBindsBind::KEY_9:
+        return "9";
+        break;
+    case ActionBindsBind::KEY_SEMICOLON:
+        return ";";
+        break;
+    case ActionBindsBind::KEY_EQUAL:
+        return "=";
+        break;
+    case ActionBindsBind::KEY_A:
+        return "A";
+        break;
+    case ActionBindsBind::KEY_B:
+        return "B";
+        break;
+    case ActionBindsBind::KEY_C:
+        return "C";
+        break;
+    case ActionBindsBind::KEY_D:
+        return "D";
+        break;
+    case ActionBindsBind::KEY_E:
+        return "E";
+        break;
+    case ActionBindsBind::KEY_F:
+        return "F";
+        break;
+    case ActionBindsBind::KEY_G:
+        return "G";
+        break;
+    case ActionBindsBind::KEY_H:
+        return "H";
+        break;
+    case ActionBindsBind::KEY_I:
+        return "I";
+        break;
+    case ActionBindsBind::KEY_J:
+        return "J";
+        break;
+    case ActionBindsBind::KEY_K:
+        return "K";
+        break;
+    case ActionBindsBind::KEY_L:
+        return "L";
+        break;
+    case ActionBindsBind::KEY_M:
+        return "M";
+        break;
+    case ActionBindsBind::KEY_N:
+        return "N";
+        break;
+    case ActionBindsBind::KEY_O:
+        return "O";
+        break;
+    case ActionBindsBind::KEY_P:
+        return "P";
+        break;
+    case ActionBindsBind::KEY_Q:
+        return "Q";
+        break;
+    case ActionBindsBind::KEY_R:
+        return "R";
+        break;
+    case ActionBindsBind::KEY_S:
+        return "S";
+        break;
+    case ActionBindsBind::KEY_T:
+        return "T";
+        break;
+    case ActionBindsBind::KEY_U:
+        return "U";
+        break;
+    case ActionBindsBind::KEY_V:
+        return "V";
+        break;
+    case ActionBindsBind::KEY_W:
+        return "W";
+        break;
+    case ActionBindsBind::KEY_X:
+        return "X";
+        break;
+    case ActionBindsBind::KEY_Y:
+        return "Y";
+        break;
+    case ActionBindsBind::KEY_Z:
+        return "Z";
+        break;
+    case ActionBindsBind::KEY_ESCAPE:
+        return "ESC";
+        break;
+    case ActionBindsBind::KEY_ENTER:
+        return "Enter";
+        break;
+    case ActionBindsBind::KEY_TAB:
+        return "Tab";
+        break;
+    case ActionBindsBind::KEY_BACKSPACE:
+        return "Backspace";
+        break;
+    case ActionBindsBind::KEY_INSERT:
+        return "Insert";
+        break;
+    case ActionBindsBind::KEY_DELETE:
+        return "Delete";
+        break;
+    case ActionBindsBind::KEY_RIGHT:
+        return "Right";
+        break;
+    case ActionBindsBind::KEY_LEFT:
+        return "Left";
+        break;
+    case ActionBindsBind::KEY_DOWN:
+        return "Down";
+        break;
+    case ActionBindsBind::KEY_UP:
+        return "Up";
+        break;
+    case ActionBindsBind::KEY_PAGE_UP:
+        return "Page Up";
+        break;
+    case ActionBindsBind::KEY_PAGE_DOWN:
+        return "Page Down";
+        break;
+    case ActionBindsBind::KEY_HOME:
+        return "Home";
+        break;
+    case ActionBindsBind::KEY_END:
+        return "End";
+        break;
+    case ActionBindsBind::KEY_CAPS_LOCK:
+        return "Caps Lock";
+        break;
+    case ActionBindsBind::KEY_SCROLL_LOCK:
+        return "Scroll Lock";
+        break;
+    case ActionBindsBind::KEY_NUM_LOCK:
+        return "Num Lock";
+        break;
+    case ActionBindsBind::KEY_PRINT_SCREEN:
+        return "Print Screen";
+        break;
+    case ActionBindsBind::KEY_PAUSE:
+        return "Pause";
+        break;
+    case ActionBindsBind::KEY_F1:
+        return "F1";
+        break;
+    case ActionBindsBind::KEY_F2:
+        return "F2";
+        break;
+    case ActionBindsBind::KEY_F3:
+        return "F3";
+        break;
+    case ActionBindsBind::KEY_F4:
+        return "F4";
+        break;
+    case ActionBindsBind::KEY_F5:
+        return "F5";
+        break;
+    case ActionBindsBind::KEY_F6:
+        return "F6";
+        break;
+    case ActionBindsBind::KEY_F7:
+        return "F7";
+        break;
+    case ActionBindsBind::KEY_F8:
+        return "F8";
+        break;
+    case ActionBindsBind::KEY_F9:
+        return "F9";
+        break;
+    case ActionBindsBind::KEY_F10:
+        return "F10";
+        break;
+    case ActionBindsBind::KEY_F11:
+        return "F11";
+        break;
+    case ActionBindsBind::KEY_F12:
+        return "F12";
+        break;
+    case ActionBindsBind::KEY_F13:
+        return "F13";
+        break;
+    case ActionBindsBind::KEY_F14:
+        return "F14";
+        break;
+    case ActionBindsBind::KEY_F15:
+        return "F15";
+        break;
+    case ActionBindsBind::KEY_F16:
+        return "F16";
+        break;
+    case ActionBindsBind::KEY_F17:
+        return "F17";
+        break;
+    case ActionBindsBind::KEY_F18:
+        return "F18";
+        break;
+    case ActionBindsBind::KEY_F19:
+        return "F19";
+        break;
+    case ActionBindsBind::KEY_F20:
+        return "F20";
+        break;
+    case ActionBindsBind::KEY_F21:
+        return "F21";
+        break;
+    case ActionBindsBind::KEY_F22:
+        return "F22";
+        break;
+    case ActionBindsBind::KEY_F23:
+        return "F23";
+        break;
+    case ActionBindsBind::KEY_F24:
+        return "F24";
+        break;
+    case ActionBindsBind::KEY_F25:
+        return "F25";
+        break;
+    }
+
+    return nullptr;
+}
+
 ActionBinds::ActionBinds(foundation::Allocator &allocator, const char *config_path)
-: bind_actions(allocator) {
+: allocator(allocator)
+, bind_actions(allocator)
+, human_readable_action_binds(allocator) {
     TempAllocator1024 ta;
 
     string_stream::Buffer buffer(ta);
@@ -122,12 +393,28 @@ ActionBinds::ActionBinds(foundation::Allocator &allocator, const char *config_pa
                         return;
                     }
 
-                    Buffer ss(ta);
-                    if (shift_state) ss << "SHIFT+";
-                    if (alt_state) ss << "ALT+";
-                    if (ctrl_state) ss << "CTRL+";
-                    ss << key_part;
 
+                    Buffer ss(ta);
+                    Buffer human_readable(ta);
+
+                    if (shift_state) {
+                        ss << "SHIFT+";
+                        human_readable << "Shift + ";
+                    }
+                    
+                    if (alt_state) {
+                        ss << "ALT+";
+                        human_readable << "Alt + ";
+                    }
+                    
+                    if (ctrl_state) {
+                        ss << "CTRL+";
+                        human_readable << "Ctrl + ";
+                    }
+                    
+                    ss << key_part;
+                    human_readable << human_readable_bind(bind);
+                    
                     size_t len = strlen(c_str(ss));
                     uint64_t bind_key = murmur_hash_64(c_str(ss), (uint32_t)len, 0);
 
@@ -135,6 +422,16 @@ ActionBinds::ActionBinds(foundation::Allocator &allocator, const char *config_pa
                         log_fatal("invalid [actionbinds] defining multiple of bind %s", str);
                     } else {
                         hash::set(bind_actions, bind_key, action_key);
+
+                        if (!hash::has(human_readable_action_binds, action_key)) {
+                            unsigned int human_readable_length = array::size(human_readable);
+                            char *human_readable_string = (char *)allocator.allocate(human_readable_length + 1);
+
+                            memcpy(human_readable_string, array::begin(human_readable), human_readable_length);
+                            human_readable_string[human_readable_length] = '\0';
+
+                            hash::set(human_readable_action_binds, action_key, (const char *)human_readable_string);
+                        }
                     }
 
 #if defined(_WIN32)
@@ -148,6 +445,13 @@ ActionBinds::ActionBinds(foundation::Allocator &allocator, const char *config_pa
     }
 
     ini_destroy(ini);
+}
+
+ActionBinds::~ActionBinds() {
+    for (auto iter = hash::begin(human_readable_action_binds); iter != hash::end(human_readable_action_binds); ++iter) {
+        const char *string = iter->value;
+        allocator.deallocate((void *)string);
+    }
 }
 
 /// Returns the Bind from a descriptor. or NOT_FOUND if not a valid descriptor.
