@@ -8,6 +8,9 @@
 #include "engine/shader.h"
 #include "engine/stb_image.h"
 
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "engine/stb_image_write.h"
+
 #include <GLFW/glfw3.h>
 #include <array.h>
 #include <cassert>
@@ -19,6 +22,15 @@
 #include <murmur_hash.h>
 #include <string>
 #include <string_stream.h>
+#include <temp_allocator.h>
+
+// clang-format off
+#if defined(_WIN32)
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <Windows.h>
+#endif
+// clang-format on
 
 using engine::Canvas;
 using engine::Engine;
@@ -301,6 +313,132 @@ void render_canvas(const Engine &engine, Canvas &canvas) {
     glPopDebugGroup();
 }
 
+void write_png(const Canvas &canvas, const char *filename) {
+    const int comp = 4;
+    if (canvas.clip_mask.size.x == -1) {
+        stbi_write_png(filename, canvas.width, canvas.height, comp, array::begin(canvas.data), canvas.width * comp);
+    } else {
+        uint32_t pixel_data_length = canvas.clip_mask.size.x * canvas.clip_mask.size.y * comp;
+        uint8_t *pixel_data = (uint8_t *)canvas.allocator.allocate(sizeof(uint8_t) * pixel_data_length);
+        if (!pixel_data) {
+            log_fatal("Could not allocate data");
+        }
+
+        const uint8_t *canvas_data = array::begin(canvas.data);
+        for (int32_t y = 0; y < canvas.clip_mask.size.y; ++y) {
+            for (int32_t x = 0; x < canvas.clip_mask.size.x; ++x) {
+                int src_index = ((canvas.clip_mask.origin.y + y) * canvas.width + (canvas.clip_mask.origin.x + x)) * comp;
+                int dest_index = (y * canvas.clip_mask.size.x + x) * comp;
+                memcpy(&pixel_data[dest_index], &canvas_data[src_index], comp);
+            }
+        }
+
+        stbi_write_png(filename, canvas.clip_mask.size.x, canvas.clip_mask.size.y, comp, pixel_data, canvas.clip_mask.size.x * comp);
+
+        canvas.allocator.deallocate(pixel_data);
+    }
+}
+
+void print(const Canvas &canvas, const char *printer) {
+    math::Rect clip_mask = canvas.clip_mask;
+    if (clip_mask.size.x == -1) {
+        clip_mask.origin.x = 0;
+        clip_mask.origin.y = 0;
+        clip_mask.size.x = canvas.width;
+        clip_mask.size.y = canvas.height;
+    }
+
+    const int comp = 4;
+
+    uint32_t pixel_data_length = clip_mask.size.x * clip_mask.size.y * comp;
+    uint8_t *pixel_data = (uint8_t *)canvas.allocator.allocate(sizeof(uint8_t) * pixel_data_length);
+    if (!pixel_data) {
+        log_fatal("Could not allocate data");
+    }
+
+    const uint8_t *canvas_data = array::begin(canvas.data);
+    for (int32_t y = 0; y < canvas.clip_mask.size.y; ++y) {
+        for (int32_t x = 0; x < canvas.clip_mask.size.x; ++x) {
+            int src_index = ((canvas.clip_mask.origin.y + y) * canvas.width + (canvas.clip_mask.origin.x + x)) * comp;
+            int dest_index = (y * canvas.clip_mask.size.x + x) * comp;
+            memcpy(&pixel_data[dest_index], &canvas_data[src_index], comp);
+        }
+    }
+
+#if defined(_WIN32)
+    // Initialize a document
+    DOCINFOW di = { sizeof(DOCINFOW), L"My Document", NULL };
+
+    int printer_length = MultiByteToWideChar(CP_ACP, 0, printer, -1, NULL, 0);
+    wchar_t *wide_printer = (wchar_t *)canvas.allocator.allocate(sizeof(wchar_t) * printer_length);
+    MultiByteToWideChar(CP_ACP, 0, printer, -1, wide_printer, printer_length);
+
+    // Start a print job
+    HDC printerDC = CreateDCW(L"WINSPOOL", wide_printer, NULL, NULL);
+    if (printerDC == NULL) {
+        canvas.allocator.deallocate(pixel_data);
+        canvas.allocator.deallocate(wide_printer);
+        log_error("Failed to create a DC for the printer.");
+        return;
+    }
+
+    canvas.allocator.deallocate(wide_printer);
+
+    if (StartDocW(printerDC, &di) <= 0) {
+        DeleteDC(printerDC);
+        canvas.allocator.deallocate(pixel_data);
+        log_error("Failed to start a document.");
+        return;
+    }
+
+    if (StartPage(printerDC) <= 0) {
+        EndDoc(printerDC);
+        DeleteDC(printerDC);
+        canvas.allocator.deallocate(pixel_data);
+        log_error("Failed to start a page.");
+        return;
+    }
+
+    const int width = clip_mask.size.x;
+    const int height = clip_mask.size.y;
+
+    BITMAPINFO bmi = {};
+    bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+    bmi.bmiHeader.biWidth = width;
+    bmi.bmiHeader.biHeight = -height; // Negative for top-down bitmap
+    bmi.bmiHeader.biPlanes = 1;
+    bmi.bmiHeader.biBitCount = 32; // 32 bits per pixel for RGBA
+    bmi.bmiHeader.biCompression = BI_RGB;
+
+    // Draw the bitmap
+    StretchDIBits(
+        printerDC,
+        0, 0, width, height,
+        0, 0, width, height,
+        pixel_data,
+        &bmi,
+        DIB_RGB_COLORS,
+        SRCCOPY
+    );
+
+    // Finish the print job
+    if (EndPage(printerDC) <= 0) {
+        log_error("Failed to end the page.");
+    }
+
+    if (EndDoc(printerDC) <= 0) {
+        log_error("Failed to end the document.");
+    }
+
+    // Clean up
+    DeleteDC(printerDC);
+#elif
+    log_error("Platform not supported");
+#endif
+
+    canvas.allocator.deallocate(pixel_data);
+}
+
 void canvas::clip(Canvas &canvas) {
     canvas.clip_mask.origin = {0, 0};
     canvas.clip_mask.size = {-1, -1};
@@ -518,8 +656,8 @@ void canvas::rectangle_fill(Canvas &canvas, int32_t x1, int32_t y1, int32_t x2, 
     int32_t min_y = std::min(y1, y2);
     int32_t max_y = std::max(y1, y2);
 
-    for (int32_t y = min_y; y <= max_y; ++y) {
-        for (int32_t x = min_x; x <= max_x; ++x) {
+    for (int32_t y = min_y; y < max_y; ++y) {
+        for (int32_t x = min_x; x < max_x; ++x) {
             pset(canvas, x, y, col);
         }
     }

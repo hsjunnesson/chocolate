@@ -221,22 +221,23 @@ void init_sprites(Sprites &sprites, const char *atlas_filename) {
     sprites.atlas = MAKE_NEW(sprites.allocator, Atlas, sprites.allocator, atlas_filename);
 }
 
-const Sprite add_sprite(Sprites &sprites, const char *sprite_name) {
+const Sprite add_sprite(Sprites &sprites, const char *sprite_name, Color4f color) {
     std::scoped_lock lock(*sprites.sprites_mutex);
 
     if (array::size(*sprites.sprites) > max_sprites) {
         log_fatal("Sprites already at max size");
     }
 
-    const Rect *rect = atlas_rect(*sprites.atlas, sprite_name);
-    if (!rect) {
+    const AtlasFrame *frame = atlas_frame(*sprites.atlas, sprite_name);
+    if (!frame) {
         log_fatal("Sprites atlas doesn't contain %s", sprite_name);
     }
 
     Sprite sprite;
     sprite.id = ++sprites.sprite_id_counter;
-    sprite.atlas_rect = rect;
+    sprite.atlas_frame = frame;
     sprite.transform = Matrix4f::identity();
+    sprite.color = color;
     sprite.dirty = true;
 
     array::push_back(*sprites.sprites, sprite);
@@ -457,10 +458,10 @@ void commit_sprites(Sprites &sprites) {
                 const int atlas_width = sprites.atlas->texture->width;
                 const int atlas_height = sprites.atlas->texture->height;
 
-                float texcoord_x = (float)sprite->atlas_rect->origin.x / atlas_width;
-                float texcoord_y = (float)(sprite->atlas_rect->origin.y + sprite->atlas_rect->size.y) / atlas_height;
-                float texcoord_w = (float)sprite->atlas_rect->size.x / atlas_width;
-                float texcoord_h = (float)sprite->atlas_rect->size.y / atlas_height;
+                float texcoord_x = (float)sprite->atlas_frame->rect.origin.x / atlas_width;
+                float texcoord_y = (float)(sprite->atlas_frame->rect.origin.y + sprite->atlas_frame->rect.size.y) / atlas_height;
+                float texcoord_w = (float)sprite->atlas_frame->rect.size.x / atlas_width;
+                float texcoord_h = (float)sprite->atlas_frame->rect.size.y / atlas_height;
 
                 sprites.vertex_data[i * 4 + 0].texture_coords = {texcoord_x, texcoord_y};
                 sprites.vertex_data[i * 4 + 1].texture_coords = {texcoord_x + texcoord_w, texcoord_y - texcoord_h};
@@ -492,6 +493,8 @@ void render_sprites(const Engine &engine, const Sprites &sprites) {
         return;
     }
 
+    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "render sprites");
+
     const float render_scale = engine.camera_zoom * engine.render_scale;
 
     const glm::mat4 projection = glm::ortho(0.0f, (float)engine.window_rect.size.x, 0.0f, (float)engine.window_rect.size.y, 0.1f, 100.0f);
@@ -516,12 +519,15 @@ void render_sprites(const Engine &engine, const Sprites &sprites) {
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDisable(GL_DEPTH_TEST);
 
     glDrawElements(GL_TRIANGLES, 6 * (GLsizei)quads, GL_UNSIGNED_INT, (void *)0);
 
+    glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
 
     glBindVertexArray(0);
+    glPopDebugGroup();
 }
 
 } // namespace engine

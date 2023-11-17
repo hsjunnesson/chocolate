@@ -1,5 +1,6 @@
 #pragma once
 
+#include "color.inl"
 #include "math.inl"
 
 #include <collection_types.h>
@@ -19,11 +20,12 @@ using namespace math;
 
 struct Engine;
 struct Atlas;
+struct AtlasFrame;
 struct Shader;
 
 struct Sprite {
     uint64_t id;
-    const Rect *atlas_rect = nullptr;
+    const AtlasFrame *atlas_frame = nullptr;
     Matrix4f transform = Matrix4f::identity();
     Color4f color = {1.0f, 1.0f, 1.0f, 1.0f};
     bool dirty = false;
@@ -76,7 +78,7 @@ struct Sprites {
 void init_sprites(Sprites &sprites, const char *atlas_filename);
 
 // Adds a sprite and returns a copy of the sprite.
-const Sprite add_sprite(Sprites &sprites, const char *sprite_name);
+const Sprite add_sprite(Sprites &sprites, const char *sprite_name, Color4f color = engine::color::white);
 
 // Remove sprite based on its id.
 void remove_sprite(Sprites &sprites, const uint64_t id);

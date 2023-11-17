@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.21)
+cmake_minimum_required(VERSION 3.20)
 project(chocolate VERSION 1.0.0)
 
 include(GNUInstallDirs)
@@ -65,6 +65,7 @@ set(HEADERS_Chocolate
     "engine/shader.h"
     "engine/sprites.h"
     "engine/stb_image.h"
+    "engine/stb_image_write.h"
     "engine/texture.h"
 )
 

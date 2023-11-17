@@ -202,6 +202,7 @@ Engine::Engine(Allocator &allocator, const char *config_path)
 , frames(0)
 , glfw_window(nullptr)
 , window_rect({{0, 0}, {0, 0}})
+, window_resizable(true)
 , window_resized(false)
 , target_aspect_ratio(1.0f)
 , input(nullptr)
@@ -213,7 +214,8 @@ Engine::Engine(Allocator &allocator, const char *config_path)
 , fps_limit(0) {
     TempAllocator1024 ta;
 
-    int window_width, window_height;
+    int window_width = 0;
+    int window_height = 0;
     bool always_on_top = false;
     string_stream::Buffer window_title(ta);
 
@@ -273,6 +275,16 @@ Engine::Engine(Allocator &allocator, const char *config_path)
         read_property("engine", "window_height", [&window_height](const char *property) {
             window_height = atoi(property);
         });
+
+        if (config::has_property(ini, "engine", "window_resizable")) {
+            read_property("engine", "window_resizable", [this](const char *property) {
+                if (strcmp("true", property) == 0) {
+                    this->window_resizable = true;
+                } else {
+                    this->window_resizable = false;
+                }
+            });
+        }
 
         target_aspect_ratio = window_width / (float)window_height;
 
@@ -343,6 +355,7 @@ Engine::Engine(Allocator &allocator, const char *config_path)
         glfwSetFramebufferSizeCallback(glfw_window, framebuffer_size_callback);
         framebuffer_size_callback(glfw_window, window_width, window_height);
         glfwSetWindowSizeLimits(glfw_window, window_width, window_height, GLFW_DONT_CARE, GLFW_DONT_CARE);
+        glfwSetWindowAttrib(glfw_window, GLFW_RESIZABLE, this->window_resizable);
     }
 
     input = MAKE_NEW(allocator, Input, allocator, glfw_window);
