@@ -491,10 +491,16 @@ void canvas::clear(Canvas &canvas, Color4f col) {
 
     int32_t max = canvas.width * canvas.height * 4;
     for (int32_t i = 0; i < max; i += 4) {
-        canvas.data[i] = r;
-        canvas.data[i + 1] = g;
-        canvas.data[i + 2] = b;
-        canvas.data[i + 3] = a;
+        int32_t x;
+        int32_t y;
+        math::coord(i / 4, x, y, canvas.width);
+
+        if (is_clipped(canvas, x, y)) {
+            canvas.data[i] = r;
+            canvas.data[i + 1] = g;
+            canvas.data[i + 2] = b;
+            canvas.data[i + 3] = a;
+        }
     }
 }
 
