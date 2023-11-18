@@ -1107,13 +1107,12 @@ void comma_separated_human_readable_action_binds(const ActionBinds &action_binds
     
     Buffer ss(ta);
     
-    for (const char **item = foundation::array::begin(items); item != foundation::array::end(items); ++item) {
-        ss << *item << ", ";
-    }
-    
-    // remove last ", "
-    if (!array::empty(ss)) {
-        array::resize(ss, array::size(ss) - 2);
+    for (int i = array::size(items) - 1; i >= 0; --i) {
+        const char *item = items[i];
+        ss << item;
+        if (i > 0) {
+            ss << ", ";
+        }
     }
     
     out = ss;
