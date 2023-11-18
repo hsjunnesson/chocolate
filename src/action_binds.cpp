@@ -421,15 +421,13 @@ ActionBinds::ActionBinds(foundation::Allocator &allocator, const char *config_pa
                     } else {
                         hash::set(bind_actions, bind_key, action_key);
 
-                        if (!hash::has(human_readable_action_binds, action_key)) {
-                            unsigned int human_readable_length = array::size(human_readable);
-                            char *human_readable_string = (char *)allocator.allocate(human_readable_length + 1);
+                        unsigned int human_readable_length = array::size(human_readable);
+                        char *human_readable_string = (char *)allocator.allocate(human_readable_length + 1);
 
-                            memcpy(human_readable_string, array::begin(human_readable), human_readable_length);
-                            human_readable_string[human_readable_length] = '\0';
-
-                            hash::set(human_readable_action_binds, action_key, (const char *)human_readable_string);
-                        }
+                        memcpy(human_readable_string, array::begin(human_readable), human_readable_length);
+                        human_readable_string[human_readable_length] = '\0';
+                        
+                        multi_hash::insert(human_readable_action_binds, action_key, (const char *)human_readable_string);
                     }
 
 #if defined(_WIN32)
@@ -446,6 +444,8 @@ ActionBinds::ActionBinds(foundation::Allocator &allocator, const char *config_pa
 }
 
 ActionBinds::~ActionBinds() {
+    TempAllocator64 ta;
+    
     for (auto iter = hash::begin(human_readable_action_binds); iter != hash::end(human_readable_action_binds); ++iter) {
         const char *string = iter->value;
         allocator.deallocate((void *)string);
@@ -1096,6 +1096,27 @@ uint64_t action_key_for_input_command(const engine::InputCommand &input_command)
     uint64_t key = murmur_hash_64(c_str(ss), (uint32_t)len, 0);
 
     return key;
+}
+
+void comma_separated_human_readable_action_binds(const ActionBinds &action_binds, uint64_t key, foundation::Array<char> &out) {
+    using namespace foundation::string_stream;
+    
+    TempAllocator256 ta;
+    foundation::Array<const char *> items(ta);
+    multi_hash::get(action_binds.human_readable_action_binds, key, items);
+    
+    Buffer ss(ta);
+    
+    for (const char **item = foundation::array::begin(items); item != foundation::array::end(items); ++item) {
+        ss << *item << ", ";
+    }
+    
+    // remove last ", "
+    if (!array::empty(ss)) {
+        array::resize(ss, array::size(ss) - 2);
+    }
+    
+    out = ss;
 }
 
 } // namespace engine
