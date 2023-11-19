@@ -33,6 +33,46 @@ bool exist(const char *filename) {
 #endif
 }
 
+bool write(foundation::Array<char> &buffer, const char *filename) {
+    using namespace string_stream;
+
+#if defined(_WIN32)
+    HANDLE file = CreateFile(TEXT(filename), GENERIC_WRITE, 0, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    
+    if (INVALID_HANDLE_VALUE == file) {
+        log_error("Could not open file %s for writing: invalid file handle", filename);
+        return false;
+    }
+    
+    SetFilePointer(file, 0, NULL, FILE_END);
+    
+    DWORD bytes_written = 0;
+    BOOL err_flag = WriteFile(file, c_str(buffer), array::size(buffer), &bytes_written, NULL);
+    
+    if (FALSE == err_flag) {
+        log_error("Error writing to file %s", filename);
+        CloseHandle(file);
+        return false;
+    }
+    
+    if (bytes_written != array::size(buffer)) {
+        log_error("Error writing to file %s, could not write entire buffer.", filename);
+        CloseHandle(file);
+        return false;
+    }
+    
+    CloseHandle(file);
+    return true;
+#elif defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
+    // TODO: implement
+    log_fatal("Unsupported platform");
+    return false;
+#else
+    log_fatal("Unsupported platform");
+    return false;
+#endif
+}
+
 // https://wiki.sei.cmu.edu/confluence/display/c/FIO19-C.+Do+not+use+fseek%28%29+and+ftell%28%29+to+compute+the+size+of+a+regular+file
 bool read(string_stream::Buffer &buffer, const char *filename) {
 #if defined(_WIN32)

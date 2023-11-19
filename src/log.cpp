@@ -1,4 +1,5 @@
 #include "engine/log.h"
+#include "engine/file.h"
 
 #include <backward.hpp>
 #include <iomanip>
@@ -17,6 +18,8 @@
 using namespace foundation;
 using namespace foundation::string_stream;
 using namespace backward;
+
+// TODO: Remake this - queue strings to a buffer, write those to log from a thread.
 
 void internal_log(LoggingSeverity severity, const char *format, ...) {
     TempAllocator1024 ta;
@@ -58,9 +61,17 @@ void internal_log(LoggingSeverity severity, const char *format, ...) {
 #endif
 
     ss << "\n";
-
+    
+#if defined(_WIN32)
+    if (GetConsoleWindow() != NULL) {
+        fprintf(stdout, "%s", c_str(ss));
+    }
+#else
     fprintf(stdout, "%s", c_str(ss));
+#endif
 
+    engine::file::write(ss, "grunka.log");
+    
 #if defined(_DEBUG) && defined(WIN32)
     OutputDebugString(c_str(ss));
 #endif

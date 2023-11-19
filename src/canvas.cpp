@@ -228,7 +228,6 @@ void init_canvas(const Engine &engine, Canvas &canvas, const ini_t *config, Arra
         }
 
         stbi_image_free(data);
-        log_info("Loaded canvas sprites (%d:%d) from %s", sprites_width, sprites_height, sprites_filename);
     } else {
         uint32_t sprites_data_size = array::size(*sprites_data);
         uint32_t channels = 4;
@@ -244,7 +243,6 @@ void init_canvas(const Engine &engine, Canvas &canvas, const ini_t *config, Arra
 
         canvas.sprites_data = *sprites_data;
         canvas.sprites_data_width = static_cast<int32_t>(sqrt(sprites_data_size / channels));
-        log_info("Loaded canvas sprites from memory");
     }
 
     // Read all key-values into canvas.sprites_indices
