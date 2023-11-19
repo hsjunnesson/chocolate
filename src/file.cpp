@@ -5,10 +5,12 @@
 #include <memory.h>
 #include <string_stream.h>
 #include <temp_allocator.h>
+#include <filesystem>
 
 // clang-format off
 #if defined(_WIN32)
 #include <windows.h>
+
 #include <fileapi.h>
 #elif defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
 #include <sys/stat.h>
@@ -19,6 +21,7 @@ namespace engine {
 namespace file {
 using namespace foundation;
 using namespace foundation::array;
+namespace fs = std::filesystem;
 
 bool exist(const char *filename) {
 #if defined(_WIN32)
@@ -35,6 +38,11 @@ bool exist(const char *filename) {
 
 bool write(foundation::Array<char> &buffer, const char *filename) {
     using namespace string_stream;
+    
+    fs::path dir_path = fs::path(filename).parent_path();
+    if (!fs::exists(dir_path)) {
+        fs::create_directories(dir_path);
+    }
 
 #if defined(_WIN32)
     HANDLE file = CreateFile(TEXT(filename), GENERIC_WRITE, 0, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);

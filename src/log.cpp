@@ -10,6 +10,8 @@
 #include <string_stream.h>
 #include <temp_allocator.h>
 #include <time.h>
+#include <chrono>
+#include <ctime>
 
 #if defined(WIN32)
 #include <windows.h>
@@ -21,59 +23,95 @@ using namespace backward;
 
 // TODO: Remake this - queue strings to a buffer, write those to log from a thread.
 
+std::string get_current_date() {
+    // Get current time
+    auto now = std::chrono::system_clock::now();
+    auto now_c = std::chrono::system_clock::to_time_t(now);
+
+    // Convert to tm struct for formatting in UTC
+    std::tm now_tm = *std::gmtime(&now_c);
+
+    // Format time to year-month-day (ISO 8601 date format)
+    std::stringstream ss;
+    ss << std::put_time(&now_tm, "%Y-%m-%d");
+
+    return ss.str();
+}
+
+std::string get_current_timestamp() {
+    // Get current time
+    auto now = std::chrono::system_clock::now();
+    auto now_c = std::chrono::system_clock::to_time_t(now);
+
+    // Convert to tm struct for formatting in UTC
+    std::tm now_tm = *std::gmtime(&now_c);
+
+    // Format time to ISO 8601 in UTC (Zulu time)
+    std::stringstream ss;
+    ss << std::put_time(&now_tm, "%FT%TZ");
+
+    // Optional: Append fractional seconds
+    auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
+    ss << '.' << std::setfill('0') << std::setw(3) << milliseconds.count();
+
+    return ss.str();
+}
+
 void internal_log(LoggingSeverity severity, const char *format, ...) {
     TempAllocator1024 ta;
-    Buffer ss(ta);
-
+    Buffer log_line(ta);
+    
     const char *severity_prefix = nullptr;
 
     switch (severity) {
     case LoggingSeverity::Debug:
-        severity_prefix = "[DEBUG] ";
+        severity_prefix = " [DEBUG] ";
         break;
     case LoggingSeverity::Info:
-        severity_prefix = "[INFO] ";
+        severity_prefix = " [INFO] ";
         break;
     case LoggingSeverity::Error:
-        severity_prefix = "[ERROR] ";
+        severity_prefix = " [ERROR] ";
         break;
     case LoggingSeverity::Fatal:
-        severity_prefix = "[FATAL] ";
+        severity_prefix = " [FATAL] ";
         break;
     default:
         return;
     }
 
-    ss << severity_prefix;
+    log_line << get_current_timestamp().c_str() << severity_prefix;
 
 #if defined(_WIN32)
     va_list args;
     va_start(args, format);
-    ss = string_stream::vprintf(ss, format, args);
+    log_line = string_stream::vprintf(log_line, format, args);
     va_end(args);
 #elif defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
     char buffer[1024];
     va_list args;
     va_start(args, format);
     vsnprintf(buffer, 1024, format, args);
-    ss << buffer;
+    log_line << buffer;
     va_end(args);
 #endif
 
-    ss << "\n";
+    log_line << "\n";
     
 #if defined(_WIN32)
     if (GetConsoleWindow() != NULL) {
-        fprintf(stdout, "%s", c_str(ss));
+        fprintf(stdout, "%s", c_str(log_line));
     }
 #else
-    fprintf(stdout, "%s", c_str(ss));
+    fprintf(stdout, "%s", c_str(log_line));
 #endif
 
-    engine::file::write(ss, "grunka.log");
+    Buffer log_filename(ta);
+    log_filename << "logs/grunka-" << get_current_date().c_str() << ".log";
+    engine::file::write(log_line, c_str(log_filename));
     
 #if defined(_DEBUG) && defined(WIN32)
-    OutputDebugString(c_str(ss));
+    OutputDebugString(c_str(log_line));
 #endif
 
     if (severity == LoggingSeverity::Fatal || severity == LoggingSeverity::Error) {
@@ -91,7 +129,7 @@ void internal_log(LoggingSeverity severity, const char *format, ...) {
 #if defined(_DEBUG) && defined(WIN32)
         std::ostringstream stream;
         p.print(st, stream);
-        stream << c_str(ss);
+        stream << c_str(log_line);
         OutputDebugString(stream.str().c_str());
 #endif
     }
