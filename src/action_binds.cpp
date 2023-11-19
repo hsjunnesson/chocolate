@@ -426,7 +426,7 @@ ActionBinds::ActionBinds(foundation::Allocator &allocator, const char *config_pa
 
                         memcpy(human_readable_string, array::begin(human_readable), human_readable_length);
                         human_readable_string[human_readable_length] = '\0';
-                        
+
                         multi_hash::insert(human_readable_action_binds, action_key, (const char *)human_readable_string);
                     }
 
@@ -445,7 +445,7 @@ ActionBinds::ActionBinds(foundation::Allocator &allocator, const char *config_pa
 
 ActionBinds::~ActionBinds() {
     TempAllocator64 ta;
-    
+
     for (auto iter = hash::begin(human_readable_action_binds); iter != hash::end(human_readable_action_binds); ++iter) {
         const char *string = iter->value;
         allocator.deallocate((void *)string);
@@ -1100,13 +1100,13 @@ uint64_t action_key_for_input_command(const engine::InputCommand &input_command)
 
 void comma_separated_human_readable_action_binds(const ActionBinds &action_binds, uint64_t key, foundation::Array<char> &out) {
     using namespace foundation::string_stream;
-    
+
     TempAllocator256 ta;
     foundation::Array<const char *> items(ta);
     multi_hash::get(action_binds.human_readable_action_binds, key, items);
-    
+
     Buffer ss(ta);
-    
+
     for (int i = array::size(items) - 1; i >= 0; --i) {
         const char *item = items[i];
         ss << item;
@@ -1114,7 +1114,7 @@ void comma_separated_human_readable_action_binds(const ActionBinds &action_binds
             ss << ", ";
         }
     }
-    
+
     out = ss;
 }
 

@@ -214,7 +214,6 @@ ActionBindsBind bind_for_keycode(const int16_t keycode);
 /// Returns 0 if not found.
 uint64_t action_key_for_input_command(const engine::InputCommand &input_command);
 
-
 /// Writes the human readable actionbinds for a certain hash.
 // For instance, murmur_hash(QUIT): "Escape, Alt+F4".
 void comma_separated_human_readable_action_binds(const ActionBinds &action_binds, uint64_t key, foundation::Array<char> &out);
