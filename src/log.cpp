@@ -12,6 +12,7 @@
 #include <time.h>
 #include <chrono>
 #include <ctime>
+#include <filesystem>
 
 #if defined(WIN32)
 #include <windows.h>
@@ -20,6 +21,7 @@
 using namespace foundation;
 using namespace foundation::string_stream;
 using namespace backward;
+namespace fs = std::filesystem;
 
 // TODO: Remake this - queue strings to a buffer, write those to log from a thread.
 
@@ -57,6 +59,39 @@ std::string get_current_timestamp() {
     return ss.str();
 }
 
+void console_log(Buffer &buffer) {
+    const char *log_line = c_str(buffer);
+    
+#if defined(_WIN32)
+    if (GetConsoleWindow() != NULL) {
+        fprintf(stderr, "%s", log_line);
+    }
+    
+    #if defined(_DEBUG)
+    OutputDebugString(log_line);
+    #endif
+#else
+    fprintf(stderr, "%s", log_line);
+#endif
+}
+
+void file_log(Buffer &buffer) {
+    TempAllocator256 ta;
+    Buffer log_filename(ta);
+
+#if defined(_WIN32)
+    char path[FILENAME_MAX];
+    GetModuleFileNameA(NULL, path, FILENAME_MAX);
+
+    fs::path dir_path = fs::path(path).parent_path();
+
+    log_filename << dir_path.string().c_str() << "/";
+#endif
+
+    log_filename << "logs/grunka-" << get_current_date().c_str() << ".log";
+    engine::file::write(buffer, c_str(log_filename));
+}
+
 void internal_log(LoggingSeverity severity, const char *format, ...) {
     TempAllocator1024 ta;
     Buffer log_line(ta);
@@ -87,7 +122,7 @@ void internal_log(LoggingSeverity severity, const char *format, ...) {
     va_start(args, format);
     log_line = string_stream::vprintf(log_line, format, args);
     va_end(args);
-#elif defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
+#else
     char buffer[1024];
     va_list args;
     va_start(args, format);
@@ -98,22 +133,9 @@ void internal_log(LoggingSeverity severity, const char *format, ...) {
 
     log_line << "\n";
     
-#if defined(_WIN32)
-    if (GetConsoleWindow() != NULL) {
-        fprintf(stdout, "%s", c_str(log_line));
-    }
-#else
-    fprintf(stdout, "%s", c_str(log_line));
-#endif
-
-    Buffer log_filename(ta);
-    log_filename << "logs/grunka-" << get_current_date().c_str() << ".log";
-    engine::file::write(log_line, c_str(log_filename));
+    console_log(log_line);
+    file_log(log_line);
     
-#if defined(_DEBUG) && defined(WIN32)
-    OutputDebugString(c_str(log_line));
-#endif
-
     if (severity == LoggingSeverity::Fatal || severity == LoggingSeverity::Error) {
         // https://github.com/bombela/backward-cpp/issues/206
         TraceResolver _workaround;
@@ -122,16 +144,16 @@ void internal_log(LoggingSeverity severity, const char *format, ...) {
         StackTrace st;
         st.load_here();
         Printer p;
-        p.color_mode = ColorMode::automatic;
         p.address = true;
-        p.print(st, stdout);
-
-#if defined(_DEBUG) && defined(WIN32)
+        
         std::ostringstream stream;
         p.print(st, stream);
-        stream << c_str(log_line);
-        OutputDebugString(stream.str().c_str());
-#endif
+
+        Buffer buffer(ta);
+        buffer << stream.str().c_str();
+        
+        console_log(buffer);
+        file_log(buffer);
     }
 
     if (severity == LoggingSeverity::Fatal) {
