@@ -489,7 +489,9 @@ int run(Engine &engine) {
 
         if (glfwWindowShouldClose(engine.glfw_window)) {
             if (engine.engine_callbacks && engine.engine_callbacks->on_shutdown) {
-                engine.engine_callbacks->on_shutdown(engine, engine.game_object);
+                if (!engine.engine_callbacks->on_shutdown(engine, engine.game_object)) {
+                    glfwSetWindowShouldClose(engine.glfw_window, GLFW_FALSE);
+                }
             } else {
                 terminate(engine);
             }

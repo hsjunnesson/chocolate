@@ -24,7 +24,9 @@ struct EngineCallbacks {
     void (*update)(Engine &engine, void *game_object, float frame_time, float delta) = nullptr;
     void (*render)(Engine &engine, void *game_object) = nullptr;
     void (*render_imgui)(Engine &engine, void *game_object) = nullptr;
-    void (*on_shutdown)(Engine &engine, void *game_object) = nullptr;
+    
+    // Return false to clear the should close flag.
+    bool (*on_shutdown)(Engine &engine, void *game_object) = nullptr;
 };
 
 struct Engine {
