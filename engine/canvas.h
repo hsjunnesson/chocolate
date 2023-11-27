@@ -54,7 +54,7 @@ struct Canvas {
     math::Rect clip_mask;
 };
 
-/** @brief Initializes the canvas.
+/** @brief Initializes the canvas with the resolution of the engine window, i.e. engine.resolution / engine.render_scale.
  * @param engine The `Engine` object.
  * @param canvas The `Canvas` to initialize.
  * @param config The `ini_t` to read config values from.
@@ -62,6 +62,16 @@ struct Canvas {
  * The buffer is assumed to be 32-bit RBGA.
  */
 void init_canvas(const Engine &engine, Canvas &canvas, const ini_t *config, Array<uint8_t> *sprites_data = nullptr);
+
+/** @brief Initializes the canvas with a fixed resolution.
+ * @param width The resolution width in pixels of the canvas.
+ * @param height The resolution height in pixels of the canvas.
+ * @param canvas The `Canvas` to initialize.
+ * @param config The `ini_t` to read config values from.
+ * @param sprites_data An optional buffer of pixels to read from memory instead of reading from [canvas] sprites_filename ini value.
+ * The buffer is assumed to be 32-bit RBGA.
+ */
+void init_canvas(int32_t width, int32_t height, Canvas &canvas, const ini_t *config, Array<uint8_t> *sprites_data = nullptr);
 
 /** Renders the canvas
  * @param engine The `Engine` object.

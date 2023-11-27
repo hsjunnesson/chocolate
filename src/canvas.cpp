@@ -162,6 +162,10 @@ Canvas::~Canvas() {
 }
 
 void init_canvas(const Engine &engine, Canvas &canvas, const ini_t *config, Array<uint8_t> *sprites_data) {
+    init_canvas(engine.window_rect.size.x / engine.render_scale, engine.window_rect.size.y / engine.render_scale, canvas, config, sprites_data);
+}
+
+void init_canvas(int32_t width, int32_t height, Canvas &canvas, const ini_t *config, Array<uint8_t> *sprites_data) {
     assert(config != nullptr);
 
     glBindTexture(GL_TEXTURE_2D, canvas.texture);
@@ -170,8 +174,8 @@ void init_canvas(const Engine &engine, Canvas &canvas, const ini_t *config, Arra
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    canvas.width = engine.window_rect.size.x / engine.render_scale;
-    canvas.height = engine.window_rect.size.y / engine.render_scale;
+    canvas.width = width;
+    canvas.height = height;
     int32_t size = canvas.width * canvas.height * 4;
     array::resize(canvas.data, size);
 
