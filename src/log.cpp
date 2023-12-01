@@ -88,7 +88,7 @@ void file_log(Buffer &buffer) {
     log_filename << dir_path.string().c_str() << "/";
 #endif
 
-    log_filename << "logs/grunka-" << get_current_date().c_str() << ".log";
+    log_filename << "logs/" << get_current_date().c_str() << ".log";
     engine::file::write(buffer, c_str(log_filename));
 }
 
