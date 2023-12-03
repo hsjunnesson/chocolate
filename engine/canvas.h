@@ -103,7 +103,7 @@ void clip(Canvas &canvas, int32_t x1, int32_t y1, int32_t x2, int32_t y2);
 
 void pset(Canvas &canvas, int32_t x, int32_t y, Color4f col);
 void clear(Canvas &canvas, Color4f col);
-void print(Canvas &canvas, const char *str, int32_t x, int32_t y, Color4f col, bool invert = false, bool mask = true, Color4f mask_col = engine::color::black);
+void print(Canvas &canvas, const char *str, int32_t x, int32_t y, Color4f col, uint8_t scale_w = 1, uint8_t scale_h = 1, bool invert = false, bool mask = true, Color4f mask_col = engine::color::black);
 void circle(Canvas &canvas, int32_t x_center, int32_t y_center, int32_t r, Color4f col);
 void circle_fill(Canvas &canvas, int32_t x_center, int32_t y_center, int32_t r, Color4f col);
 void line(Canvas &canvas, int32_t x1, int32_t y1, int32_t x2, int32_t y2, Color4f col);

@@ -23,6 +23,7 @@
 #include <string>
 #include <string_stream.h>
 #include <temp_allocator.h>
+#include <emmintrin.h>
 
 // clang-format off
 #if defined(_WIN32)
@@ -485,7 +486,37 @@ void canvas::pset(Canvas &canvas, int32_t x, int32_t y, Color4f col) {
     canvas.data[i + 3] = a;
 }
 
+void clear_simd(Canvas &canvas, Color4f col) {
+    uint8_t r = (uint8_t)(col.r * 255);
+    uint8_t g = (uint8_t)(col.g * 255);
+    uint8_t b = (uint8_t)(col.b * 255);
+    uint8_t a = (uint8_t)(col.a * 255);
+
+    uint32_t packed_color = (a << 24) | (b << 16) | (g << 8) | r;
+    __m128i color = _mm_set1_epi32(packed_color);
+    int32_t num_pixels = canvas.width * canvas.height;
+    int32_t num_iterations = num_pixels / 4;
+
+    for (int32_t i = 0; i < num_iterations; ++i) {
+        _mm_storeu_si128(reinterpret_cast<__m128i*>(&canvas.data[i * 16]), color);
+    }
+    
+    // remaining pixels
+    for (int32_t i = num_iterations * 4; i < num_pixels; ++i) {
+        int32_t index = i * 4;
+        canvas.data[index] = r;
+        canvas.data[index + 1] = g;
+        canvas.data[index + 2] = b;
+        canvas.data[index + 3] = a;
+    }
+}
+
 void canvas::clear(Canvas &canvas, Color4f col) {
+    if (canvas.clip_mask.size.x == -1) {
+        clear_simd(canvas, col);
+        return;
+    }
+
     uint8_t r = (uint8_t)(col.r * 255);
     uint8_t g = (uint8_t)(col.g * 255);
     uint8_t b = (uint8_t)(col.b * 255);
@@ -506,7 +537,7 @@ void canvas::clear(Canvas &canvas, Color4f col) {
     }
 }
 
-void canvas::print(Canvas &canvas, const char *str, int32_t x, int32_t y, Color4f col, bool invert, bool mask, Color4f mask_col) {
+void canvas::print(Canvas &canvas, const char *str, int32_t x, int32_t y, Color4f col, uint8_t scale_w, uint8_t scale_h, bool invert, bool mask, Color4f mask_col) {
     if (array::empty(canvas.sprites_data)) {
         log_fatal("Attempting to canvas::print without sprites");
     }
@@ -518,12 +549,12 @@ void canvas::print(Canvas &canvas, const char *str, int32_t x, int32_t y, Color4
         char c = str[i];
 
         if (c == ' ') {
-            xx += canvas.sprite_size;
+            xx += canvas.sprite_size * scale_w;
             continue;
         }
 
         if (c == '\n') {
-            yy += canvas.sprite_size;
+            yy += canvas.sprite_size * scale_h;
             xx = x;
             continue;
         }
@@ -539,13 +570,17 @@ void canvas::print(Canvas &canvas, const char *str, int32_t x, int32_t y, Color4
         }
 
         uint32_t sprite_index = hash::get(canvas.sprites_indices, key, (uint32_t)0);
-        sprite(canvas, sprite_index, xx, yy, col, 1, 1, 1, 1, false, false, invert, mask, mask_col);
+        sprite(canvas, sprite_index, xx, yy, col, 1, 1, scale_w, scale_h, false, false, invert, mask, mask_col);
 
-        xx += canvas.sprite_size;
+        xx += canvas.sprite_size * scale_w;
     }
 }
 
 void canvas::circle(Canvas &canvas, int32_t x_center, int32_t y_center, int32_t r, Color4f col) {
+    if (r <= 0.0f) {
+        return;
+    }
+
     int32_t x = r;
     int32_t y = 0;
     int32_t p = 1 - r;
@@ -577,25 +612,80 @@ void canvas::circle(Canvas &canvas, int32_t x_center, int32_t y_center, int32_t 
     }
 }
 
+// Draw a horizontal, straight line using SIMD
+void line_simd(Canvas &canvas, int32_t x0, int32_t y, int32_t x1, Color4f col) {
+    y = (y >= 0) ? y : 0;
+    y = (y < canvas.height) ? y : canvas.height - 1;
+    x0 = (x0 >= 0) ? x0 : 0;
+    x1 = (x1 < canvas.width) ? x1 : canvas.width - 1;
+    
+    if (x0 > x1) {
+        std::swap(x0, x1);
+    }
+    
+    uint8_t r = static_cast<uint8_t>(col.r * 255);
+    uint8_t g = static_cast<uint8_t>(col.g * 255);
+    uint8_t b = static_cast<uint8_t>(col.b * 255);
+    uint8_t a = static_cast<uint8_t>(col.a * 255);
+
+    uint32_t packedColor = (a << 24) | (b << 16) | (g << 8) | r;
+    __m128i color = _mm_set1_epi32(packedColor);
+
+    int32_t i = x0;
+    int32_t end = x1 - (x1 - x0) % 4;
+
+    // SIMD loop for bulk pixel setting
+    for (int32_t i = x0; i < end; i += 4) {
+        _mm_storeu_si128(reinterpret_cast<__m128i*>(&canvas.data[(y * canvas.width + i) * 4]), color);
+    }
+
+    // Handle remaining pixels
+    for (int32_t i = end; i <= x1; ++i) {
+        int32_t index = (y * canvas.width + i) * 4;
+        canvas.data[index] = r;
+        canvas.data[index + 1] = g;
+        canvas.data[index + 2] = b;
+        canvas.data[index + 3] = a;
+    }
+}
+
 void canvas::circle_fill(Canvas &canvas, int32_t x_center, int32_t y_center, int32_t r, Color4f col) {
+    if (r <= 0.0f) {
+        return;
+    }
+    
     int32_t x = r;
     int32_t y = 0;
     int32_t p = 1 - r;
-
+    
+    bool has_clip_mask = canvas.clip_mask.size.x != -1;
+    
     while (x >= y) {
-        line(canvas, x_center - x, y_center + y, x_center + x, y_center + y, col);
-        line(canvas, x_center - x, y_center - y, x_center + x, y_center - y, col);
-        line(canvas, x_center - y, y_center + x, x_center + y, y_center + x, col);
-        line(canvas, x_center - y, y_center - x, x_center + y, y_center - x, col);
-
+        if (has_clip_mask) {
+            line(canvas, x_center - x, y_center + y, x_center + x, y_center + y, col);
+            line(canvas, x_center - x, y_center - y, x_center + x, y_center - y, col);
+            line(canvas, x_center - y, y_center + x, x_center + y, y_center + x, col);
+            line(canvas, x_center - y, y_center - x, x_center + y, y_center - x, col);
+        } else {
+            line_simd(canvas, x_center - x, y_center + y, x_center + x, col);
+            line_simd(canvas, x_center - x, y_center - y, x_center + x, col);
+            line_simd(canvas, x_center - y, y_center + x, x_center + y, col);
+            line_simd(canvas, x_center - y, y_center - x, x_center + y, col);
+        }
+        
         ++y;
 
         if (p <= 0) {
             p = p + 2 * y + 1;
         } else {
             if (p + 2 * (y - x + 1) < 0) {
-                line(canvas, x_center - x, y_center + y - 1, x_center + x, y_center + y - 1, col);
-                line(canvas, x_center - x, y_center - y + 1, x_center + x, y_center - y + 1, col);
+                if (has_clip_mask) {
+                    line(canvas, x_center - x, y_center + y - 1, x_center + x, y_center + y - 1, col);
+                    line(canvas, x_center - x, y_center - y + 1, x_center + x, y_center - y + 1, col);
+                } else {
+                    line_simd(canvas, x_center - x, y_center + y - 1, x_center + x, col);
+                    line_simd(canvas, x_center - x, y_center - y + 1, x_center + x, col);
+                }
             }
             --x;
             p = p + 2 * y - 2 * x + 1;
@@ -657,7 +747,23 @@ void canvas::rectangle(Canvas &canvas, int32_t x1, int32_t y1, int32_t x2, int32
     line(canvas, x1, y2, x1, y1, col);
 }
 
+void rectangle_fill_simd(Canvas &canvas, int32_t x1, int32_t y1, int32_t x2, int32_t y2, Color4f col) {
+    int32_t min_x = std::min(x1, x2);
+    int32_t max_x = std::max(x1, x2);
+    int32_t min_y = std::min(y1, y2);
+    int32_t max_y = std::max(y1, y2);
+
+    for (int32_t y = min_y; y < max_y; ++y) {
+        line_simd(canvas, min_x, y, max_x, col);
+    }
+}
+
 void canvas::rectangle_fill(Canvas &canvas, int32_t x1, int32_t y1, int32_t x2, int32_t y2, Color4f col) {
+    if (canvas.clip_mask.size.x == -1) {
+        rectangle_fill_simd(canvas, x1, y1, x2, y2, col);
+        return;
+    }
+
     int32_t min_x = std::min(x1, x2);
     int32_t max_x = std::max(x1, x2);
     int32_t min_y = std::min(y1, y2);
