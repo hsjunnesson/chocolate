@@ -649,94 +649,65 @@ void line_simd(Canvas &canvas, int32_t x0, int32_t y, int32_t x1, Color4f col) {
     }
 }
 
-void canvas::circle_fill(Canvas &canvas, int32_t x_center, int32_t y_center, int32_t r, Color4f col) {
-    if (r <= 0.0f) {
-        return;
-    }
-    
-    int32_t x = r;
-    int32_t y = 0;
-    int32_t p = 1 - r;
-    
-    bool has_clip_mask = canvas.clip_mask.size.x != -1;
-    
-    while (x >= y) {
-        if (has_clip_mask) {
-            line(canvas, x_center - x, y_center + y, x_center + x, y_center + y, col);
-            line(canvas, x_center - x, y_center - y, x_center + x, y_center - y, col);
-            line(canvas, x_center - y, y_center + x, x_center + y, y_center + x, col);
-            line(canvas, x_center - y, y_center - x, x_center + y, y_center - x, col);
-        } else {
-            line_simd(canvas, x_center - x, y_center + y, x_center + x, col);
-            line_simd(canvas, x_center - x, y_center - y, x_center + x, col);
-            line_simd(canvas, x_center - y, y_center + x, x_center + y, col);
-            line_simd(canvas, x_center - y, y_center - x, x_center + y, col);
+    void canvas::circle_fill(Canvas &canvas, int32_t x_center, int32_t y_center, int32_t r, Color4f col) {
+        if (r <= 0.0f) {
+            return;
         }
         
-        ++y;
-
-        if (p <= 0) {
-            p = p + 2 * y + 1;
-        } else {
-            if (p + 2 * (y - x + 1) < 0) {
-                if (has_clip_mask) {
-                    line(canvas, x_center - x, y_center + y - 1, x_center + x, y_center + y - 1, col);
-                    line(canvas, x_center - x, y_center - y + 1, x_center + x, y_center - y + 1, col);
-                } else {
-                    line_simd(canvas, x_center - x, y_center + y - 1, x_center + x, col);
-                    line_simd(canvas, x_center - x, y_center - y + 1, x_center + x, col);
-                }
+        int32_t x = r;
+        int32_t y = 0;
+        int32_t p = 1 - r;
+        
+        bool has_clip_mask = canvas.clip_mask.size.x != -1;
+        
+        while (x >= y) {
+            if (has_clip_mask) {
+                line(canvas, x_center - x, y_center + y, x_center + x, y_center + y, col);
+                line(canvas, x_center - x, y_center - y, x_center + x, y_center - y, col);
+                line(canvas, x_center - y, y_center + x, x_center + y, y_center + x, col);
+                line(canvas, x_center - y, y_center - x, x_center + y, y_center - x, col);
+            } else {
+                line_simd(canvas, x_center - x, y_center + y, x_center + x, col);
+                line_simd(canvas, x_center - x, y_center - y, x_center + x, col);
+                line_simd(canvas, x_center - y, y_center + x, x_center + y, col);
+                line_simd(canvas, x_center - y, y_center - x, x_center + y, col);
             }
-            --x;
-            p = p + 2 * y - 2 * x + 1;
+            
+            ++y;
+    
+            if (p <= 0) {
+                p = p + 2 * y + 1;
+            } else {
+                if (p + 2 * (y - x + 1) < 0) {
+                    if (has_clip_mask) {
+                        line(canvas, x_center - x, y_center + y - 1, x_center + x, y_center + y - 1, col);
+                        line(canvas, x_center - x, y_center - y + 1, x_center + x, y_center - y + 1, col);
+                    } else {
+                        line_simd(canvas, x_center - x, y_center + y - 1, x_center + x, col);
+                        line_simd(canvas, x_center - x, y_center - y + 1, x_center + x, col);
+                    }
+                }
+                --x;
+                p = p + 2 * y - 2 * x + 1;
+            }
         }
     }
-}
 
 void canvas::line(Canvas &canvas, int32_t x1, int32_t y1, int32_t x2, int32_t y2, Color4f col) {
-    int dx = x2 - x1;
-    int dy = y2 - y1;
+    int dx = abs(x2 - x1);
+    int dy = abs(y2 - y1);
+    int stepx = x1 < x2 ? 1 : -1;
+    int stepy = y1 < y2 ? 1 : -1;
+    int err = (dx > dy ? dx : -dy) / 2;
+    int e2;
 
-    int stepx = (dx > 0) - (dx < 0);
-    int stepy = (dy > 0) - (dy < 0);
+    while (true) {
+        pset(canvas, x1, y1, col);
 
-    dx = abs(dx);
-    dy = abs(dy);
-
-    if (dx > dy) {
-        int pdx = 2 * dy;
-        int err = pdx - dx;
-        int pdy = err - dx;
-
-        for (int k = 0; k <= dx; k++) {
-            pset(canvas, x1, y1, col);
-
-            if (err > 0) {
-                y1 += stepy;
-                err += pdy;
-            } else {
-                err += pdx;
-            }
-
-            x1 += stepx;
-        }
-    } else {
-        int pdx = 2 * dx;
-        int err = pdx - dy;
-        int pdy = err - dy;
-
-        for (int k = 0; k <= dy; k++) {
-            pset(canvas, x1, y1, col);
-
-            if (err > 0) {
-                x1 += stepx;
-                err += pdx;
-            } else {
-                err += pdy;
-            }
-
-            y1 += stepy;
-        }
+        if (x1 == x2 && y1 == y2) break;
+        e2 = err;
+        if (e2 > -dx) { err -= dy; x1 += stepx; }
+        if (e2 < dy) { err += dx; y1 += stepy; }
     }
 }
 
@@ -772,6 +743,56 @@ void canvas::rectangle_fill(Canvas &canvas, int32_t x1, int32_t y1, int32_t x2, 
     for (int32_t y = min_y; y < max_y; ++y) {
         for (int32_t x = min_x; x < max_x; ++x) {
             pset(canvas, x, y, col);
+        }
+    }
+}
+
+inline float edge_function(const math::Vector2f &v0, const math::Vector2f &v1, float px, float py) {
+    return (px - v0.x) * (v1.y - v0.y) - (py - v0.y) * (v1.x - v0.x);
+}
+
+inline __m128 edge_function_sse(const __m128 &v0x, const __m128 &v0y, const __m128 &v1x, const __m128 &v1y, const __m128 &px, const __m128 &py) {
+    return _mm_sub_ps(_mm_mul_ps(_mm_sub_ps(px, v0x), _mm_sub_ps(v1y, v0y)), _mm_mul_ps(_mm_sub_ps(py, v0y), _mm_sub_ps(v1x, v0x)));
+}
+
+void canvas::triangle_fill(Canvas &canvas, math::Vector2f v0, math::Vector2f v1, math::Vector2f v2, Color4f col) {
+    float signed_area = (v0.x - v2.x) * (v1.y - v2.y) - (v1.x - v2.x) * (v0.y - v2.y);
+    if (signed_area > 0.0f) {
+        std::swap(v1, v2);
+    }
+    
+    float min_x = std::min({v0.x, v1.x, v2.x});
+    float min_y = std::min({v0.y, v1.y, v2.y});
+    float max_x = std::max({v0.x, v1.x, v2.x});
+    float max_y = std::max({v0.y, v1.y, v2.y});
+
+    for (int y = static_cast<int>(min_y); y <= static_cast<int>(max_y); ++y) {
+        int x = static_cast<int>(min_x);
+        for (; x <= static_cast<int>(max_x) - 4; x += 4) {
+            __m128 px = _mm_set_ps(x + 3, x + 2, x + 1, x);
+            __m128 py = _mm_set1_ps(y);
+
+            __m128 w0 = edge_function_sse(_mm_set1_ps(v1.x), _mm_set1_ps(v1.y), _mm_set1_ps(v2.x), _mm_set1_ps(v2.y), px, py);
+            __m128 w1 = edge_function_sse(_mm_set1_ps(v2.x), _mm_set1_ps(v2.y), _mm_set1_ps(v0.x), _mm_set1_ps(v0.y), px, py);
+            __m128 w2 = edge_function_sse(_mm_set1_ps(v0.x), _mm_set1_ps(v0.y), _mm_set1_ps(v1.x), _mm_set1_ps(v1.y), px, py);
+
+            int mask = _mm_movemask_ps(_mm_and_ps(_mm_and_ps(_mm_cmpge_ps(w0, _mm_setzero_ps()), _mm_cmpge_ps(w1, _mm_setzero_ps())), _mm_cmpge_ps(w2, _mm_setzero_ps())));
+
+            for (int i = 0; i < 4; ++i) {
+                if (mask & (1 << i)) {
+                    pset(canvas, x + i, y, col);
+                }
+            }
+        }
+        
+        for (; x <= static_cast<int>(max_x); ++x) {
+            float w0 = edge_function(v1, v2, x, y);
+            float w1 = edge_function(v2, v0, x, y);
+            float w2 = edge_function(v0, v1, x, y);
+
+            if (w0 >= 0 && w1 >= 0 && w2 >= 0) {
+                pset(canvas, x, y, col);
+            }
         }
     }
 }
