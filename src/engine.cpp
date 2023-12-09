@@ -224,7 +224,7 @@ Engine::Engine(Allocator &allocator, const char *config_path)
     bool always_on_top = false;
     Buffer window_title(ta);
     Buffer window_icon(ta);
-    
+
     // Load config
     {
         Buffer buffer(ta);
@@ -305,7 +305,7 @@ Engine::Engine(Allocator &allocator, const char *config_path)
                 }
             });
         }
-        
+
         if (config::has_property(ini, "engine", "window_icon")) {
             read_property("engine", "window_icon", [&window_icon](const char *property) {
                 window_icon << property;
@@ -368,21 +368,21 @@ Engine::Engine(Allocator &allocator, const char *config_path)
         framebuffer_size_callback(glfw_window, window_width, window_height);
         glfwSetWindowSizeLimits(glfw_window, window_width, window_height, GLFW_DONT_CARE, GLFW_DONT_CARE);
         glfwSetWindowAttrib(glfw_window, GLFW_RESIZABLE, this->window_resizable);
-        
+
         if (!array::empty(window_icon)) {
             int width, height, channels;
             unsigned char *icon_data = stbi_load(c_str(window_icon), &width, &height, &channels, 4);
             if (icon_data == nullptr) {
                 log_fatal("Could not load window icon from: %s", c_str(window_icon));
             }
-            
+
             GLFWimage icon;
             icon.width = width;
             icon.height = height;
             icon.pixels = icon_data;
-            
+
             glfwSetWindowIcon(glfw_window, 1, &icon);
-            stbi_image_free(icon_data); 
+            stbi_image_free(icon_data);
         }
     }
 

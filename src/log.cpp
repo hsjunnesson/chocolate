@@ -2,6 +2,9 @@
 #include "engine/file.h"
 
 #include <backward.hpp>
+#include <chrono>
+#include <ctime>
+#include <filesystem>
 #include <iomanip>
 #include <memory.h>
 #include <sstream>
@@ -10,9 +13,6 @@
 #include <string_stream.h>
 #include <temp_allocator.h>
 #include <time.h>
-#include <chrono>
-#include <ctime>
-#include <filesystem>
 
 #if defined(WIN32)
 #include <windows.h>
@@ -61,15 +61,15 @@ std::string get_current_timestamp() {
 
 void console_log(Buffer &buffer) {
     const char *log_line = c_str(buffer);
-    
+
 #if defined(_WIN32)
     if (GetConsoleWindow() != NULL) {
         fprintf(stderr, "%s", log_line);
     }
-    
-    #if defined(_DEBUG)
+
+#if defined(_DEBUG)
     OutputDebugString(log_line);
-    #endif
+#endif
 #else
     fprintf(stderr, "%s", log_line);
 #endif
@@ -95,7 +95,7 @@ void file_log(Buffer &buffer) {
 void internal_log(LoggingSeverity severity, const char *format, ...) {
     TempAllocator1024 ta;
     Buffer log_line(ta);
-    
+
     const char *severity_prefix = nullptr;
 
     switch (severity) {
@@ -132,10 +132,10 @@ void internal_log(LoggingSeverity severity, const char *format, ...) {
 #endif
 
     log_line << "\n";
-    
+
     console_log(log_line);
     file_log(log_line);
-    
+
     if (severity == LoggingSeverity::Fatal || severity == LoggingSeverity::Error) {
         // https://github.com/bombela/backward-cpp/issues/206
         TraceResolver _workaround;
@@ -145,13 +145,13 @@ void internal_log(LoggingSeverity severity, const char *format, ...) {
         st.load_here();
         Printer p;
         p.address = true;
-        
+
         std::ostringstream stream;
         p.print(st, stream);
 
         Buffer buffer(ta);
         buffer << stream.str().c_str();
-        
+
         console_log(buffer);
         file_log(buffer);
     }

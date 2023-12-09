@@ -88,7 +88,7 @@ Sprites::Sprites(Allocator &allocator)
     sprites_mutex = MAKE_NEW(allocator, std::mutex);
     animations = MAKE_NEW(allocator, Array<SpriteAnimation>, allocator);
     done_animations = MAKE_NEW(allocator, Array<SpriteAnimation>, allocator);
-    transforms = MAKE_NEW(allocator, Hash<Matrix4f>, allocator);
+    transforms = MAKE_NEW(allocator, Hash<glm::mat4>, allocator);
 
     const size_t vertex_count = 4 * max_sprites;
     const size_t vertex_data_size = sizeof(Vertex) * vertex_count;
@@ -221,7 +221,7 @@ void init_sprites(Sprites &sprites, const char *atlas_filename) {
     sprites.atlas = MAKE_NEW(sprites.allocator, Atlas, sprites.allocator, atlas_filename);
 }
 
-const Sprite add_sprite(Sprites &sprites, const char *sprite_name, Color4f color) {
+const Sprite add_sprite(Sprites &sprites, const char *sprite_name, glm::vec4 color) {
     std::scoped_lock lock(*sprites.sprites_mutex);
 
     if (array::size(*sprites.sprites) > max_sprites) {
@@ -236,7 +236,7 @@ const Sprite add_sprite(Sprites &sprites, const char *sprite_name, Color4f color
     Sprite sprite;
     sprite.id = ++sprites.sprite_id_counter;
     sprite.atlas_frame = frame;
-    sprite.transform = Matrix4f::identity();
+    sprite.transform = glm::mat4(1.0f);
     sprite.color = color;
     sprite.dirty = true;
 
@@ -271,12 +271,12 @@ const Sprite *get_sprite(const Sprites &sprites, const uint64_t id) {
     return nullptr;
 }
 
-void transform_sprite(Sprites &sprites, const uint64_t id, const Matrix4f transform) {
+void transform_sprite(Sprites &sprites, const uint64_t id, const glm::mat4 transform) {
     std::scoped_lock lock(*sprites.sprites_mutex);
     multi_hash::insert(*sprites.transforms, id, transform);
 }
 
-void color_sprite(Sprites &sprites, const uint64_t id, const Color4f color) {
+void color_sprite(Sprites &sprites, const uint64_t id, const glm::vec4 color) {
     std::scoped_lock lock(*sprites.sprites_mutex);
 
     for (engine::Sprite *iter = array::begin(*sprites.sprites); iter != array::end(*sprites.sprites); ++iter) {
@@ -292,7 +292,7 @@ const Array<SpriteAnimation> &done_sprite_animations(Sprites &sprites) {
     return *sprites.done_animations;
 }
 
-uint64_t animate_sprite_position(Sprites &sprites, const uint64_t sprite_id, const Vector3 to_position, const float duration, const float delay) {
+uint64_t animate_sprite_position(Sprites &sprites, const uint64_t sprite_id, const glm::vec3 to_position, const float duration, const float delay) {
     const Sprite *sprite = get_sprite(sprites, sprite_id);
     if (!sprite) {
         return 0;
@@ -309,14 +309,11 @@ uint64_t animate_sprite_position(Sprites &sprites, const uint64_t sprite_id, con
 
     {
         glm::vec3 to_position_vec3 = glm::vec3(to_position.x, to_position.y, to_position.z);
-        glm::mat4 from_transform_mat4 = glm::make_mat4(animation.from_transform.m);
+        glm::mat4 from_transform_mat4 = animation.from_transform;
         glm::vec3 from_position_vec3 = from_transform_mat4[3];
         glm::mat4 delta(1.0f);
         delta = glm::translate(delta, to_position_vec3 - from_position_vec3);
-
-        const glm::mat4 to_transform_mat4 = delta * from_transform_mat4;
-        const float *to_transform_mat4_value_ptr = glm::value_ptr(to_transform_mat4);
-        memcpy(animation.to_transform.m, to_transform_mat4_value_ptr, sizeof(float) * 16);
+        animation.to_transform = delta * from_transform_mat4;
     }
 
     array::push_back(*sprites.animations, animation);
@@ -324,7 +321,7 @@ uint64_t animate_sprite_position(Sprites &sprites, const uint64_t sprite_id, con
     return animation.animation_id;
 }
 
-uint64_t animate_sprite_color(Sprites &sprites, const uint64_t sprite_id, const Color4f to_color, const float duration, const float delay) {
+uint64_t animate_sprite_color(Sprites &sprites, const uint64_t sprite_id, const glm::vec4 to_color, const float duration, const float delay) {
     const Sprite *sprite = get_sprite(sprites, sprite_id);
     if (!sprite) {
         return 0;
@@ -367,19 +364,16 @@ void update_sprites(Sprites &sprites, float t, float dt) {
 
         switch (animation->type) {
         case SpriteAnimation::Type::Position: {
-            const glm::vec3 from_pos = glm::make_mat4(animation->from_transform.m)[3];
-            const glm::vec3 to_pos = glm::make_mat4(animation->to_transform.m)[3];
+            const glm::vec3 from_pos = animation->from_transform[3];
+            const glm::vec3 to_pos = animation->to_transform[3];
             const glm::vec3 mixed_pos = glm::mix(from_pos, to_pos, a);
 
             glm::mat4 delta(1.0f);
             delta = glm::translate(delta, -from_pos);
             delta = glm::translate(delta, mixed_pos);
 
-            const glm::mat4 mixed_transform = delta * glm::make_mat4(animation->from_transform.m);
-            const float *mixed_transform_value_ptr = glm::value_ptr(mixed_transform);
-            const Matrix4f final_transform(mixed_transform_value_ptr);
-
-            transform_sprite(sprites, animation->sprite_id, final_transform);
+            const glm::mat4 mixed_transform = delta * animation->from_transform;
+            transform_sprite(sprites, animation->sprite_id, mixed_transform);
             break;
         }
         case SpriteAnimation::Type::Rotation: {
@@ -388,9 +382,9 @@ void update_sprites(Sprites &sprites, float t, float dt) {
             break;
         }
         case SpriteAnimation::Type::Color: {
-            const Color4f from_color = animation->from_color;
-            const Color4f to_color = animation->to_color;
-            const Color4f mixed_color = math::mix(from_color, to_color, a);
+            const glm::vec4 from_color = animation->from_color;
+            const glm::vec4 to_color = animation->to_color;
+            const glm::vec4 mixed_color = math::mix(from_color, to_color, a);
             color_sprite(sprites, animation->sprite_id, mixed_color);
         }
         }
@@ -421,25 +415,25 @@ void commit_sprites(Sprites &sprites) {
     std::scoped_lock lock(*sprites.sprites_mutex);
 
     TempAllocator1024 ta;
-    Array<Matrix4f> transform_updates(ta);
+    Array<glm::mat4> transform_updates(ta);
 
     int i = 0;
     for (engine::Sprite *sprite = array::begin(*sprites.sprites); sprite != array::end(*sprites.sprites); ++sprite) {
         multi_hash::get(*sprites.transforms, sprite->id, transform_updates);
 
-        glm::mat4 sprite_transform = glm::make_mat4(sprite->transform.m);
+        glm::mat4 sprite_transform = sprite->transform;
 
         if (!array::empty(transform_updates)) {
             // Apply cummulated transform matrices
-            for (Matrix4f *transform_update = array::begin(transform_updates); transform_update != array::end(transform_updates); ++transform_update) {
+            for (glm::mat4 *transform_update = array::begin(transform_updates); transform_update != array::end(transform_updates); ++transform_update) {
                 if (transform_update == array::begin(transform_updates)) {
-                    sprite_transform = glm::make_mat4(transform_update->m);
+                    sprite_transform = *transform_update;
                 } else {
-                    sprite_transform *= glm::make_mat4(transform_update->m);
+                    sprite_transform *= *transform_update;
                 }
             }
 
-            sprite->transform = Matrix4f(glm::value_ptr(sprite_transform));
+            sprite->transform = sprite_transform;
             sprite->dirty = true;
             array::clear(transform_updates);
         }

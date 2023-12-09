@@ -1,90 +1,19 @@
 #pragma once
 
 #include <algorithm>
-#include <assert.h>
-#include <cmath>
-#include <cstring>
-#include <inttypes.h>
-#include <limits>
+#include <glm/glm.hpp>
 
 namespace math {
 
-struct Vector2 {
-    int32_t x = 0;
-    int32_t y = 0;
-};
-
-struct Vector2f {
-    float x = 0.0f;
-    float y = 0.0f;
-};
-
-struct Vector3 {
-    int32_t x = 0;
-    int32_t y = 0;
-    int32_t z = 0;
-};
-
-struct Vector3f {
-    float x = 0.0f;
-    float y = 0.0f;
-    float z = 0.0f;
-};
-
-struct Color4f {
-    float r = 0;
-    float g = 0;
-    float b = 0;
-    float a = 0;
-
-    bool operator==(const Color4f &other) const {
-        constexpr float epsilon = std::numeric_limits<float>::epsilon();
-        return std::abs(r - other.r) <= epsilon &&
-               std::abs(g - other.g) <= epsilon &&
-               std::abs(b - other.b) <= epsilon &&
-               std::abs(a - other.a) <= epsilon;
-    }
-
-    bool operator!=(const Color4f &other) const {
-        return !(*this == other);
-    }
-};
-
-struct Matrix4f {
-    float m[16];
-
-    Matrix4f()
-    : m{
-          0.0f, 0.0f, 0.0f, 0.0f,
-          0.0f, 0.0f, 0.0f, 0.0f,
-          0.0f, 0.0f, 0.0f, 0.0f,
-          0.0f, 0.0f, 0.0f, 0.0f} {}
-
-    explicit Matrix4f(const float *float_data) {
-        memcpy(m, float_data, sizeof(float) * 16);
-    }
-
-    static Matrix4f identity() {
-        Matrix4f mat4;
-        float m[16] = {
-            1.0f, 0.0f, 0.0f, 0.0f,
-            0.0f, 1.0f, 0.0f, 0.0f,
-            0.0f, 0.0f, 1.0f, 0.0f,
-            0.0f, 0.0f, 0.0f, 1.0f};
-        memcpy(mat4.m, m, sizeof(m));
-        return mat4;
-    }
-};
-
 struct Vertex {
-    Vector3f position;
-    Color4f color;
-    Vector2f texture_coords;
+    glm::vec3 position;
+    glm::vec4 color;
+    glm::vec2 texture_coords;
 };
 
 struct Rect {
-    Vector2 origin;
-    Vector2 size;
+    glm::ivec2 origin;
+    glm::ivec2 size;
 };
 
 /**
@@ -95,13 +24,13 @@ struct Rect {
  * @param a The ratio of blending.
  * @return constexpr Color4f The mixed color.
  */
-constexpr Color4f mix(const Color4f x, const Color4f y, const float a) {
+constexpr glm::vec4 mix(const glm::vec4 x, const glm::vec4 y, const float a) {
     const float ratio = 1.0f - a;
-    Color4f res;
-    res.r = x.r * ratio + y.r * a;
-    res.g = x.g * ratio + y.g * a;
-    res.b = x.b * ratio + y.b * a;
-    res.a = x.a * ratio + y.a * a;
+    glm::vec4 res{
+        x.r * ratio + y.r * a,
+        x.g * ratio + y.g * a,
+        x.b * ratio + y.b * a,
+        x.a * ratio + y.a * a};
     return res;
 }
 
@@ -169,7 +98,7 @@ T approach(T value, T target, T amount) {
 /**
  * @brief Whether `point` is inside `rect`.
  */
-constexpr bool is_inside(const Rect &rect, const Vector2 point) {
+constexpr bool is_inside(const Rect &rect, const glm::ivec2 point) {
     return point.x >= rect.origin.x &&
            point.x < (rect.origin.x + rect.size.x) &&
            point.y >= rect.origin.y &&
@@ -179,7 +108,7 @@ constexpr bool is_inside(const Rect &rect, const Vector2 point) {
 /**
  * @brief Whether `point` is inside `rect`.
  */
-constexpr bool is_inside(const Rect &rect, const Vector2f point) {
+constexpr bool is_inside(const Rect &rect, const glm::vec2 point) {
     return point.x >= rect.origin.x &&
            point.x < (rect.origin.x + rect.size.x) &&
            point.y >= rect.origin.y &&

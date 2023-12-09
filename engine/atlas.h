@@ -1,7 +1,8 @@
 #pragma once
 
-#include "math.inl"
+#include "engine/math.inl"
 #include <collection_types.h>
+#include <glm/glm.hpp>
 
 namespace foundation {
 typedef Array<char> Buffer;
@@ -12,7 +13,7 @@ namespace engine {
 struct Texture;
 
 struct AtlasFrame {
-    math::Vector2f pivot;
+    glm::vec2 pivot;
     math::Rect rect;
 };
 

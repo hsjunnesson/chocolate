@@ -19,7 +19,6 @@
 namespace engine {
 using namespace foundation;
 using namespace foundation::string_stream;
-using namespace math;
 
 Atlas::Atlas(foundation::Allocator &allocator, const char *atlas_filename)
 : allocator(allocator)
@@ -101,7 +100,7 @@ Atlas::Atlas(foundation::Allocator &allocator, const char *atlas_filename)
                 log_fatal("Could not parse atlas %s: frame missing \"h\": ...", atlas_filename);
             }
 
-            Vector2f pv = {0.5f, 0.5f};
+            glm::vec2 pv = {0.5f, 0.5f};
 
             cJSON *pivot = cJSON_GetObjectItemCaseSensitive(frame, "pivot");
             if (pivot && cJSON_IsObject(pivot)) {
@@ -119,7 +118,7 @@ Atlas::Atlas(foundation::Allocator &allocator, const char *atlas_filename)
                 pv.y = (float)pvy->valuedouble;
             }
 
-            Rect r;
+            math::Rect r;
             r.origin.x = x->valueint;
             r.origin.y = y->valueint;
             r.size.x = w->valueint;
@@ -165,7 +164,7 @@ const AtlasFrame *atlas_frame(const Atlas &atlas, const char *sprite_name) {
     return nullptr;
 }
 
-const Rect *atlas_rect(const Atlas &atlas, const char *sprite_name) {
+const math::Rect *atlas_rect(const Atlas &atlas, const char *sprite_name) {
     const AtlasFrame *frame = atlas_frame(atlas, sprite_name);
     if (!frame) {
         return nullptr;

@@ -2,7 +2,6 @@
 
 #include "color.inl"
 #include "math.inl"
-
 #include <collection_types.h>
 #include <inttypes.h>
 #ifdef __APPLE__
@@ -26,8 +25,8 @@ struct Shader;
 struct Sprite {
     uint64_t id;
     const AtlasFrame *atlas_frame = nullptr;
-    Matrix4f transform = Matrix4f::identity();
-    Color4f color = {1.0f, 1.0f, 1.0f, 1.0f};
+    glm::mat4 transform = glm::mat4(1.0f);
+    glm::vec4 color = {1.0f, 1.0f, 1.0f, 1.0f};
     bool dirty = false;
 };
 
@@ -44,10 +43,10 @@ struct SpriteAnimation {
     float start_time;
     float duration;
     bool completed;
-    Matrix4f from_transform;
-    Matrix4f to_transform;
-    Color4f from_color;
-    Color4f to_color;
+    glm::mat4 from_transform;
+    glm::mat4 to_transform;
+    glm::vec4 from_color;
+    glm::vec4 to_color;
 };
 
 // A collection of sprites that share an atlas.
@@ -71,14 +70,14 @@ struct Sprites {
     uint64_t animation_id_counter;
     Array<SpriteAnimation> *animations;
     Array<SpriteAnimation> *done_animations; // The list of done animations since last frame
-    Hash<Matrix4f> *transforms;              // A multihash map of sprite ids to a list of transforms waiting to be applied and cleared on commit_sprites.
+    Hash<glm::mat4> *transforms;             // A multihash map of sprite ids to a list of transforms waiting to be applied and cleared on commit_sprites.
 };
 
 // Initializes this Sprites with an atlas. Required before rendering.
 void init_sprites(Sprites &sprites, const char *atlas_filename);
 
 // Adds a sprite and returns a copy of the sprite.
-const Sprite add_sprite(Sprites &sprites, const char *sprite_name, Color4f color = engine::color::white);
+const Sprite add_sprite(Sprites &sprites, const char *sprite_name, glm::vec4 color = engine::color::white);
 
 // Remove sprite based on its id.
 void remove_sprite(Sprites &sprites, const uint64_t id);
@@ -87,10 +86,10 @@ void remove_sprite(Sprites &sprites, const uint64_t id);
 const Sprite *get_sprite(const Sprites &sprites, const uint64_t id);
 
 // Transforms a sprite. Will take effect on next commit;
-void transform_sprite(Sprites &sprites, const uint64_t id, const Matrix4f transform);
+void transform_sprite(Sprites &sprites, const uint64_t id, const glm::mat4 transform);
 
 // Updates color of sprite.
-void color_sprite(Sprites &sprites, const uint64_t id, const Color4f color);
+void color_sprite(Sprites &sprites, const uint64_t id, const glm::vec4 color);
 
 // Returns the array of done animation since last frame.
 const Array<SpriteAnimation> &done_sprite_animations(Sprites &sprites);
@@ -105,7 +104,7 @@ const Array<SpriteAnimation> &done_sprite_animations(Sprites &sprites);
  * @param delay The delay before starting animation in seconds.
  * @return uint64_t The id of the SpriteAnimation. 0 on errors.
  */
-uint64_t animate_sprite_position(Sprites &sprites, const uint64_t sprite_id, const Vector3 to_position, const float duration, const float delay = 0.0f);
+uint64_t animate_sprite_position(Sprites &sprites, const uint64_t sprite_id, const glm::vec3 to_position, const float duration, const float delay = 0.0f);
 
 /**
  * @brief Creates a sprite animation for color.
@@ -117,7 +116,7 @@ uint64_t animate_sprite_position(Sprites &sprites, const uint64_t sprite_id, con
  * @param delay The delay before starting animation in seconds.
  * @return uint64_t The id of the SpriteAnimation. 0 on errors.
  */
-uint64_t animate_sprite_color(Sprites &sprites, const uint64_t sprite_id, const Color4f to_color, const float duration, const float delay = 0.0f);
+uint64_t animate_sprite_color(Sprites &sprites, const uint64_t sprite_id, const glm::vec4 to_color, const float duration, const float delay = 0.0f);
 
 // Updates animations.
 void update_sprites(Sprites &sprites, float t, float dt);

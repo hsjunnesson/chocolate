@@ -1,9 +1,9 @@
 #pragma once
 
-#include "math.inl"
-
+#include "engine/math.inl"
 #include <collection_types.h>
 #include <engine/color.inl>
+#include <glm/fwd.hpp>
 #include <memory_types.h>
 
 typedef struct ini_t ini_t;
@@ -16,7 +16,6 @@ struct Shader;
 using foundation::Allocator;
 using foundation::Array;
 using foundation::Hash;
-using math::Color4f;
 
 struct Canvas {
     Canvas(Allocator &allocator);
@@ -101,18 +100,18 @@ void clip(Canvas &canvas);
 // Sets the clipping mask. Pixels will only be drawn painted inside this rectangle.
 void clip(Canvas &canvas, int32_t x1, int32_t y1, int32_t x2, int32_t y2);
 
-void pset(Canvas &canvas, int32_t x, int32_t y, Color4f col);
-void clear(Canvas &canvas, Color4f col);
-void print(Canvas &canvas, const char *str, int32_t x, int32_t y, Color4f col, uint8_t scale_w = 1, uint8_t scale_h = 1, bool invert = false, bool mask = true, Color4f mask_col = engine::color::black);
-void circle(Canvas &canvas, int32_t x_center, int32_t y_center, int32_t r, Color4f col);
-void circle_fill(Canvas &canvas, int32_t x_center, int32_t y_center, int32_t r, Color4f col);
-void line(Canvas &canvas, int32_t x1, int32_t y1, int32_t x2, int32_t y2, Color4f col);
-void rectangle(Canvas &canvas, int32_t x1, int32_t y1, int32_t x2, int32_t y2, Color4f col);
-void rectangle_fill(Canvas &canvas, int32_t x1, int32_t y1, int32_t x2, int32_t y2, Color4f col);
-void triangle_fill(Canvas &canvas, math::Vector2f v0, math::Vector2f v1, math::Vector2f v2, Color4f col);
+void pset(Canvas &canvas, int32_t x, int32_t y, glm::vec4 col);
+void clear(Canvas &canvas, glm::vec4 col);
+void print(Canvas &canvas, const char *str, int32_t x, int32_t y, glm::vec4 col, uint8_t scale_w = 1, uint8_t scale_h = 1, bool invert = false, bool mask = true, glm::vec4 mask_col = engine::color::black);
+void circle(Canvas &canvas, int32_t x_center, int32_t y_center, int32_t r, glm::vec4 col);
+void circle_fill(Canvas &canvas, int32_t x_center, int32_t y_center, int32_t r, glm::vec4 col);
+void line(Canvas &canvas, int32_t x1, int32_t y1, int32_t x2, int32_t y2, glm::vec4 col);
+void rectangle(Canvas &canvas, int32_t x1, int32_t y1, int32_t x2, int32_t y2, glm::vec4 col);
+void rectangle_fill(Canvas &canvas, int32_t x1, int32_t y1, int32_t x2, int32_t y2, glm::vec4 col);
+void triangle_fill(Canvas &canvas, glm::vec2 v0, glm::vec2 v1, glm::vec2 v2, glm::vec4 col);
 
 // Draw sprite at position `x`, `y`. `w` and `h` determine how many sprites wide and tall to blit.
-void sprite(Canvas &canvas, uint32_t n, int32_t x, int32_t y, Color4f col = engine::color::white, uint8_t w = 1, uint8_t h = 1, uint8_t scale_w = 1, uint8_t scale_h = 1, bool flip_x = false, bool flip_y = false, bool invert = false, bool mask = true, Color4f mask_col = engine::color::black);
+void sprite(Canvas &canvas, uint32_t n, int32_t x, int32_t y, glm::vec4 col = engine::color::white, uint8_t w = 1, uint8_t h = 1, uint8_t scale_w = 1, uint8_t scale_h = 1, bool flip_x = false, bool flip_y = false, bool invert = false, bool mask = true, glm::vec4 mask_col = engine::color::black);
 
 // Returns a key used to lookup the sprite to blit for a character using the print() function.
 constexpr const char *character_key(char c) {
