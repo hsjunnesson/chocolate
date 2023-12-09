@@ -67,6 +67,7 @@ set(HEADERS_Chocolate
     "engine/stb_image.h"
     "engine/stb_image_write.h"
     "engine/texture.h"
+    "engine/util.inl"
 )
 
 

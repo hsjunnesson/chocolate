@@ -4,6 +4,7 @@
 #include "engine/log.h"
 #include "engine/shader.h"
 #include "engine/texture.h"
+#include "engine/util.inl"
 
 #include <GLFW/glfw3.h>
 #include <array.h>
@@ -15,6 +16,7 @@
 #include <memory.h>
 #include <mutex>
 #include <temp_allocator.h>
+#include <algorithm>
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/euler_angles.hpp>
@@ -75,20 +77,16 @@ Sprites::Sprites(Allocator &allocator)
 , vbo(0)
 , vao(0)
 , ebo(0)
-, sprites(nullptr)
-, sprite_id_counter(0)
-, sprites_mutex(nullptr)
 , time(0)
+, sprite_id_counter(0)
 , animation_id_counter(0)
-, animations(nullptr)
-, done_animations(nullptr)
-, transforms(nullptr) {
+, sprites_mutex(nullptr)
+, sprites(allocator)
+, animations(allocator)
+, done_animations(allocator)
+, transforms(allocator) {
     shader = MAKE_NEW(allocator, Shader, nullptr, vertex_source, fragment_source, "Sprites");
-    sprites = MAKE_NEW(allocator, Array<Sprite>, allocator);
     sprites_mutex = MAKE_NEW(allocator, std::mutex);
-    animations = MAKE_NEW(allocator, Array<SpriteAnimation>, allocator);
-    done_animations = MAKE_NEW(allocator, Array<SpriteAnimation>, allocator);
-    transforms = MAKE_NEW(allocator, Hash<glm::mat4>, allocator);
 
     const size_t vertex_count = 4 * max_sprites;
     const size_t vertex_data_size = sizeof(Vertex) * vertex_count;
@@ -174,9 +172,9 @@ Sprites::Sprites(Allocator &allocator)
 }
 
 Sprites::~Sprites() {
-    if (shader) {
-        MAKE_DELETE(allocator, Shader, shader);
-    }
+    MAKE_DELETE(allocator, Atlas, atlas);
+    MAKE_DELETE(allocator, Shader, shader);
+    MAKE_DELETE(allocator, mutex, sprites_mutex);
 
     if (vbo) {
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -191,30 +189,6 @@ Sprites::~Sprites() {
     if (ebo) {
         glDeleteBuffers(1, &ebo);
     }
-
-    if (sprites) {
-        MAKE_DELETE(allocator, Array, sprites);
-    }
-
-    if (sprites_mutex) {
-        MAKE_DELETE(allocator, mutex, sprites_mutex);
-    }
-
-    if (atlas) {
-        MAKE_DELETE(allocator, Atlas, atlas);
-    }
-
-    if (animations) {
-        MAKE_DELETE(allocator, Array, animations);
-    }
-
-    if (done_animations) {
-        MAKE_DELETE(allocator, Array, done_animations);
-    }
-
-    if (transforms) {
-        MAKE_DELETE(allocator, Hash, transforms);
-    }
 }
 
 void init_sprites(Sprites &sprites, const char *atlas_filename) {
@@ -224,7 +198,7 @@ void init_sprites(Sprites &sprites, const char *atlas_filename) {
 const Sprite add_sprite(Sprites &sprites, const char *sprite_name, glm::vec4 color) {
     std::scoped_lock lock(*sprites.sprites_mutex);
 
-    if (array::size(*sprites.sprites) > max_sprites) {
+    if (array::size(sprites.sprites) > max_sprites) {
         log_fatal("Sprites already at max size");
     }
 
@@ -238,22 +212,19 @@ const Sprite add_sprite(Sprites &sprites, const char *sprite_name, glm::vec4 col
     sprite.atlas_frame = frame;
     sprite.transform = glm::mat4(1.0f);
     sprite.color = color;
-    sprite.dirty = true;
 
-    array::push_back(*sprites.sprites, sprite);
-
+    array::push_back(sprites.sprites, sprite);
+    
     return sprite;
 }
 
 void remove_sprite(Sprites &sprites, const uint64_t id) {
     std::scoped_lock lock(*sprites.sprites_mutex);
 
-    for (engine::Sprite *iter = array::begin(*sprites.sprites); iter != array::end(*sprites.sprites); ++iter) {
-        if (iter->id == id) {
-            if (iter + 1 != array::end(*sprites.sprites)) {
-                std::swap(*iter, array::back(*sprites.sprites));
-            }
-            array::pop_back(*sprites.sprites);
+    for (uint32_t i = 0; i < array::size(sprites.sprites); ++i) {
+        const Sprite *sprite = &sprites.sprites[i];
+        if (sprite->id == id) {
+            shift_pop(sprites.sprites, i);
             break;
         }
     }
@@ -261,8 +232,7 @@ void remove_sprite(Sprites &sprites, const uint64_t id) {
 
 const Sprite *get_sprite(const Sprites &sprites, const uint64_t id) {
     std::scoped_lock lock(*sprites.sprites_mutex);
-
-    for (Sprite *iter = array::begin(*sprites.sprites); iter != array::end(*sprites.sprites); ++iter) {
+    for (const Sprite *iter = array::begin(sprites.sprites); iter != array::end(sprites.sprites); ++iter) {
         if (iter->id == id) {
             return iter;
         }
@@ -273,23 +243,22 @@ const Sprite *get_sprite(const Sprites &sprites, const uint64_t id) {
 
 void transform_sprite(Sprites &sprites, const uint64_t id, const glm::mat4 transform) {
     std::scoped_lock lock(*sprites.sprites_mutex);
-    multi_hash::insert(*sprites.transforms, id, transform);
+    multi_hash::insert(sprites.transforms, id, transform);
 }
 
 void color_sprite(Sprites &sprites, const uint64_t id, const glm::vec4 color) {
     std::scoped_lock lock(*sprites.sprites_mutex);
 
-    for (engine::Sprite *iter = array::begin(*sprites.sprites); iter != array::end(*sprites.sprites); ++iter) {
+    for (engine::Sprite *iter = array::begin(sprites.sprites); iter != array::end(sprites.sprites); ++iter) {
         if (iter->id == id) {
             iter->color = color;
-            iter->dirty = true;
             break;
         }
     }
 }
 
 const Array<SpriteAnimation> &done_sprite_animations(Sprites &sprites) {
-    return *sprites.done_animations;
+    return sprites.done_animations;
 }
 
 uint64_t animate_sprite_position(Sprites &sprites, const uint64_t sprite_id, const glm::vec3 to_position, const float duration, const float delay) {
@@ -316,7 +285,7 @@ uint64_t animate_sprite_position(Sprites &sprites, const uint64_t sprite_id, con
         animation.to_transform = delta * from_transform_mat4;
     }
 
-    array::push_back(*sprites.animations, animation);
+    array::push_back(sprites.animations, animation);
 
     return animation.animation_id;
 }
@@ -337,7 +306,7 @@ uint64_t animate_sprite_color(Sprites &sprites, const uint64_t sprite_id, const 
     animation.from_color = sprite->color;
     animation.to_color = to_color;
 
-    array::push_back(*sprites.animations, animation);
+    array::push_back(sprites.animations, animation);
 
     return animation.animation_id;
 }
@@ -348,9 +317,9 @@ void update_sprites(Sprites &sprites, float t, float dt) {
 
     bool dirty = false;
 
-    array::clear(*sprites.done_animations);
+    array::clear(sprites.done_animations);
 
-    for (SpriteAnimation *animation = array::begin(*sprites.animations); animation != array::end(*sprites.animations); ++animation) {
+    for (SpriteAnimation *animation = array::begin(sprites.animations); animation != array::end(sprites.animations); ++animation) {
         if (t < animation->start_time) {
             continue;
         }
@@ -397,18 +366,24 @@ void update_sprites(Sprites &sprites, float t, float dt) {
 
     if (dirty) {
         Array<SpriteAnimation> animations(sprites.allocator);
-        array::reserve(animations, array::size(*sprites.animations));
+        array::reserve(animations, array::size(sprites.animations));
 
-        for (SpriteAnimation *animation = array::begin(*sprites.animations); animation != array::end(*sprites.animations); ++animation) {
+        for (SpriteAnimation *animation = array::begin(sprites.animations); animation != array::end(sprites.animations); ++animation) {
             if (animation->completed) {
-                array::push_back(*sprites.done_animations, *animation);
+                array::push_back(sprites.done_animations, *animation);
             } else {
                 array::push_back(animations, *animation);
             }
         }
 
-        *sprites.animations = animations;
+        sprites.animations = animations;
     }
+}
+
+bool sort_fn(const Sprite &lhs, const Sprite &rhs) {
+    glm::vec3 lhs_pos = lhs.transform[3];
+    glm::vec3 rhs_pos = rhs.transform[3];
+    return (lhs_pos.z < rhs_pos.z);
 }
 
 void commit_sprites(Sprites &sprites) {
@@ -417,9 +392,8 @@ void commit_sprites(Sprites &sprites) {
     TempAllocator1024 ta;
     Array<glm::mat4> transform_updates(ta);
 
-    int i = 0;
-    for (engine::Sprite *sprite = array::begin(*sprites.sprites); sprite != array::end(*sprites.sprites); ++sprite) {
-        multi_hash::get(*sprites.transforms, sprite->id, transform_updates);
+    for (engine::Sprite *sprite = array::begin(sprites.sprites); sprite != array::end(sprites.sprites); ++sprite) {
+        multi_hash::get(sprites.transforms, sprite->id, transform_updates);
 
         glm::mat4 sprite_transform = sprite->transform;
 
@@ -434,50 +408,49 @@ void commit_sprites(Sprites &sprites) {
             }
 
             sprite->transform = sprite_transform;
-            sprite->dirty = true;
             array::clear(transform_updates);
         }
+    }
+    
+    std::sort(array::begin(sprites.sprites), array::end(sprites.sprites), sort_fn);
+    
+    for (uint32_t i = 0; i < array::size(sprites.sprites); ++i) {
+        const Sprite *sprite = &sprites.sprites[i];
 
-        if (sprite->dirty) {
-            // position
-            {
-                for (int ii = 0; ii < 4; ++ii) {
-                    const glm::vec4 position = sprite_transform * unit_quad[ii];
-                    sprites.vertex_data[i * 4 + ii].position = {position.x, position.y, position.z};
-                }
+        // position
+        {
+            for (int ii = 0; ii < 4; ++ii) {
+                const glm::vec4 position = sprite->transform * unit_quad[ii];
+                sprites.vertex_data[i * 4 + ii].position = {position.x, position.y, position.z};
             }
-
-            // texture coords
-            {
-                const int atlas_width = sprites.atlas->texture->width;
-                const int atlas_height = sprites.atlas->texture->height;
-
-                float texcoord_x = (float)sprite->atlas_frame->rect.origin.x / atlas_width;
-                float texcoord_y = (float)(sprite->atlas_frame->rect.origin.y + sprite->atlas_frame->rect.size.y) / atlas_height;
-                float texcoord_w = (float)sprite->atlas_frame->rect.size.x / atlas_width;
-                float texcoord_h = (float)sprite->atlas_frame->rect.size.y / atlas_height;
-
-                sprites.vertex_data[i * 4 + 0].texture_coords = {texcoord_x, texcoord_y};
-                sprites.vertex_data[i * 4 + 1].texture_coords = {texcoord_x + texcoord_w, texcoord_y - texcoord_h};
-                sprites.vertex_data[i * 4 + 2].texture_coords = {texcoord_x, texcoord_y - texcoord_h};
-                sprites.vertex_data[i * 4 + 3].texture_coords = {texcoord_x + texcoord_w, texcoord_y};
-            }
-
-            // color
-            {
-                sprites.vertex_data[i * 4 + 0].color = sprite->color;
-                sprites.vertex_data[i * 4 + 1].color = sprite->color;
-                sprites.vertex_data[i * 4 + 2].color = sprite->color;
-                sprites.vertex_data[i * 4 + 3].color = sprite->color;
-            }
-
-            sprite->dirty = false;
         }
 
-        ++i;
+        // texture coords
+        {
+            const int atlas_width = sprites.atlas->texture->width;
+            const int atlas_height = sprites.atlas->texture->height;
+
+            float texcoord_x = (float)sprite->atlas_frame->rect.origin.x / atlas_width;
+            float texcoord_y = (float)(sprite->atlas_frame->rect.origin.y + sprite->atlas_frame->rect.size.y) / atlas_height;
+            float texcoord_w = (float)sprite->atlas_frame->rect.size.x / atlas_width;
+            float texcoord_h = (float)sprite->atlas_frame->rect.size.y / atlas_height;
+
+            sprites.vertex_data[i * 4 + 0].texture_coords = {texcoord_x, texcoord_y};
+            sprites.vertex_data[i * 4 + 1].texture_coords = {texcoord_x + texcoord_w, texcoord_y - texcoord_h};
+            sprites.vertex_data[i * 4 + 2].texture_coords = {texcoord_x, texcoord_y - texcoord_h};
+            sprites.vertex_data[i * 4 + 3].texture_coords = {texcoord_x + texcoord_w, texcoord_y};
+        }
+
+        // color
+        {
+            sprites.vertex_data[i * 4 + 0].color = sprite->color;
+            sprites.vertex_data[i * 4 + 1].color = sprite->color;
+            sprites.vertex_data[i * 4 + 2].color = sprite->color;
+            sprites.vertex_data[i * 4 + 3].color = sprite->color;
+        }
     }
 
-    hash::clear(*sprites.transforms);
+    hash::clear(sprites.transforms);
 }
 
 void render_sprites(const Engine &engine, const Sprites &sprites) {
@@ -509,12 +482,13 @@ void render_sprites(const Engine &engine, const Sprites &sprites) {
     glUniformMatrix4fv(glGetUniformLocation(shader_program, "projection"), 1, GL_FALSE, glm::value_ptr(projection * view));
     glUniformMatrix4fv(glGetUniformLocation(shader_program, "model"), 1, GL_FALSE, glm::value_ptr(model));
 
-    uint64_t quads = array::size(*sprites.sprites);
+    uint64_t quads = array::size(sprites.sprites);
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_DEPTH_TEST);
 
+//    glDrawElements(GL_TRIANGLES, 6 * (GLsizei)quads, GL_UNSIGNED_INT, array::begin(sprites.sprite_indices));
     glDrawElements(GL_TRIANGLES, 6 * (GLsizei)quads, GL_UNSIGNED_INT, (void *)0);
 
     glEnable(GL_DEPTH_TEST);

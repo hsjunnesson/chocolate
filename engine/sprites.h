@@ -53,7 +53,7 @@ struct SpriteAnimation {
 struct Sprites {
     Sprites(Allocator &allocator);
     ~Sprites();
-
+    
     Allocator &allocator;
     Atlas *atlas;
     Shader *shader;
@@ -62,15 +62,17 @@ struct Sprites {
     uint32_t vao;
     uint32_t ebo;
 
-    Array<Sprite> *sprites;
-    uint64_t sprite_id_counter;
-    std::mutex *sprites_mutex;
-
     float time;
+
+    uint64_t sprite_id_counter;
     uint64_t animation_id_counter;
-    Array<SpriteAnimation> *animations;
-    Array<SpriteAnimation> *done_animations; // The list of done animations since last frame
-    Hash<glm::mat4> *transforms;             // A multihash map of sprite ids to a list of transforms waiting to be applied and cleared on commit_sprites.
+
+    std::mutex *sprites_mutex;
+    
+    Array<Sprite> sprites;
+    Array<SpriteAnimation> animations;
+    Array<SpriteAnimation> done_animations; // The list of done animations since last frame
+    Hash<glm::mat4> transforms;             // A multihash map of sprite ids to a list of transforms waiting to be applied and cleared on commit_sprites.
 };
 
 // Initializes this Sprites with an atlas. Required before rendering.
