@@ -9,7 +9,6 @@ set(LIB_NAME ${PROJECT_NAME})
 # Find locally installed dependencies. Tip: Use VCPKG for these.
 
 find_package(glfw3 CONFIG REQUIRED)
-find_package(glm CONFIG REQUIRED)
 find_package(cJSON CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
 find_package(Backward CONFIG REQUIRED)
@@ -33,59 +32,45 @@ if (NOT bitsquidfoundation_POPULATED)
     FetchContent_MakeAvailable(BitSquidFoundation)
 endif()
 
+FetchContent_Declare(
+    HandmadeMath
+    GIT_REPOSITORY https://github.com/HandmadeMath/HandmadeMath.git
+    GIT_TAG 422bc588e9e8ae580f472f05e47c01a646acff38 # v2.0.0
+)
+
+if (NOT HandmadeMath_POPULATED)
+    FetchContent_MakeAvailable(HandmadeMath)
+endif()
+
 
 # Chocolate sources
 set(SRC_Chocolate
-    "src/action_binds.cpp"
-    "src/atlas.cpp"
-    "src/canvas.cpp"
-    "src/config.cpp"
-    "src/engine.cpp"
-    "src/file.cpp"
-    "src/input.cpp"
-    "src/log.cpp"
-    "src/shader.cpp"
-    "src/sprites.cpp"
-    "src/texture.cpp"
+    "foundation/allocator.cpp"
+    "foundation/allocator.h"
+    "foundation/api_types.h"
+    "foundation/engine.h"
+    "foundation/log.cpp"
+    "foundation/log.h"
+    "vendor/stb_image.h"
+    "vendor/stb_image_write.h"
     "glad/src/glad.c"
-)
-
-set(HEADERS_Chocolate
-    "engine/action_binds.h"
-    "engine/atlas.h"
-    "engine/canvas.h"
-    "engine/color.inl"
-    "engine/config.h"
-    "engine/engine.h"
-    "engine/file.h"
-    "engine/ini.h"
-    "engine/input.h"
-    "engine/log.h"
-    "engine/math.inl"
-    "engine/shader.h"
-    "engine/sprites.h"
-    "engine/stb_image.h"
-    "engine/stb_image_write.h"
-    "engine/texture.h"
-    "engine/util.inl"
 )
 
 
 # Create library
 add_library(${LIB_NAME} STATIC
     ${SRC_Chocolate}
-    ${HEADERS_Chocolate}
 )
 
 set_target_properties(
     ${LIB_NAME}
     PROPERTIES
     OUTPUT_NAME "chocolate"
-    POSITION_INDEPENDENT_CODE ON
+    C_STANDARD 11
+    C_STANDARD_REQUIRED YES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO
-    LINKER_LANGUAGE CXX
+    LINKER_LANGUAGE C
 )
 
 
@@ -93,6 +78,7 @@ set_target_properties(
 target_include_directories(${LIB_NAME} PUBLIC ${PROJECT_SOURCE_DIR})
 target_include_directories(${LIB_NAME} SYSTEM PUBLIC ${bitsquidfoundation_SOURCE_DIR})
 target_include_directories(${LIB_NAME} SYSTEM PRIVATE ${PROJECT_SOURCE_DIR}/glad/include)
+target_include_directories(${LIB_NAME} SYSTEM PUBLIC ${HandmadeMath_SOURCE_DIR})
 
 if (SUPERLUMINAL)
     target_include_directories(${LIB_NAME} SYSTEM PRIVATE ${SuperluminalAPI_INCLUDE_DIRS})
@@ -106,15 +92,9 @@ target_link_libraries(${LIB_NAME}
     Backward::Backward
     bitsquid-foundation
     glfw
-    glm::glm
     cjson
     imgui::imgui
 )
-
-if (SUPERLUMINAL)
-    target_link_libraries(${LIB_NAME} SuperluminalAPI)
-endif()
-
 
 # Compiler warnings & definitions
 
@@ -126,9 +106,3 @@ if (MSVC)
         target_compile_definitions(${PROJECT_NAME} PRIVATE SUPERLUMINAL=1)
     endif()
 endif()
-
-
-# Enable tests
-
-enable_testing()
-add_subdirectory(tests)
